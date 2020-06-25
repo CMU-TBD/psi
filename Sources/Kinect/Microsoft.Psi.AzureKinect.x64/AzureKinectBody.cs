@@ -86,9 +86,9 @@ namespace Microsoft.Psi.AzureKinect
         public Dictionary<JointId, (CoordinateSystem Pose, JointConfidenceLevel Confidence)> Joints { get; } = new Dictionary<JointId, (CoordinateSystem, JointConfidenceLevel)>();
 
         /// <summary>
-        /// Gets the body's tracking ID.
+        /// Gets or sets the body's tracking ID.
         /// </summary>
-        public uint TrackingId { get; private set; }
+        public uint TrackingId { get; set; }
 
         /// <summary>
         /// Copies new joint and tracking information for this body from a Microsoft.Azure.Kinect body instance.
