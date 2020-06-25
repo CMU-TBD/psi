@@ -206,6 +206,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureKinectSample", "Sample
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Psi.Kinect.Visualization.Windows", "Sources\Kinect\Microsoft.Psi.Kinect.Visualization.Windows\Microsoft.Psi.Kinect.Visualization.Windows.csproj", "{F31606FF-3737-45DC-8E89-6256AACD841F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TBD", "TBD", "{E228820A-569C-4B5E-8481-262043A0F786}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TBD.Psi.VisualPipeline", "TBD\TBD.Psi.VisualPipeline\TBD.Psi.VisualPipeline.csproj", "{B9370264-F177-458F-855E-14B0B9BC1F6E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -460,6 +464,8 @@ Global
 		{F31606FF-3737-45DC-8E89-6256AACD841F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F31606FF-3737-45DC-8E89-6256AACD841F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F31606FF-3737-45DC-8E89-6256AACD841F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9370264-F177-458F-855E-14B0B9BC1F6E}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{B9370264-F177-458F-855E-14B0B9BC1F6E}.Release|Any CPU.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -549,6 +555,7 @@ Global
 		{C91D0412-1BB2-40D2-8DCA-A48B6C5B7E67} = {CB8286F5-167B-4416-8FE9-9B97FCF146D5}
 		{66639311-E7BE-4A5B-A35B-9BFF6D3F69F2} = {1AA38339-B349-4AA7-A0A9-F92ADCFDB2DF}
 		{F31606FF-3737-45DC-8E89-6256AACD841F} = {CB8286F5-167B-4416-8FE9-9B97FCF146D5}
+		{B9370264-F177-458F-855E-14B0B9BC1F6E} = {E228820A-569C-4B5E-8481-262043A0F786}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EAF15EE9-DCC5-411B-A9E5-7C2F3D132331}
