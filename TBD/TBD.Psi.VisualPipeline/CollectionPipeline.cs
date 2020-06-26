@@ -60,18 +60,26 @@
                 azure.InfraredImage.Write("k4a_ir", store);
                 azure.ColorImage.EncodeJpeg(90, DeliveryPolicy.LatestMessage).Write("k4a_image", store);
 
-                //Merge the who streams
+                // Merge the who streams
                 var merger = new BodyMerger(pipeline, azureBodiesInWorld);
                 merger.AddKinect2BodyStream(k2bodiesInWorld);
 
+                // Tracking of Bodies across time.
+                var tracker = new BodyTracker(pipeline);
+                merger.PipeTo(tracker);
+                tracker.Out.Write("TrackedBodies", store);
+
+                var rosPub = new ROSWorldSender(pipeline);
+                tracker.PipeTo(rosPub);
+
                 // For testing, convert the first body into a single coordinate system.
-                merger.Process<List<List<AzureKinectBody>>, CoordinateSystem>((m, e, o) =>
+/*                merger.Process<List<List<AzureKinectBody>>, CoordinateSystem>((m, e, o) =>
                 {
                     if (m.Count > 0)
                     {
                         o.Post(m[0][0].Joints[JointId.Neck].Pose, e.OriginatingTime);
                     }
-                }).Write("Merged", store);
+                }).Write("Merged", store);*/
 
                 pipeline.Diagnostics.Write("diagnostics", store);
                 pipeline.RunAsync();

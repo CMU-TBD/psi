@@ -1,5 +1,6 @@
 ﻿namespace TBD.Psi.VisualPipeline
 {
+    using System;
     using System.Numerics;
     using MathNet.Numerics.LinearAlgebra;
     using MathNet.Spatial.Euclidean;
@@ -20,6 +21,21 @@
         public static CoordinateSystem CreateCoordinateSystemFrom(Point3D position, float yaw, float pitch, float roll)
         {
             return CreateCoordinateSystemFrom(position, System.Numerics.Quaternion.CreateFromYawPitchRoll(pitch, roll, yaw));
+        }
+
+        //Implementation of https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
+        public static System.Numerics.Quaternion GetQuaternionFromCoordinateSystem(CoordinateSystem cs)
+        {
+
+            var rotMat = cs.GetRotationSubMatrix();
+            double w = Math.Sqrt(1 + rotMat.At(0, 0) + rotMat.At(1, 1) + rotMat.At(2, 2)) / 2.0;
+            double w4 = 4 * w;
+            double x = (rotMat.At(2, 1) - rotMat.At(1, 2)) / w4;
+            double y = (rotMat.At(0, 2) - rotMat.At(2, 0)) / w4;
+            double z = (rotMat.At(1, 0) - rotMat.At(0, 1)) / w4;
+
+            return new System.Numerics.Quaternion(Convert.ToSingle(x), Convert.ToSingle(y), Convert.ToSingle(z), Convert.ToSingle(w));
+
         }
 
         public static CoordinateSystem CreateCoordinateSystemFrom(Point3D position, System.Numerics.Quaternion orientation)
