@@ -69,8 +69,8 @@
                 merger.PipeTo(tracker);
                 tracker.Out.Write("TrackedBodies", store);
 
-                var rosPub = new ROSWorldSender(pipeline);
-                tracker.PipeTo(rosPub);
+/*                var rosPub = new ROSWorldSender(pipeline);
+                tracker.PipeTo(rosPub);*/
 
                 // For testing, convert the first body into a single coordinate system.
 /*                merger.Process<List<List<AzureKinectBody>>, CoordinateSystem>((m, e, o) =>

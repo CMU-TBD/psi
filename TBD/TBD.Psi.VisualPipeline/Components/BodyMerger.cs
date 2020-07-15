@@ -131,6 +131,5 @@
                 this.producerList.Add(inConnector.Out);
             }
         }
-
     }
 }
