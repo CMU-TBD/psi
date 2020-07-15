@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <Platform>x64</Platform>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Platforms>AnyCPU;x64</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MathNet.Spatial.Signed" Version="0.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Sources\Audio\Microsoft.Psi.Audio.Windows\Microsoft.Psi.Audio.Windows.csproj" />
+    <ProjectReference Include="..\..\Sources\Audio\Microsoft.Psi.Audio\Microsoft.Psi.Audio.csproj" />
+    <ProjectReference Include="..\..\Sources\Imaging\Microsoft.Psi.Imaging.Windows\Microsoft.Psi.Imaging.Windows.csproj" />
+    <ProjectReference Include="..\..\Sources\Imaging\Microsoft.Psi.Imaging\Microsoft.Psi.Imaging.csproj" />
+    <ProjectReference Include="..\..\Sources\Kinect\Microsoft.Psi.AzureKinect.x64\Microsoft.Psi.AzureKinect.x64.csproj" />
+    <ProjectReference Include="..\..\Sources\Media\Microsoft.Psi.Media.Windows.x64\Microsoft.Psi.Media.Windows.x64.csproj" />
+    <ProjectReference Include="..\..\Sources\Runtime\Microsoft.Psi\Microsoft.Psi.csproj" />
+    <ProjectReference Include="..\..\Sources\Speech\Microsoft.Psi.Speech.Windows\Microsoft.Psi.Speech.Windows.csproj" />
+    <ProjectReference Include="..\..\Sources\Speech\Microsoft.Psi.Speech\Microsoft.Psi.Speech.csproj" />
+  </ItemGroup>
+
+</Project>
