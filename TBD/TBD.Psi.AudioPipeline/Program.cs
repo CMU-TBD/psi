@@ -141,7 +141,7 @@ namespace TBD.Psi.AudioPipeline
                 }
 
                 // get all of the script files in order and store in array
-                var recordingFiles = Directory.GetFiles(@"C:/Data/Audio/" + directoryName, directoryName + "-script*", System.IO.SearchOption.TopDirectoryOnly).OrderBy(f => new FileInfo(f).CreationTime);
+                var recordingFiles = Directory.GetFiles(@"C:\Data\Audio\" + directoryName, directoryName + "-script*", System.IO.SearchOption.TopDirectoryOnly).OrderBy(f => new FileInfo(f).CreationTime);
 
                 // add the size of each file to this list
                 List<string> sizes = new List<string>();
@@ -162,7 +162,7 @@ namespace TBD.Psi.AudioPipeline
                     // if the is a mismatch between phrases and recordings, then send an alert so that they can be manually fixed
                     try
                     {
-                        var newLine = phrases.ElementAt(i) + "," + sizes.ElementAt(i) + "," + recordingFiles.ElementAt(i);
+                        var newLine = recordingFiles.ElementAt(i) + "," + sizes.ElementAt(i) + "," + phrases.ElementAt(i);
                         csv.AppendLine(newLine);
                     }
                     catch
@@ -179,7 +179,7 @@ namespace TBD.Psi.AudioPipeline
                 }
 
                 // write the csv to file
-                File.WriteAllText(@"C:\\Data\\Audio\\" + directoryName + @"\\" + directoryName + ".csv", csv.ToString());
+                File.WriteAllText(@"C:\\Data\\Audio\\" + directoryName + @"\\" + directoryName + @"-csv-script" + scriptNum.ToString() + ".csv", csv.ToString());
 
 
                 // keeps window open until keypress
