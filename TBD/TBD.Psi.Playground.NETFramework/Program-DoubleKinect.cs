@@ -28,7 +28,7 @@
                     BodyTrackerConfiguration = new AzureKinectBodyTrackerConfiguration()
                     {
                         CpuOnlyMode = false,
-                    }    
+                    }
                 });
 
                 var k4a2 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()

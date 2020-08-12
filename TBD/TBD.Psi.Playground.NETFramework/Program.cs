@@ -14,7 +14,6 @@
         static void Main(string[] args)
         {
             //DoubleKinect.Run(args);
-            ProgramDeepSpeech.Run();
             //OpenCVTest.Run(args);
 
             /*     using (var p = Pipeline.Create(true))
