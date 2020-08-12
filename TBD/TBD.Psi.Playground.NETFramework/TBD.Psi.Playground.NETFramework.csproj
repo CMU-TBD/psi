@@ -31,6 +31,8 @@
     <ProjectReference Include="..\..\Sources\Runtime\Microsoft.Psi\Microsoft.Psi.csproj" />
     <ProjectReference Include="..\..\Sources\Speech\Microsoft.Psi.Speech.Windows\Microsoft.Psi.Speech.Windows.csproj" />
     <ProjectReference Include="..\..\Sources\Speech\Microsoft.Psi.Speech\Microsoft.Psi.Speech.csproj" />
+    <ProjectReference Include="..\TBD.Psi.DeepSpeech\TBD.Psi.DeepSpeech.csproj" />
+    <ProjectReference Include="..\TBD.Psi.OpenCV.Interop\TBD.Psi.OpenCV.Interop.vcxproj" />
   </ItemGroup>
 
 </Project>

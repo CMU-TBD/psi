@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TBD.Psi.Playground.NETFramework": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

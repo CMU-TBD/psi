@@ -1,21 +1,27 @@
-﻿using Microsoft.Psi.Audio;
-using Microsoft.Psi.Components;
-using Microsoft.Psi.Speech;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// Copyright (c) Carnegie Mellon University. All rights reserved.
+// Licensed under the MIT license.
 
-namespace TBD.Psi.DeepSpeech.Framework
+// Modified from psi\Sources\Integrations\CognitiveServices\Microsoft.Psi.CognitiveServices.Speech\AzureSpeechRecognizer.cs
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
+
+namespace TBD.Psi.DeepSpeech
 {
-    using DeepSpeech.Framework;
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using DeepSpeechClient.Models;
     using DeepSpeechClient.Interfaces;
     using Microsoft.Psi;
     using Microsoft.Psi.Common;
+    using Microsoft.Psi.Audio;
+    using Microsoft.Psi.Components;
+    using Microsoft.Psi.Speech;
 
-    class DeepSpeechRecognizer : IConsumerProducer<ValueTuple<AudioBuffer, bool>, IStreamingSpeechRecognitionResult>, IDisposable
+    public class DeepSpeechRecognizer : IConsumerProducer<ValueTuple<AudioBuffer, bool>, IStreamingSpeechRecognitionResult>, IDisposable
     {
         private readonly IDeepSpeech deepSpeechClient;
         private DeepSpeechStream deepSpeechStream;
@@ -34,8 +40,6 @@ namespace TBD.Psi.DeepSpeech.Framework
             // Create the Emitter and Receivers
             this.In = pipeline.CreateReceiver< ValueTuple<AudioBuffer, bool>>(this, this.Receive, nameof(this.In));
             this.Out = pipeline.CreateEmitter<IStreamingSpeechRecognitionResult>(this, nameof(this.Out));
-
-
 
             // Create the clinet
             this.deepSpeechClient = new DeepSpeechClient.DeepSpeech(pathToModel);

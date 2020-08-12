@@ -15,6 +15,8 @@
     using Microsoft.Psi.Components;
     using Microsoft.Azure.Kinect.BodyTracking;
     using TBD.Psi.VisualPipeline.Components;
+    using MathNet.Numerics.LinearAlgebra.Complex;
+    using MathNet.Numerics.LinearAlgebra;
 
     public class CollectionPipeline
     {
@@ -27,24 +29,21 @@
                 // Create all the coordinate frames.
                 var World = new CoordinateSystem();
                 var WorldToAzure = new CoordinateSystem(new Point3D(0, 0, 1), UnitVector3D.XAxis, UnitVector3D.YAxis, UnitVector3D.ZAxis);
-                var AzureToKinect2 = Utils.CreateCoordinateSystemFrom(0.15f, -0.7f, 0.3f, Convert.ToSingle(MathNet.Spatial.Units.Angle.FromDegrees(45).Radians), 0f, 0f);
-                var WorldToKinect2 = new CoordinateSystem(WorldToAzure * AzureToKinect2);
+                // var AzureToKinect2 = Utils.CreateCoordinateSystemFrom(0.15f, -0.7f, 0.3f, Convert.ToSingle(MathNet.Spatial.Units.Angle.FromDegrees(45).Radians), 0f, 0f);
+                double[,] t =
+                {
+                    {0.3913, 0.8957, 0.210, 0.391},
+                    {-0.864, 0.4364, -0.24992, 1.95},
+                    {-0.315, -0.084, 0.945, 0.704},
+                    {0,0,0,1},
+                };
+                var Azure1ToAzure2 = new CoordinateSystem(Matrix<double>.Build.DenseOfArray(t));
+                var WorldToAzure2 = new CoordinateSystem(WorldToAzure * Azure1ToAzure2);
 
                 // Repeat the frames to the store.
-                Generators.Repeat(pipeline, new List<CoordinateSystem> { World, WorldToAzure, WorldToKinect2 }, TimeSpan.FromSeconds(1)).Write("frames", store);
+                Generators.Repeat(pipeline, new List<CoordinateSystem> { World, WorldToAzure, WorldToAzure2 }, TimeSpan.FromSeconds(1)).Write("frames", store);
 
-                var kinect = new Microsoft.Psi.Kinect.KinectSensor(pipeline, new KinectSensorConfiguration()
-                {
-                    OutputBodies = true,
-                    OutputColor = true,
-                    OutputDepth = true,
-                });
-                var k2bodiesInWorld = kinect.Bodies.ChangeToFrame(WorldToKinect2);
-                k2bodiesInWorld.Write("kinect2_bodies", store);
-
-                kinect.ColorImage.EncodeJpeg(90, DeliveryPolicy.LatestMessage).Write("kinect2_color", store);
-
-                var azure = new AzureKinectSensor(pipeline, new AzureKinectSensorConfiguration()
+                var azure1 = new AzureKinectSensor(pipeline, new AzureKinectSensorConfiguration()
                 {
                     OutputColor = true,
                     OutputInfrared = true,
@@ -52,17 +51,33 @@
                     {
                         CpuOnlyMode = false,
                         TemporalSmoothing = 0.25f
-                    }
+                    },
+                    DeviceIndex = 1
                 });
 
-                var azureBodiesInWorld = azure.Bodies.ChangeToFrame(WorldToAzure);
-                azureBodiesInWorld.Write("k4a_bodies", store);
-                azure.InfraredImage.Write("k4a_ir", store);
-                azure.ColorImage.EncodeJpeg(90, DeliveryPolicy.LatestMessage).Write("k4a_image", store);
+                var azure1BodiesInWorld = azure1.Bodies.ChangeToFrame(WorldToAzure);
+                azure1BodiesInWorld.Write("azure1.bodies", store);
+                azure1.ColorImage.EncodeJpeg(90, DeliveryPolicy.LatestMessage).Write("azure1.color", store);
+
+                var azure2 = new AzureKinectSensor(pipeline, new AzureKinectSensorConfiguration()
+                {
+                    OutputColor = true,
+                    OutputInfrared = true,
+                    BodyTrackerConfiguration = new AzureKinectBodyTrackerConfiguration()
+                    {
+                        CpuOnlyMode = false,
+                        TemporalSmoothing = 0.25f
+                    },
+                    DeviceIndex = 0
+                });
+
+                var azure2BodiesInWorld = azure2.Bodies.ChangeToFrame(WorldToAzure2);
+                azure2BodiesInWorld.Write("azure2.bodies", store);
+                azure2.ColorImage.EncodeJpeg(90, DeliveryPolicy.LatestMessage).Write("azure2.color", store);
 
                 // Merge the who streams
-                var merger = new BodyMerger(pipeline, azureBodiesInWorld);
-                merger.AddKinect2BodyStream(k2bodiesInWorld);
+                var merger = new BodyMerger(pipeline, azure1BodiesInWorld);
+                merger.AddAzureKinectBodyStream(azure2BodiesInWorld);
 
                 // Tracking of Bodies across time.
                 var tracker = new BodyTracker(pipeline);

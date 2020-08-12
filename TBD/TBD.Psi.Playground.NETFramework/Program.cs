@@ -13,27 +13,30 @@
     {
         static void Main(string[] args)
         {
-            DoubleKinect.Run(args);
-       /*     using (var p = Pipeline.Create(true))
-            {
-                var store = Store.Create(p, "test", @"C:\Data\Stores");
+            //DoubleKinect.Run(args);
+            ProgramDeepSpeech.Run();
+            //OpenCVTest.Run(args);
 
-                var k4a1 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
-                {
-                    OutputColor = true,
-                    DeviceIndex = 1
-                });
-                var arucoDetector = new OpenCVArucoDetector(p);
-                k4a1.ColorImage.PipeTo(arucoDetector.ImageIn);
-                arucoDetector.IdsOut.Do(m =>
-                {
-                    Console.WriteLine(m.Count);
-                });
-                k4a1.ColorImage.Write("img", store);
-                arucoDetector.IdsOut.Select(m => m.Count).Write("num", store);
-                p.RunAsync();
-                Console.ReadLine();
-            }*/
+            /*     using (var p = Pipeline.Create(true))
+                 {
+                     var store = Store.Create(p, "test", @"C:\Data\Stores");
+
+                     var k4a1 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
+                     {
+                         OutputColor = true,
+                         DeviceIndex = 1
+                     });
+                     var arucoDetector = new OpenCVArucoDetector(p);
+                     k4a1.ColorImage.PipeTo(arucoDetector.ImageIn);
+                     arucoDetector.IdsOut.Do(m =>
+                     {
+                         Console.WriteLine(m.Count);
+                     });
+                     k4a1.ColorImage.Write("img", store);
+                     arucoDetector.IdsOut.Select(m => m.Count).Write("num", store);
+                     p.RunAsync();
+                     Console.ReadLine();
+                 }*/
         }
     }
 }
