@@ -1,19 +1,24 @@
-﻿
+﻿// Copyright (c) Carnegie Mellon University. All rights reserved.
+// Licensed under the MIT license.
+
 namespace TBD.Psi.VisualPipeline
 {
+    using System;
+    using System.Linq;
     using MathNet.Spatial.Euclidean;
     using Microsoft.Psi;
     using Microsoft.Psi.AzureKinect;
     using Microsoft.Psi.Imaging;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using TBD.Psi.VisualPipeline.Components;
 
-    class CalibrationTool
+    /// <summary>
+    /// Program to run calibration tools.
+    /// </summary>
+    internal class CalibrationTool
     {
+        /// <summary>
+        /// Main function of tool.
+        /// </summary>
         public static void Run()
         {
             using (var p = Pipeline.Create(true))
@@ -24,7 +29,7 @@ namespace TBD.Psi.VisualPipeline
                 {
                     OutputColor = true,
                     OutputInfrared = true,
-                    DeviceIndex = 1
+                    DeviceIndex = 1,
                 });
 
                 var k4a1BoardDetector = new BoardDetector(p, 4, 6, 0.0355f, 0.007f, "h");
@@ -39,7 +44,7 @@ namespace TBD.Psi.VisualPipeline
                 {
                     OutputColor = true,
                     OutputInfrared = true,
-                    DeviceIndex = 0
+                    DeviceIndex = 0,
                 });
 
                 var k4a2BoardDetector = new BoardDetector(p, 4, 6, 0.0355f, 0.007f, "h");
@@ -49,7 +54,6 @@ namespace TBD.Psi.VisualPipeline
                 k4a2.DepthDeviceCalibrationInfo.PipeTo(k4a2BoardDetector.CalibrationIn);
 
                 k4a2BoardDetector.Write("board2pose", store);
-
 
                 k4a1BoardDetector.Join(k4a2BoardDetector, TimeSpan.FromMilliseconds(50)).Select(m =>
                 {

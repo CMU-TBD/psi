@@ -1,11 +1,18 @@
-﻿namespace TBD.Psi.VisualPipeline
-{
-    using Microsoft.Psi;
-    using System;
+﻿// Copyright (c) Carnegie Mellon University. All rights reserved.
+// Licensed under the MIT license.
 
-    class Program
+namespace TBD.Psi.VisualPipeline
+{
+    /// <summary>
+    /// Main Program Entry.
+    /// </summary>
+    public class Program
     {
-        static void Main(string[] args)
+        /// <summary>
+        /// Main Program Entry.
+        /// </summary>
+        /// <param name="args">System Arguments.</param>
+        public static void Main(string[] args)
         {
             // CollectionPipeline.Run();
             CalibrationTool.Run();

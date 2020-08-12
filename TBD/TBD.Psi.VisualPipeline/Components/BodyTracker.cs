@@ -1,13 +1,19 @@
+// Copyright (c) Carnegie Mellon University. All rights reserved.
+// Licensed under the MIT license.
+
 namespace TBD.Psi.VisualPipeline.Components
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Microsoft.Azure.Kinect.BodyTracking;
     using Microsoft.Psi;
     using Microsoft.Psi.AzureKinect;
     using Microsoft.Psi.Components;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
 
+    /// <summary>
+    /// Psi Componet that given a a merged bodies, track the user overtime.
+    /// </summary>
     public class BodyTracker : IConsumerProducer<List<List<AzureKinectBody>>, List<AzureKinectBody>>
     {
         private uint peopleIndex = 0;
@@ -15,6 +21,10 @@ namespace TBD.Psi.VisualPipeline.Components
         private Pipeline pipeline;
         private Dictionary<uint, (AzureKinectBody, DateTime)> currTrackingPeople = new Dictionary<uint, (AzureKinectBody, DateTime)>();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BodyTracker"/> class.
+        /// </summary>
+        /// <param name="pipeline">Current pipeline.</param>
         public BodyTracker(Pipeline pipeline)
         {
             this.pipeline = pipeline;
@@ -22,10 +32,28 @@ namespace TBD.Psi.VisualPipeline.Components
             this.Out = pipeline.CreateEmitter<List<AzureKinectBody>>(this, nameof(this.Out));
         }
 
+        /// <inheritdoc/>
+        public Receiver<List<List<AzureKinectBody>>> In { get; private set; }
+
+        /// <inheritdoc/>
+        public Emitter<List<AzureKinectBody>> Out { get; private set; }
+
+        private static bool CompareAzureBodies(AzureKinectBody b1, AzureKinectBody b2)
+        {
+            if (b1.Joints[JointId.Neck].Confidence != JointConfidenceLevel.None && b2.Joints[JointId.Neck].Confidence != JointConfidenceLevel.None)
+            {
+                var neck1 = b1.Joints[JointId.Neck].Pose;
+                var neck2 = b2.Joints[JointId.Neck].Pose;
+                var poseDiff = neck1 - neck2;
+                return Math.Sqrt((poseDiff[0, 3] * poseDiff[0, 3]) + (poseDiff[1, 3] * poseDiff[1, 3])) < 0.5;
+            }
+
+            return false;
+        }
+
         private void BodiesCallback(List<List<AzureKinectBody>> msg, Envelope env)
         {
             var currentBodies = new List<AzureKinectBody>();
-            
 
             // We don't know when this is called, so we going to remove stall data based on a previous threshold
             this.currTrackingPeople = this.currTrackingPeople.Where(pair => (this.pipeline.GetCurrentTime() - pair.Value.Item2) < this.removeThreshold)
@@ -38,8 +66,9 @@ namespace TBD.Psi.VisualPipeline.Components
             foreach (var candidate in msg)
             {
                 var found = false;
+
                 // see whether ther is a good match
-                foreach(var key in currTrackingPeople.Keys)
+                foreach (var key in this.currTrackingPeople.Keys)
                 {
                     // ignore if used
                     if (matchedIndex.IndexOf(key) != -1)
@@ -47,11 +76,12 @@ namespace TBD.Psi.VisualPipeline.Components
                         continue;
                     }
 
-                    //try to see if they are a good match
-                    if (this.matchingBodies(currTrackingPeople[key].Item1, candidate))
+                    // try to see if they are a good match
+                    if (this.MatchingBodies(this.currTrackingPeople[key].Item1, candidate))
                     {
                         // MATCH
                         matchedIndex.Add(key);
+
                         // update the bodies with the first body
                         this.currTrackingPeople[key] = (candidate[0], env.Time);
                         var body = candidate[0];
@@ -61,10 +91,12 @@ namespace TBD.Psi.VisualPipeline.Components
                         break;
                     }
                 }
+
                 if (found)
                 {
                     continue;
                 }
+
                 // We cannot find a good match. It might be someone new
                 candidate[0].TrackingId = this.peopleIndex;
                 this.currTrackingPeople[this.peopleIndex++] = (candidate[0], env.Time);
@@ -74,32 +106,17 @@ namespace TBD.Psi.VisualPipeline.Components
             this.Out.Post(currentBodies, env.OriginatingTime);
         }
 
-        private static bool compareAzureBodies(AzureKinectBody b1, AzureKinectBody b2)
+        private bool MatchingBodies(AzureKinectBody tracked, List<AzureKinectBody> candidate)
         {
-            if (b1.Joints[JointId.Neck].Confidence != JointConfidenceLevel.None && b2.Joints[JointId.Neck].Confidence != JointConfidenceLevel.None)
+            foreach (var body in candidate)
             {
-                var neck1 = b1.Joints[JointId.Neck].Pose;
-                var neck2 = b2.Joints[JointId.Neck].Pose;
-                var poseDiff = neck1 - neck2;
-                return (Math.Sqrt(poseDiff[0, 3] * poseDiff[0, 3] + poseDiff[1, 3] * poseDiff[1, 3]) < 0.5);
-            }
-            return false;
-        }
-
-        private bool matchingBodies(AzureKinectBody tracked, List<AzureKinectBody> candidate)
-        {
-            foreach(var body in candidate)
-            {
-                if (compareAzureBodies(tracked, body))
+                if (CompareAzureBodies(tracked, body))
                 {
                     return true;
                 }
             }
+
             return false;
         }
-
-        public Receiver<List<List<AzureKinectBody>>> In { private set; get; }
-
-        public Emitter<List<AzureKinectBody>> Out { private set; get; }
     }
 }

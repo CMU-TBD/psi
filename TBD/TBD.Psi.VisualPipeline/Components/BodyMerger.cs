@@ -1,24 +1,31 @@
-﻿namespace TBD.Psi.VisualPipeline.Components
+﻿// Copyright (c) Carnegie Mellon University. All rights reserved.
+// Licensed under the MIT license.
+
+namespace TBD.Psi.VisualPipeline.Components
 {
-    using Microsoft.Azure.Kinect.BodyTracking;
-    using Microsoft.Psi;
-    using Microsoft.Psi.AzureKinect;
-    using Microsoft.Psi.Common.Interpolators;
-    using Microsoft.Psi.Components;
-    using Microsoft.Psi.Kinect;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+    using Microsoft.Azure.Kinect.BodyTracking;
+    using Microsoft.Psi;
+    using Microsoft.Psi.AzureKinect;
+    using Microsoft.Psi.Components;
+    using Microsoft.Psi.Kinect;
 
-    class BodyMerger : Subpipeline, IProducer<List<List<AzureKinectBody>>>
+    /// <summary>
+    /// Psi Component that merges kinect bodies from multiple sources.
+    /// </summary>
+    public class BodyMerger : Subpipeline, IProducer<List<List<AzureKinectBody>>>
     {
+        private readonly List<IProducer<List<AzureKinectBody>>> producerList = new List<IProducer<List<AzureKinectBody>>>();
+        private readonly Connector<List<List<AzureKinectBody>>> outConnector;
         private IProducer<List<AzureKinectBody>> mainProducer;
-        private List<IProducer<List<AzureKinectBody>>> producerList = new List<IProducer<List<AzureKinectBody>>>();
-        private Connector<List<List<AzureKinectBody>>> outConnector;
         private int inputConnectorIndex;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BodyMerger"/> class.
+        /// </summary>
+        /// <param name="pipeline">Current pipeline.</param>
         public BodyMerger(Pipeline pipeline)
             : base(pipeline, nameof(BodyMerger))
         {
@@ -26,21 +33,73 @@
             this.outConnector = this.CreateOutputConnectorTo<List<List<AzureKinectBody>>>(pipeline, nameof(this.outConnector));
         }
 
-        private static bool compareAzureBodies(AzureKinectBody b1, AzureKinectBody b2)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BodyMerger"/> class.
+        /// </summary>
+        /// <param name="pipeline">Current pipeline.</param>
+        /// <param name="mainProducer">The primary producer of AzureKinectBodies. This body will be used before others.</param>
+        public BodyMerger(Pipeline pipeline, IProducer<List<AzureKinectBody>> mainProducer)
+            : this(pipeline)
+        {
+            var inConnector = this.CreateInputConnectorFrom<List<AzureKinectBody>>(mainProducer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
+            mainProducer.PipeTo(inConnector);
+            this.mainProducer = inConnector.Out;
+        }
+
+        /// <inheritdoc/>
+        public Emitter<List<List<AzureKinectBody>>> Out => this.outConnector.Out;
+
+        /// <summary>
+        /// Add a Kinect2 Body Stream.
+        /// </summary>
+        /// <param name="producer">Kinect2 body stream producer.</param>
+        /// <param name="isMain">Whether this body is a main input or not.</param>
+        public void AddKinect2BodyStream(IProducer<List<KinectBody>> producer, bool isMain = false)
+        {
+            this.AddAzureKinectBodyStream(producer.ToAzureKinectBodies(), isMain);
+        }
+
+        /// <summary>
+        /// Add a Azure Kinect Body Stream.
+        /// </summary>
+        /// <param name="producer">Azure kinect body stream producer.</param>
+        /// <param name="isMain">Whether this body is a main input or not.</param>
+        public void AddAzureKinectBodyStream(IProducer<List<AzureKinectBody>> producer, bool isMain = false)
+        {
+            if (isMain)
+            {
+                if (this.mainProducer != null)
+                {
+                    this.producerList.Add(this.mainProducer);
+                }
+
+                var inConnector = this.CreateInputConnectorFrom<List<AzureKinectBody>>(producer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
+                producer.PipeTo(inConnector);
+                this.mainProducer = inConnector.Out;
+            }
+            else
+            {
+                var inConnector = this.CreateInputConnectorFrom<List<AzureKinectBody>>(producer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
+                producer.PipeTo(inConnector);
+                this.producerList.Add(inConnector.Out);
+            }
+        }
+
+        private static bool CompareAzureBodies(AzureKinectBody b1, AzureKinectBody b2)
         {
             if (b1.Joints[JointId.Neck].Confidence != JointConfidenceLevel.None && b2.Joints[JointId.Neck].Confidence != JointConfidenceLevel.None)
             {
                 var neck1 = b1.Joints[JointId.Neck].Pose;
                 var neck2 = b2.Joints[JointId.Neck].Pose;
                 var poseDiff = neck1 - neck2;
-                return (Math.Sqrt(poseDiff[0, 3] * poseDiff[0, 3] + poseDiff[1, 3] * poseDiff[1, 3]) < 0.3);
+                return Math.Sqrt((poseDiff[0, 3] * poseDiff[0, 3]) + (poseDiff[1, 3] * poseDiff[1, 3])) < 0.3;
             }
+
             return false;
         }
 
         private void PipelineStartEvent(object sender, PipelineRunEventArgs e)
         {
-
             var joiner = new Join<List<AzureKinectBody>, List<AzureKinectBody>, List<AzureKinectBody>, List<AzureKinectBody>>(
               this.mainProducer.Out.Pipeline,
               Reproducible.Nearest<List<AzureKinectBody>>(TimeSpan.FromMilliseconds(200)),
@@ -69,10 +128,11 @@
                     {
                         continue;
                     }
+
                     // create a collection with this body inside 
                     var currentCollection = new List<AzureKinectBody>()
                     {
-                        listOfBodies[i]
+                        listOfBodies[i],
                     };
 
                     // compare with all remaining bodies
@@ -83,53 +143,20 @@
                         {
                             continue;
                         }
+
                         // check if the values are meaningful.
-                        if (compareAzureBodies(listOfBodies[i], listOfBodies[j]))
+                        if (CompareAzureBodies(listOfBodies[i], listOfBodies[j]))
                         {
                             usedBodiesList.Add(j);
                             currentCollection.Add(listOfBodies[j]);
                         }
                     }
+
                     mergedList.Add(currentCollection);
                 }
+
                 return mergedList;
             }).Out.PipeTo(this.outConnector);
-        }
-
-        public BodyMerger(Pipeline pipeline, IProducer<List<AzureKinectBody>> mainProducer)
-            : this(pipeline)
-        {
-            var inConnector = this.CreateInputConnectorFrom<List<AzureKinectBody>>(mainProducer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
-            mainProducer.PipeTo(inConnector);
-            this.mainProducer = inConnector.Out;
-        }
-
-
-        public Emitter<List<List<AzureKinectBody>>> Out => this.outConnector.Out;
-
-        public void AddKinect2BodyStream(IProducer<List<KinectBody>> producer, bool isMain = false)
-        {
-            this.AddAzureKinectBodyStream(producer.ToAzureKinectBodies(), isMain);
-        }
-
-        public void AddAzureKinectBodyStream(IProducer<List<AzureKinectBody>> producer, bool isMain = false)
-        {
-            if (isMain)
-            {
-                if (this.mainProducer != null)
-                {
-                    this.producerList.Add(this.mainProducer);
-                }
-                var inConnector = this.CreateInputConnectorFrom<List<AzureKinectBody>>(producer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
-                producer.PipeTo(inConnector);
-                this.mainProducer = inConnector.Out;
-            }
-            else
-            {
-                var inConnector = this.CreateInputConnectorFrom<List<AzureKinectBody>>(producer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
-                producer.PipeTo(inConnector);
-                this.producerList.Add(inConnector.Out);
-            }
         }
     }
 }

@@ -1,30 +1,32 @@
-﻿namespace TBD.Psi.VisualPipeline
+﻿// Copyright (c) Carnegie Mellon University. All rights reserved.
+// Licensed under the MIT license.
+
+namespace TBD.Psi.VisualPipeline
 {
     using System;
     using System.Numerics;
     using MathNet.Numerics.LinearAlgebra;
     using MathNet.Spatial.Euclidean;
 
-    public class Utils
+    internal class Utils
     {
-
-        public static CoordinateSystem CreateCoordinateSystemFrom(float x, float y, float z, float qx, float qy, float qz, float qw)
+        internal static CoordinateSystem CreateCoordinateSystemFrom(float x, float y, float z, float qx, float qy, float qz, float qw)
         {
             return CreateCoordinateSystemFrom(new Point3D(x, y, z), new System.Numerics.Quaternion(qx, qy, qz, qw));
         }
 
-        public static CoordinateSystem CreateCoordinateSystemFrom(float x, float y, float z, float yaw, float pitch, float roll)
+        internal static CoordinateSystem CreateCoordinateSystemFrom(float x, float y, float z, float yaw, float pitch, float roll)
         {
             return CreateCoordinateSystemFrom(new Point3D(x, y, z), yaw, pitch, roll);
         }
 
-        public static CoordinateSystem CreateCoordinateSystemFrom(Point3D position, float yaw, float pitch, float roll)
+        internal static CoordinateSystem CreateCoordinateSystemFrom(Point3D position, float yaw, float pitch, float roll)
         {
             return CreateCoordinateSystemFrom(position, System.Numerics.Quaternion.CreateFromYawPitchRoll(pitch, roll, yaw));
         }
 
-        //Implementation of https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
-        public static System.Numerics.Quaternion GetQuaternionFromCoordinateSystem(CoordinateSystem cs)
+        // Implementation of https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
+        internal static System.Numerics.Quaternion GetQuaternionFromCoordinateSystem(CoordinateSystem cs)
         {
 
             var rotMat = cs.GetRotationSubMatrix();
@@ -38,7 +40,7 @@
 
         }
 
-        public static CoordinateSystem CreateCoordinateSystemFrom(Point3D position, System.Numerics.Quaternion orientation)
+        internal static CoordinateSystem CreateCoordinateSystemFrom(Point3D position, System.Numerics.Quaternion orientation)
         {
             var rotation = Matrix4x4.CreateFromQuaternion(orientation);
             var transformationMatrix = Matrix<double>.Build.DenseOfArray(new double[,]
