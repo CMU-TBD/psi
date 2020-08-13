@@ -10,7 +10,7 @@ namespace TBD.Psi.VisualPipeline.Components
     using RosMessageTypes = TBD.Psi.Ros.RosMessageTypes;
 
     /// <summary>
-    /// Component to Send Azure Kinect Bodies to ROS
+    /// Component to Send Azure Kinect Bodies to ROS.
     /// </summary>
     public class ROSWorldSender : IConsumer<List<AzureKinectBody>>
     {
@@ -61,7 +61,7 @@ namespace TBD.Psi.VisualPipeline.Components
                     new Microsoft.Ros.RosMessageTypes.Standard.Header.Kind(
                         this.msgSeq++,
                         env.OriginatingTime,
-                        "World"
+                        "PsiWorld"
                     ),
                     body.TrackingId,
                     jointList);

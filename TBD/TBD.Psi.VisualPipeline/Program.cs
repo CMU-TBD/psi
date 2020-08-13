@@ -16,6 +16,7 @@ namespace TBD.Psi.VisualPipeline
         {
             CollectionPipeline.Run();
             // CalibrationTool.Run();
+            // ReplayPipeline.Run("test", @"C:\Data\Playback\Example2");
         }
     }
 }

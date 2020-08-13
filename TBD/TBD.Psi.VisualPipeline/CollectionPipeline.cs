@@ -7,7 +7,9 @@ namespace TBD.Psi.VisualPipeline
     using System.Collections.Generic;
     using MathNet.Numerics.LinearAlgebra;
     using MathNet.Spatial.Euclidean;
+    using Microsoft.Kinect;
     using Microsoft.Psi;
+    using Microsoft.Psi.Audio;
     using Microsoft.Psi.AzureKinect;
     using Microsoft.Psi.Imaging;
     using TBD.Psi.VisualPipeline.Components;
@@ -24,7 +26,7 @@ namespace TBD.Psi.VisualPipeline
         {
             using (var pipeline = Pipeline.Create(true))
             {
-                var store = Store.Create(pipeline, "test", @"C:\Data\Stores");
+                var store = Store.Create(pipeline, "collection", @"C:\Data\Stores");
 
                 // Create all the coordinate frames.
                 var world = new CoordinateSystem();
@@ -33,9 +35,9 @@ namespace TBD.Psi.VisualPipeline
                 // var AzureToKinect2 = Utils.CreateCoordinateSystemFrom(0.15f, -0.7f, 0.3f, Convert.ToSingle(MathNet.Spatial.Units.Angle.FromDegrees(45).Radians), 0f, 0f);
                 double[,] t =
                 {
-                    { 0.6015787541327052, 0.7405488845530716, 0.2994280398375518, -0.0996640355434418 },
-                    { -0.7082055991914679, 0.6679070122005621, -0.22892137929127385, 1.911414425890803 },
-                    { -0.3695237906414093, -0.07407815224828282, 0.9262493460523588, 0.9352022962784129 },
+                    { 0.6871732017331661, 0.7031817600601086, 0.1883044833599294, 0.2677199191357014 },
+                    { -0.6807490328826277, 0.7109074966586263, -0.1704070299415766, 1.9980800067893445 },
+                    { -0.2537198160356354, -0.01208070831256065, 0.9672139709976488, 0.3408471667899609 },
                     { 0.0, 0.0, 0.0, 1.0 },
                 };
                 var azure1ToAzure2 = new CoordinateSystem(Matrix<double>.Build.DenseOfArray(t));
@@ -44,6 +46,13 @@ namespace TBD.Psi.VisualPipeline
                 // Repeat the frames to the store.
                 Generators.Repeat(pipeline, new List<CoordinateSystem> { world, worldToAzure, worldToAzure2 }, TimeSpan.FromSeconds(1)).Write("frames", store);
 
+                // Audio recording from main device
+                var audioSource = new AudioCapture(pipeline, new AudioCaptureConfiguration()
+                {
+                    OutputFormat = WaveFormat.Create16kHz1Channel16BitPcm(),
+                });
+                audioSource.Write("audio", store);
+
                 var azure1 = new AzureKinectSensor(pipeline, new AzureKinectSensorConfiguration()
                 {
                     OutputColor = true,
@@ -51,7 +60,7 @@ namespace TBD.Psi.VisualPipeline
                     BodyTrackerConfiguration = new AzureKinectBodyTrackerConfiguration()
                     {
                         CpuOnlyMode = false,
-                        TemporalSmoothing = 0.25f,
+                        TemporalSmoothing = 0.2f,
                     },
                     DeviceIndex = 1,
                 });
@@ -67,7 +76,7 @@ namespace TBD.Psi.VisualPipeline
                     BodyTrackerConfiguration = new AzureKinectBodyTrackerConfiguration()
                     {
                         CpuOnlyMode = false,
-                        TemporalSmoothing = 0.25f,
+                        TemporalSmoothing = 0.2f,
                     },
                     DeviceIndex = 0,
                 });

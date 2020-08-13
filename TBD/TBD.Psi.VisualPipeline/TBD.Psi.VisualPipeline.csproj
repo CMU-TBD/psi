@@ -21,6 +21,8 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Sources\Audio\Microsoft.Psi.Audio.Windows\Microsoft.Psi.Audio.Windows.csproj" />
+    <ProjectReference Include="..\..\Sources\Audio\Microsoft.Psi.Audio\Microsoft.Psi.Audio.csproj" />
     <ProjectReference Include="..\..\Sources\Imaging\Microsoft.Psi.Imaging.Windows\Microsoft.Psi.Imaging.Windows.csproj" />
     <ProjectReference Include="..\..\Sources\Imaging\Microsoft.Psi.Imaging\Microsoft.Psi.Imaging.csproj" />
     <ProjectReference Include="..\..\Sources\Integrations\ROS\Microsoft.Psi.ROS\Microsoft.Psi.ROS.fsproj" />
