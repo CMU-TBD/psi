@@ -33,10 +33,10 @@ namespace TBD.Psi.VisualPipeline
                 // var AzureToKinect2 = Utils.CreateCoordinateSystemFrom(0.15f, -0.7f, 0.3f, Convert.ToSingle(MathNet.Spatial.Units.Angle.FromDegrees(45).Radians), 0f, 0f);
                 double[,] t =
                 {
-                    { 0.3913, 0.8957, 0.210, 0.391 },
-                    { -0.864, 0.4364, -0.24992, 1.95 },
-                    { -0.315, -0.084, 0.945, 0.704 },
-                    { 0, 0, 0, 1 },
+                    { 0.6015787541327052, 0.7405488845530716, 0.2994280398375518, -0.0996640355434418 },
+                    { -0.7082055991914679, 0.6679070122005621, -0.22892137929127385, 1.911414425890803 },
+                    { -0.3695237906414093, -0.07407815224828282, 0.9262493460523588, 0.9352022962784129 },
+                    { 0.0, 0.0, 0.0, 1.0 },
                 };
                 var azure1ToAzure2 = new CoordinateSystem(Matrix<double>.Build.DenseOfArray(t));
                 var worldToAzure2 = new CoordinateSystem(worldToAzure * azure1ToAzure2);

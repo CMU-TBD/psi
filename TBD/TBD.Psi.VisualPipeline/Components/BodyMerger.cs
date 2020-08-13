@@ -85,19 +85,6 @@ namespace TBD.Psi.VisualPipeline.Components
             }
         }
 
-        private static bool CompareAzureBodies(AzureKinectBody b1, AzureKinectBody b2)
-        {
-            if (b1.Joints[JointId.Neck].Confidence != JointConfidenceLevel.None && b2.Joints[JointId.Neck].Confidence != JointConfidenceLevel.None)
-            {
-                var neck1 = b1.Joints[JointId.Neck].Pose;
-                var neck2 = b2.Joints[JointId.Neck].Pose;
-                var poseDiff = neck1 - neck2;
-                return Math.Sqrt((poseDiff[0, 3] * poseDiff[0, 3]) + (poseDiff[1, 3] * poseDiff[1, 3])) < 0.3;
-            }
-
-            return false;
-        }
-
         private void PipelineStartEvent(object sender, PipelineRunEventArgs e)
         {
             var joiner = new Join<List<AzureKinectBody>, List<AzureKinectBody>, List<AzureKinectBody>, List<AzureKinectBody>>(
@@ -145,7 +132,7 @@ namespace TBD.Psi.VisualPipeline.Components
                         }
 
                         // check if the values are meaningful.
-                        if (CompareAzureBodies(listOfBodies[i], listOfBodies[j]))
+                        if (Utils.CompareAzureBodies(listOfBodies[i], listOfBodies[j]))
                         {
                             usedBodiesList.Add(j);
                             currentCollection.Add(listOfBodies[j]);

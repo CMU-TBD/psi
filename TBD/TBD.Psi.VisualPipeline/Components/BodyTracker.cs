@@ -38,19 +38,6 @@ namespace TBD.Psi.VisualPipeline.Components
         /// <inheritdoc/>
         public Emitter<List<AzureKinectBody>> Out { get; private set; }
 
-        private static bool CompareAzureBodies(AzureKinectBody b1, AzureKinectBody b2)
-        {
-            if (b1.Joints[JointId.Neck].Confidence != JointConfidenceLevel.None && b2.Joints[JointId.Neck].Confidence != JointConfidenceLevel.None)
-            {
-                var neck1 = b1.Joints[JointId.Neck].Pose;
-                var neck2 = b2.Joints[JointId.Neck].Pose;
-                var poseDiff = neck1 - neck2;
-                return Math.Sqrt((poseDiff[0, 3] * poseDiff[0, 3]) + (poseDiff[1, 3] * poseDiff[1, 3])) < 0.5;
-            }
-
-            return false;
-        }
-
         private void BodiesCallback(List<List<AzureKinectBody>> msg, Envelope env)
         {
             var currentBodies = new List<AzureKinectBody>();
@@ -110,7 +97,7 @@ namespace TBD.Psi.VisualPipeline.Components
         {
             foreach (var body in candidate)
             {
-                if (CompareAzureBodies(tracked, body))
+                if (Utils.CompareAzureBodies(tracked, body))
                 {
                     return true;
                 }

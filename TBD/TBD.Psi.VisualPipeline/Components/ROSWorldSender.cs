@@ -46,7 +46,7 @@ namespace TBD.Psi.VisualPipeline.Components
                 var jointList = new List<RosMessageTypes.tbd_ros_msgs.HumanJoint.Kind>();
                 foreach (var joint in body.Joints)
                 {
-                    var q = Utils.GetQuaternionFromCoordinateSystem(joint.Value.Pose);
+                    var q = VisualPipeline.Utils.GetQuaternionFromCoordinateSystem(joint.Value.Pose);
                     var poseKind = new Microsoft.Ros.RosMessageTypes.Geometry.Pose.Kind(
                         new Microsoft.Ros.RosMessageTypes.Geometry.Point.Kind(joint.Value.Pose.At(0, 3), joint.Value.Pose.At(1, 3), joint.Value.Pose.At(2, 3)),
                         new Microsoft.Ros.RosMessageTypes.Geometry.Quaternion.Kind(q.X, q.Y, q.Z, q.W));
