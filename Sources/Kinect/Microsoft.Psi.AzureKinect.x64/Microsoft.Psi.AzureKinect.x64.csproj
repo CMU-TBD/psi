@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Platforms>x64</Platforms>
+    <Platform>x64</Platform>
     <RootNamespace>Microsoft.Psi.AzureKinect</RootNamespace>
     <Description>Provides APIs and components for using Microsoft Azure Kinect sensor.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
