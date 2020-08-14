@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Sources\Kinect\Microsoft.Psi.AzureKinect.x64\Microsoft.Psi.AzureKinect.x64.csproj" />
+    <ProjectReference Include="..\TBD.Psi.ROS\TBD.Psi.ROS.fsproj" />
+  </ItemGroup>
+
+  <!-- <ItemGroup>
+    <PackageReference Include="MathNet.Spatial" Version="0.5.0" />
+  </ItemGroup> -->
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+</Project>
