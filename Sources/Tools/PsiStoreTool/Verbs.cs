@@ -83,6 +83,14 @@ namespace PsiStoreTool
         }
 
         /// <summary>
+        /// Isolate stream verb.
+        /// </summary>
+        [Verb("isolatestream", HelpText = "Isolate a stream from a store. Only that stream is saved.")]
+        internal class IsolateStream : BaseStreamCommand
+        {
+        }
+
+        /// <summary>
         /// Display messages verb.
         /// </summary>
         [Verb("messages", HelpText = "Display messages in stream.")]

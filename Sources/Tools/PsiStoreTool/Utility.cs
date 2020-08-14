@@ -160,6 +160,52 @@ namespace PsiStoreTool
         }
 
         /// <summary>
+        /// Isolates a stream from the store.
+        /// </summary>
+        /// <param name="stream">Stream name.</param>
+        /// <param name="store">Store name.</param>
+        /// <param name="path">Store path.</param>
+        /// <returns>Success flag.</returns>
+        internal static int IsolateStream(string stream, string store, string path)
+        {
+            string tempFolderPath = Path.Combine(path, $"Copy-{Guid.NewGuid()}");
+
+            // copy only the wanted streams by name to the new path
+            Store.Copy((store, path), (store, tempFolderPath), null, s => s.Name == stream, false);
+
+            // create a SafeCopy folder in which to save the original store files
+            var safeCopyPath = Path.Combine(path, $"Original-{Guid.NewGuid()}");
+            Directory.CreateDirectory(safeCopyPath);
+
+            // Move the original store files to the BeforeRepair folder. Do this even if the deleteOldStore
+            // flag is true, as deleting the original store files immediately may occasionally fail. This can
+            // happen because the InfiniteFileReader disposes of its MemoryMappedView in a background
+            // thread, which may still be in progress. If deleteOldStore is true, we will delete the
+            // BeforeRepair folder at the very end (by which time any open MemoryMappedViews will likely
+            // have finished disposing).
+            foreach (var file in Directory.EnumerateFiles(path))
+            {
+                var fileInfo = new FileInfo(file);
+                File.Move(file, Path.Combine(safeCopyPath, fileInfo.Name));
+            }
+
+            // move the repaired store files to the original folder
+            foreach (var file in Directory.EnumerateFiles(Path.Combine(tempFolderPath)))
+            {
+                var fileInfo = new FileInfo(file);
+                File.Move(file, Path.Combine(path, fileInfo.Name));
+            }
+
+            // cleanup temporary folder
+            Directory.Delete(tempFolderPath, true);
+
+            // delete the old store files
+            Directory.Delete(safeCopyPath, true);
+
+            return 0;
+        }
+
+        /// <summary>
         /// Print (first n) messages from stream.
         /// </summary>
         /// <param name="stream">Stream name.</param>
