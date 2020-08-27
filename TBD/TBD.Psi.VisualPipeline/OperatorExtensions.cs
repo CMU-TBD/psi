@@ -8,17 +8,15 @@ namespace TBD.Psi.VisualPipeline
     using System.Linq;
     using MathNet.Spatial.Euclidean;
     using Microsoft.Azure.Kinect.BodyTracking;
-    using Microsoft.Kinect;
     using Microsoft.Psi;
     using Microsoft.Psi.AzureKinect;
-    using Microsoft.Psi.Kinect;
 
     /// <summary>
     /// Common Psi Component Extensions.
     /// </summary>
     public static class OperatorExtensions
     {
-        private static List<(JointId, JointType)> k4AtoK2JointCorrespondence = new List<(JointId, JointType)>
+        /*private static List<(JointId, JointType)> k4AtoK2JointCorrespondence = new List<(JointId, JointType)>
         {
             // Head
             (JointId.Head, JointType.Head),
@@ -51,7 +49,7 @@ namespace TBD.Psi.VisualPipeline
             (JointId.KneeRight, JointType.KneeRight),
             (JointId.AnkleRight, JointType.AnkleRight),
             (JointId.FootRight, JointType.FootRight),
-        };
+        };*/
 
         /// <summary>
         /// Change the Coordinate System of Each Azure Kinect Body.
@@ -78,7 +76,7 @@ namespace TBD.Psi.VisualPipeline
                 return m;
             });
         }
-
+/*
         /// <summary>
         /// Change the Coordinate System of Each Kinect2 Body.
         /// </summary>
@@ -104,8 +102,8 @@ namespace TBD.Psi.VisualPipeline
 
                 return m;
             });
-        }
-
+        }*/
+/*
         private static (CoordinateSystem, JointConfidenceLevel) ConvertK2JointToAzure(ValueTuple<CoordinateSystem, TrackingState> tuple)
         {
             var level = JointConfidenceLevel.None;
@@ -119,8 +117,8 @@ namespace TBD.Psi.VisualPipeline
             }
 
             return (tuple.Item1, level);
-        }
-
+        }*/
+/*
         /// <summary>
         /// Convert a Kinect2 Bodies to Azure Kinect Bodies.
         /// </summary>
@@ -148,6 +146,6 @@ namespace TBD.Psi.VisualPipeline
                 return k4aBodies;
             });
 
-        }
+        }*/
     }
 }

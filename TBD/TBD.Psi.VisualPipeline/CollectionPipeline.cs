@@ -7,12 +7,11 @@ namespace TBD.Psi.VisualPipeline
     using System.Collections.Generic;
     using MathNet.Numerics.LinearAlgebra;
     using MathNet.Spatial.Euclidean;
-    using Microsoft.Kinect;
     using Microsoft.Psi;
     using Microsoft.Psi.Audio;
     using Microsoft.Psi.AzureKinect;
     using Microsoft.Psi.Imaging;
-    using TBD.Psi.VisualPipeline.Components;
+    using TBD.Psi.VisionComponents;
 
     /// <summary>
     /// Data Collection Pipeline
@@ -35,9 +34,9 @@ namespace TBD.Psi.VisualPipeline
                 // var AzureToKinect2 = Utils.CreateCoordinateSystemFrom(0.15f, -0.7f, 0.3f, Convert.ToSingle(MathNet.Spatial.Units.Angle.FromDegrees(45).Radians), 0f, 0f);
                 double[,] t =
                 {
-                    { 0.6871732017331661, 0.7031817600601086, 0.1883044833599294, 0.2677199191357014 },
-                    { -0.6807490328826277, 0.7109074966586263, -0.1704070299415766, 1.9980800067893445 },
-                    { -0.2537198160356354, -0.01208070831256065, 0.9672139709976488, 0.3408471667899609 },
+                    { 0.6898107548540056, 0.6980158389305268, 0.19875929843093532, 0.23878132786416262 },
+                    { -0.6615352078026387, 0.7158160398480782, -0.21810572940811288, 1.9903781791180917 },
+                    { -0.2941637151745038, 0.01952653830886774, 0.9554708954680918, 0.4386583226015547 },
                     { 0.0, 0.0, 0.0, 1.0 },
                 };
                 var azure1ToAzure2 = new CoordinateSystem(Matrix<double>.Build.DenseOfArray(t));
@@ -62,13 +61,14 @@ namespace TBD.Psi.VisualPipeline
                         CpuOnlyMode = false,
                         TemporalSmoothing = 0.2f,
                     },
-                    DeviceIndex = 1,
+                    DeviceIndex = 0,
+                    SynchronizedImagesOnly = true,
                 });
 
                 var azure1BodiesInWorld = azure1.Bodies.ChangeToFrame(worldToAzure);
                 azure1BodiesInWorld.Write("azure1.bodies", store);
                 azure1.ColorImage.EncodeJpeg(90, DeliveryPolicy.LatestMessage).Write("azure1.color", store);
-
+/*
                 var azure2 = new AzureKinectSensor(pipeline, new AzureKinectSensorConfiguration()
                 {
                     OutputColor = true,
@@ -79,6 +79,7 @@ namespace TBD.Psi.VisualPipeline
                         TemporalSmoothing = 0.2f,
                     },
                     DeviceIndex = 0,
+                    SynchronizedImagesOnly = true,
                 });
 
                 var azure2BodiesInWorld = azure2.Bodies.ChangeToFrame(worldToAzure2);
@@ -92,7 +93,7 @@ namespace TBD.Psi.VisualPipeline
                 // Tracking of Bodies across time.
                 var tracker = new BodyTracker(pipeline);
                 merger.PipeTo(tracker);
-                tracker.Out.Write("TrackedBodies", store);
+                tracker.Out.Write("TrackedBodies", store);*/
 
                 /*                var rosPub = new ROSWorldSender(pipeline);
                                 tracker.PipeTo(rosPub);*/

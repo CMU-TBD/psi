@@ -45,6 +45,18 @@ namespace Microsoft.Psi
             // Get the list of currently loaded assemblies
             Assembly[] loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
 
+            // Fix the name difference between .NET Core and .NET Framework
+/*            if (assemblyName.FullName.StartsWith("mscorlib"))
+            {
+                return loadedAssemblies.FirstOrDefault(a => a.GetName().FullName.StartsWith("System.Private.CoreLib"));
+            }
+
+            if (assemblyName.FullName.StartsWith("System.Private.CoreLib"))
+            {
+                return loadedAssemblies.FirstOrDefault(a => a.GetName().FullName.StartsWith("mscorlib"));
+            }
+*/
+
             // Attempt to match by full name first
             var assembly = loadedAssemblies.FirstOrDefault(a => a.GetName().FullName == assemblyName.FullName);
             if (assembly != null)

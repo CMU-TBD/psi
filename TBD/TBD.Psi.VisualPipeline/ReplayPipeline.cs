@@ -10,7 +10,7 @@ namespace TBD.Psi.VisualPipeline
     using Microsoft.Psi;
     using Microsoft.Psi.AzureKinect;
     using Microsoft.Psi.Imaging;
-    using TBD.Psi.VisualPipeline.Components;
+    using TBD.Psi.VisionComponents;
 
     /// <summary>
     /// Data Collection Pipeline
@@ -51,7 +51,7 @@ namespace TBD.Psi.VisualPipeline
 
                 // Write diagnostics + start
                 p.Diagnostics.Write("diagnostics", store);
-                p.Run(new ReplayDescriptor(TimeInterval.Infinite, replaySpeed: 0.5f));
+                p.Run(new ReplayDescriptor(TimeInterval.Infinite));
 
                 Console.WriteLine("Done!");
 
