@@ -7,6 +7,7 @@ namespace TBD.Psi.VisualPipeline
     using System.Collections.Generic;
     using MathNet.Numerics.LinearAlgebra;
     using MathNet.Spatial.Euclidean;
+    using Microsoft.Azure.Kinect.Sensor;
     using Microsoft.Psi;
     using Microsoft.Psi.Audio;
     using Microsoft.Psi.AzureKinect;
@@ -34,11 +35,12 @@ namespace TBD.Psi.VisualPipeline
                 // var AzureToKinect2 = Utils.CreateCoordinateSystemFrom(0.15f, -0.7f, 0.3f, Convert.ToSingle(MathNet.Spatial.Units.Angle.FromDegrees(45).Radians), 0f, 0f);
                 double[,] t =
                 {
-                    { 0.6898107548540056, 0.6980158389305268, 0.19875929843093532, 0.23878132786416262 },
-                    { -0.6615352078026387, 0.7158160398480782, -0.21810572940811288, 1.9903781791180917 },
-                    { -0.2941637151745038, 0.01952653830886774, 0.9554708954680918, 0.4386583226015547 },
+                    { 0.8420226996347768, 0.538726260165883, -0.02779999352170998, 0.8463989332685926 },
+                    { -0.5384696730248816, 0.8424803003546693, 0.01661415197353884, 1.1692662085599896 },
+                    { 0.03237567809698574, 0.0009798581466861382, 0.9994754275690789, -0.05975978645631769 },
                     { 0.0, 0.0, 0.0, 1.0 },
                 };
+
                 var azure1ToAzure2 = new CoordinateSystem(Matrix<double>.Build.DenseOfArray(t));
                 var worldToAzure2 = new CoordinateSystem(worldToAzure * azure1ToAzure2);
 
@@ -56,23 +58,25 @@ namespace TBD.Psi.VisualPipeline
                 {
                     OutputColor = true,
                     OutputInfrared = true,
+                    WiredSyncMode = WiredSyncMode.Subordinate,
                     BodyTrackerConfiguration = new AzureKinectBodyTrackerConfiguration()
                     {
                         CpuOnlyMode = false,
                         TemporalSmoothing = 0.2f,
                     },
-                    DeviceIndex = 0,
+                    DeviceIndex = 1,
                     SynchronizedImagesOnly = true,
                 });
 
                 var azure1BodiesInWorld = azure1.Bodies.ChangeToFrame(worldToAzure);
                 azure1BodiesInWorld.Write("azure1.bodies", store);
                 azure1.ColorImage.EncodeJpeg(90, DeliveryPolicy.LatestMessage).Write("azure1.color", store);
-/*
+
                 var azure2 = new AzureKinectSensor(pipeline, new AzureKinectSensorConfiguration()
                 {
                     OutputColor = true,
                     OutputInfrared = true,
+                    WiredSyncMode = WiredSyncMode.Master,
                     BodyTrackerConfiguration = new AzureKinectBodyTrackerConfiguration()
                     {
                         CpuOnlyMode = false,
@@ -93,7 +97,7 @@ namespace TBD.Psi.VisualPipeline
                 // Tracking of Bodies across time.
                 var tracker = new BodyTracker(pipeline);
                 merger.PipeTo(tracker);
-                tracker.Out.Write("TrackedBodies", store);*/
+                tracker.Out.Write("TrackedBodies", store);
 
                 /*                var rosPub = new ROSWorldSender(pipeline);
                                 tracker.PipeTo(rosPub);*/

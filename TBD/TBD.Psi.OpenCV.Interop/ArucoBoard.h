@@ -19,7 +19,7 @@ namespace TBD
 			public:
 				
 				ArucoBoard(int markersX, int markersY, float markerLength, float markerSeperation, System::String^ dictName, int firstMarker) {
-					cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_5X5_100);
+					cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_100);
 					cv::aruco::GridBoard board = *(cv::aruco::GridBoard::create(markersX, markersY, markerLength, markerSeperation, dictionary, firstMarker));
 					boardPtr = new cv::aruco::GridBoard(board);
 				}
