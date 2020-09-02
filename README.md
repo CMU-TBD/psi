@@ -5,3 +5,5 @@ This is a fork of [Platform for Situated Intelligence](https://github.com/micros
 ## Changes from Psi Main Repo
 * Microsoft.Psi.AzureKinect.x64:
 	* Enable editting of AzureBody ID after creation. This lets us convert bodies from Kinect 2 to Azure Kinect. 
+* Microsoft.Psi.AudioCapture
+    * Make the audio capture 16KHz by default

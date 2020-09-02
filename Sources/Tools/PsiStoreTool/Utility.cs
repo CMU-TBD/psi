@@ -46,7 +46,7 @@ namespace PsiStoreTool
 
             using (var pipeline = Pipeline.Create())
             {
-                var data = Store.Open(pipeline, store, Path.GetFullPath(path));
+                var data = PsiStore.Open(pipeline, store, Path.GetFullPath(path));
 
                 stringBuilder.AppendLine($"{data.AvailableStreams.Count()} Available Streams (store={store}, path={path})");
                 if (showSize)
@@ -54,7 +54,13 @@ namespace PsiStoreTool
                     stringBuilder.AppendLine("[Avg. Message Size / Total Size]; * marks indexed streams");
                     foreach (var stream in data.AvailableStreams.OrderByDescending(s => (double)s.MessageCount * s.AverageMessageSize))
                     {
-                        var isIndexed = stream.IsIndexed ? "* " : "  ";
+                        var psiStream = stream as PsiStreamMetadata;
+                        if (psiStream == null)
+                        {
+                            throw new NotSupportedException("Currently, only Psi Stores are supported.");
+                        }
+
+                        var isIndexed = psiStream.IsIndexed ? "* " : "  ";
                         stringBuilder.AppendLine($"{isIndexed}[{(double)stream.AverageMessageSize / 1024:0.00}Kb / {(stream.AverageMessageSize * (double)stream.MessageCount) / (1024 * 1024):0.00}Mb] {stream.Name} ({stream.TypeName.Split(',')[0]})");
                     }
                 }
@@ -84,8 +90,13 @@ namespace PsiStoreTool
             Console.WriteLine($"Stream Metadata (stream={stream}, store={store}, path={path})");
             using (var pipeline = Pipeline.Create())
             {
-                var data = Store.Open(pipeline, store, Path.GetFullPath(path));
-                var meta = data.AvailableStreams.First(s => s.Name == stream);
+                var data = PsiStore.Open(pipeline, store, Path.GetFullPath(path));
+                var meta = data.AvailableStreams.First(s => s.Name == stream) as PsiStreamMetadata;
+                if (meta == null)
+                {
+                    throw new NotSupportedException("Currently, only Psi Stores are supported.");
+                }
+
                 Console.WriteLine($"ID: {meta.Id}");
                 Console.WriteLine($"Name: {meta.Name}");
                 Console.WriteLine($"TypeName: {meta.TypeName}");
@@ -125,7 +136,7 @@ namespace PsiStoreTool
             string tempFolderPath = Path.Combine(path, $"Copy-{Guid.NewGuid()}");
 
             // copy all streams to the new path, excluding the specified stream by name
-            Store.Copy((store, path), (store, tempFolderPath), null, s => s.Name != stream, false);
+            PsiStore.Copy((store, path), (store, tempFolderPath), null, s => s.Name != stream, false);
 
             // create a SafeCopy folder in which to save the original store files
             var safeCopyPath = Path.Combine(path, $"Original-{Guid.NewGuid()}");
@@ -219,7 +230,7 @@ namespace PsiStoreTool
             using (var pipeline = Pipeline.Create())
             {
                 var count = 0;
-                var data = Store.Open(pipeline, store, Path.GetFullPath(path));
+                var data = PsiStore.Open(pipeline, store, Path.GetFullPath(path));
                 data.OpenDynamicStream(stream).Do((m, e) =>
                 {
                     if (count++ < number)
@@ -279,7 +290,7 @@ namespace PsiStoreTool
         internal static int ConcatenateStores(string stores, string path, string output)
         {
             Console.WriteLine($"Concatenating stores (stores={stores}, path={path}, output={output})");
-            Store.Concatenate(stores.Split(';').Select(s => (s, path)), (output, path), new Progress<double>(p => Console.WriteLine($"Progress: {p * 100.0:F2}%")), Console.WriteLine);
+            PsiStore.Concatenate(stores.Split(';').Select(s => (s, path)), (output, path), new Progress<double>(p => Console.WriteLine($"Progress: {p * 100.0:F2}%")), Console.WriteLine);
             return 0;
         }
 
@@ -315,7 +326,7 @@ namespace PsiStoreTool
                 }
             }
 
-            Store.Crop((store, path), (output, path), startTime, lengthRelativeInterval, true, new Progress<double>(p => Console.WriteLine($"Progress: {p * 100.0:F2}%")), Console.WriteLine);
+            PsiStore.Crop((store, path), (output, path), startTime, lengthRelativeInterval, true, new Progress<double>(p => Console.WriteLine($"Progress: {p * 100.0:F2}%")), Console.WriteLine);
             return 0;
         }
 
@@ -365,7 +376,7 @@ namespace PsiStoreTool
             // process task
             using (var pipeline = Pipeline.Create())
             {
-                var importer = store != null ? Store.Open(pipeline, store, Path.GetFullPath(path)) : null;
+                var importer = store != null ? PsiStore.Open(pipeline, store, Path.GetFullPath(path)) : null;
 
                 // prepare parameters
                 var streamMode = stream?.Length > 0;
@@ -515,7 +526,7 @@ namespace PsiStoreTool
         {
             using (var pipeline = Pipeline.Create())
             {
-                var data = Store.Open(pipeline, store, Path.GetFullPath(path));
+                var data = PsiStore.Open(pipeline, store, Path.GetFullPath(path));
                 var messages = data.OpenDynamicStream(stream);
                 messages.PipeTo(transport(pipeline));
                 messages.Count().Do(i =>
@@ -620,7 +631,7 @@ namespace PsiStoreTool
             PrintNode(message, 1);
         }
 
-        private static IEnumerable<(MethodInfo Method, TaskAttribute Attribute)> LoadTasks(IEnumerable<string> extraAssemblies)
+        private static IEnumerable<(MethodInfo Method, BatchProcessingTaskAttribute Attribute)> LoadTasks(IEnumerable<string> extraAssemblies)
         {
             var assemblies = (ConfigurationManager.AppSettings["taskAssemblies"]?.Split(';') ?? new string[0]).Concat(extraAssemblies).Where(s => s.Length > 0);
             if (assemblies == null || assemblies.Count() == 0)
@@ -684,9 +695,9 @@ namespace PsiStoreTool
                 {
                     foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.Public))
                     {
-                        foreach (var attr in method.GetCustomAttributes(typeof(TaskAttribute)))
+                        foreach (var attr in method.GetCustomAttributes(typeof(BatchProcessingTaskAttribute)))
                         {
-                            yield return (method, (TaskAttribute)attr);
+                            yield return (method, (BatchProcessingTaskAttribute)attr);
                         }
                     }
                 }
