@@ -197,7 +197,7 @@ namespace AzureKinectSample
 
                 var sensor2 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
                 {
-                    DeviceIndex = 1,
+                    DeviceIndex = 0,
                     CameraFPS = FPS.FPS15,
                     WiredSyncMode = WiredSyncMode.Subordinate,
                     PowerlineFrequency = AzureKinectSensorConfiguration.PowerlineFrequencyTypes.SixtyHz,

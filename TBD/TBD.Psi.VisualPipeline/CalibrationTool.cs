@@ -34,8 +34,9 @@ namespace TBD.Psi.VisualPipeline
                 var k4a1 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
                 {
                     OutputColor = true,
-                    WiredSyncMode = WiredSyncMode.Subordinate,
+                    WiredSyncMode = WiredSyncMode.Master,
                     OutputInfrared = true,
+                    Exposure = TimeSpan.FromTicks(100000),
                     DeviceIndex = 1,
                 });
 
@@ -55,8 +56,9 @@ namespace TBD.Psi.VisualPipeline
                 var k4a2 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
                 {
                     OutputColor = true,
-                    WiredSyncMode = WiredSyncMode.Master,
+                    WiredSyncMode = WiredSyncMode.Subordinate,
                     OutputInfrared = true,
+                    Exposure = TimeSpan.FromTicks(100000),
                     DeviceIndex = 0,
                 });
 

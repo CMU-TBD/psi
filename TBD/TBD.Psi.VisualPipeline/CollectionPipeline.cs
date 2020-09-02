@@ -30,14 +30,14 @@ namespace TBD.Psi.VisualPipeline
 
                 // Create all the coordinate frames.
                 var world = new CoordinateSystem();
-                var worldToAzure = new CoordinateSystem(new Point3D(0, 0, 1), UnitVector3D.XAxis, UnitVector3D.YAxis, UnitVector3D.ZAxis);
+                var worldToAzure = new CoordinateSystem(new Point3D(0, 0, 1.5875), UnitVector3D.XAxis, UnitVector3D.YAxis, UnitVector3D.ZAxis);
 
                 // var AzureToKinect2 = Utils.CreateCoordinateSystemFrom(0.15f, -0.7f, 0.3f, Convert.ToSingle(MathNet.Spatial.Units.Angle.FromDegrees(45).Radians), 0f, 0f);
                 double[,] t =
                 {
-                    { 0.8420226996347768, 0.538726260165883, -0.02779999352170998, 0.8463989332685926 },
-                    { -0.5384696730248816, 0.8424803003546693, 0.01661415197353884, 1.1692662085599896 },
-                    { 0.03237567809698574, 0.0009798581466861382, 0.9994754275690789, -0.05975978645631769 },
+                    { 0.47922841581647085, -0.8635098532159414, 0.16426695721016488, 2.2743956804033574 },
+                    { 0.8584639052030658, 0.49614738676514686, 0.11573470690384041, -3.663957768309161 },
+                    { -0.18270152965297623, 0.09049035310517378, 0.9796029013772857, 0.6595395938135741 },
                     { 0.0, 0.0, 0.0, 1.0 },
                 };
 
@@ -48,17 +48,18 @@ namespace TBD.Psi.VisualPipeline
                 Generators.Repeat(pipeline, new List<CoordinateSystem> { world, worldToAzure, worldToAzure2 }, TimeSpan.FromSeconds(1)).Write("frames", store);
 
                 // Audio recording from main device
-                var audioSource = new AudioCapture(pipeline, new AudioCaptureConfiguration()
+/*                var audioSource = new AudioCapture(pipeline, new AudioCaptureConfiguration()
                 {
                     OutputFormat = WaveFormat.Create16kHz1Channel16BitPcm(),
                 });
-                audioSource.Write("audio", store);
+                audioSource.Write("audio", store);*/
 
                 var azure1 = new AzureKinectSensor(pipeline, new AzureKinectSensorConfiguration()
                 {
                     OutputColor = true,
                     OutputInfrared = true,
-                    WiredSyncMode = WiredSyncMode.Subordinate,
+                    WiredSyncMode = WiredSyncMode.Master,
+                    Exposure = TimeSpan.FromTicks(100000),
                     BodyTrackerConfiguration = new AzureKinectBodyTrackerConfiguration()
                     {
                         CpuOnlyMode = false,
@@ -76,7 +77,8 @@ namespace TBD.Psi.VisualPipeline
                 {
                     OutputColor = true,
                     OutputInfrared = true,
-                    WiredSyncMode = WiredSyncMode.Master,
+                    WiredSyncMode = WiredSyncMode.Subordinate,
+                    Exposure = TimeSpan.FromTicks(100000),
                     BodyTrackerConfiguration = new AzureKinectBodyTrackerConfiguration()
                     {
                         CpuOnlyMode = false,
