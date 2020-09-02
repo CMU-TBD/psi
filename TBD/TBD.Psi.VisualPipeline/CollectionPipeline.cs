@@ -24,9 +24,9 @@ namespace TBD.Psi.VisualPipeline
         /// </summary>
         public static void Run()
         {
-            using (var pipeline = Pipeline.Create(true))
+            using (var pipeline = Pipeline.Create(enableDiagnostics: true))
             {
-                var store = Store.Create(pipeline, "collection", @"C:\Data\Stores");
+                var store = PsiStore.Create(pipeline, "collection-02", @"C:\Data\Stores");
 
                 // Create all the coordinate frames.
                 var world = new CoordinateSystem();
@@ -35,9 +35,9 @@ namespace TBD.Psi.VisualPipeline
                 // var AzureToKinect2 = Utils.CreateCoordinateSystemFrom(0.15f, -0.7f, 0.3f, Convert.ToSingle(MathNet.Spatial.Units.Angle.FromDegrees(45).Radians), 0f, 0f);
                 double[,] t =
                 {
-                    { 0.47922841581647085, -0.8635098532159414, 0.16426695721016488, 2.2743956804033574 },
-                    { 0.8584639052030658, 0.49614738676514686, 0.11573470690384041, -3.663957768309161 },
-                    { -0.18270152965297623, 0.09049035310517378, 0.9796029013772857, 0.6595395938135741 },
+                    { 0.8078703900378181, -0.5891752140483332, -0.013780285992902435, 0.032736135237783445 },
+                    { 0.5892683041286023, 0.8079544527659226, 0.0011840202089164265, -1.6603675898139039 },
+                    { 0.010406663708646178, -0.0090647342387594, 0.9999043463322372, -0.3337323335749119 },
                     { 0.0, 0.0, 0.0, 1.0 },
                 };
 
@@ -65,7 +65,7 @@ namespace TBD.Psi.VisualPipeline
                         CpuOnlyMode = false,
                         TemporalSmoothing = 0.2f,
                     },
-                    DeviceIndex = 1,
+                    DeviceIndex = 0,
                     SynchronizedImagesOnly = true,
                 });
 
@@ -84,7 +84,7 @@ namespace TBD.Psi.VisualPipeline
                         CpuOnlyMode = false,
                         TemporalSmoothing = 0.2f,
                     },
-                    DeviceIndex = 0,
+                    DeviceIndex = 1,
                     SynchronizedImagesOnly = true,
                 });
 

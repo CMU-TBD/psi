@@ -25,11 +25,11 @@ namespace TBD.Psi.VisualPipeline
         /// <param name="rootPath">Path to Store.</param>
         public static void Run(string storeName, string rootPath)
         {
-            using (var p = Pipeline.Create(true))
+            using (var p = Pipeline.Create(enableDiagnostics: true))
             {
                 // output store
-                var input = Store.Open(p, storeName, rootPath);
-                var store = Store.Create(p, "replayPipeline", @"C:\Data\Stores");
+                var input = PsiStore.Open(p, storeName, rootPath);
+                var store = PsiStore.Create(p, "replayPipeline", @"C:\Data\Stores");
 
                 var body1 = input.OpenStream<List<AzureKinectBody>>("azure1.bodies");
                 var body2 = input.OpenStream<List<AzureKinectBody>>("azure2.bodies");

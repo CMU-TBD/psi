@@ -16,7 +16,7 @@ namespace TBD.Psi.VisualPipeline
         {
             using (var p = Pipeline.Create())
             {
-                var store = Store.Create(p, "record-compress", @"C:\Data\Stores");
+                var store = PsiStore.Create(p, "record-compress", @"C:\Data\Stores");
 
                 // start azure1 - main
                 var azure1 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()

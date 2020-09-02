@@ -27,9 +27,9 @@ namespace TBD.Psi.VisualPipeline
         {
             using (var writer = new StreamWriter(@"C:\Data\pose2.csv"))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-            using (var p = Pipeline.Create(true))
+            using (var p = Pipeline.Create(enableDiagnostics: true))
             {
-                var store = Store.Create(p, "test", @"C:\Data\Stores");
+                var store = PsiStore.Create(p, "test", @"C:\Data\Stores");
 
                 var k4a1 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
                 {
@@ -37,7 +37,7 @@ namespace TBD.Psi.VisualPipeline
                     WiredSyncMode = WiredSyncMode.Master,
                     OutputInfrared = true,
                     Exposure = TimeSpan.FromTicks(100000),
-                    DeviceIndex = 1,
+                    DeviceIndex = 0,
                 });
 
                 var boardMarkerSize = 0.056f;
@@ -59,7 +59,7 @@ namespace TBD.Psi.VisualPipeline
                     WiredSyncMode = WiredSyncMode.Subordinate,
                     OutputInfrared = true,
                     Exposure = TimeSpan.FromTicks(100000),
-                    DeviceIndex = 0,
+                    DeviceIndex = 1,
                 });
 
                 var k4a2BoardDetector = new BoardDetector(p, 4, 6, boardMarkerSize, boardMarkerDist, "h");
@@ -80,14 +80,14 @@ namespace TBD.Psi.VisualPipeline
                     csv.NextRecord();
                     Console.WriteLine("one record");
                 });
-/*                joiner.Select(m =>
-                {
-                    var (pose1, pose2) = m;
-                    var p2Inv = pose2.Invert();
-                    var cs = new CoordinateSystem(pose1 * p2Inv);
-                    Console.WriteLine(cs);
-                    return cs;
-                }).Write("solution", store);*/
+                /*                joiner.Select(m =>
+                                {
+                                    var (pose1, pose2) = m;
+                                    var p2Inv = pose2.Invert();
+                                    var cs = new CoordinateSystem(pose1 * p2Inv);
+                                    Console.WriteLine(cs);
+                                    return cs;
+                                }).Write("solution", store);*/
 
                 p.Diagnostics.Write("diagnostics", store);
                 p.RunAsync();

@@ -70,7 +70,7 @@ namespace TBD.Psi.VisionComponents
                         matchedIndex.Add(key);
 
                         // update the bodies with the first body
-                        this.currTrackingPeople[key] = (candidate[0], env.Time);
+                        this.currTrackingPeople[key] = (candidate[0], env.OriginatingTime);
                         var body = candidate[0];
                         body.TrackingId = key;
                         currentBodies.Add(body);
@@ -86,7 +86,7 @@ namespace TBD.Psi.VisionComponents
 
                 // We cannot find a good match. It might be someone new
                 candidate[0].TrackingId = this.peopleIndex;
-                this.currTrackingPeople[this.peopleIndex++] = (candidate[0], env.Time);
+                this.currTrackingPeople[this.peopleIndex++] = (candidate[0], env.OriginatingTime);
                 currentBodies.Add(candidate[0]);
             }
 

@@ -14,9 +14,9 @@ namespace TBD.Psi.VisualPipeline
         /// <param name="args">System Arguments.</param>
         public static void Main(string[] args)
         {
-            RecordingPipeline.Run();
+            // RecordingPipeline.Run();
             // CollectionPipeline.Run();
-            // CalibrationTool.Run();
+            CalibrationTool.Run();
             // ReplayPipeline.Run("test", @"C:\Data\Playback\Example2");
         }
     }
