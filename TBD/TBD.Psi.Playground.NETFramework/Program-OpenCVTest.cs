@@ -19,9 +19,9 @@
 
         public static void Run(string[] args)
         {
-            using (var p = Pipeline.Create(true))
+            using (var p = Pipeline.Create())
             {
-                var store = Store.Create(p, "test", @"C:\Data\Stores");
+                var store = PsiStore.Create(p, "test", @"C:\Data\Stores");
 
                 var k4a1 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
                 {
@@ -90,7 +90,7 @@
                     e.Post(numTags, env.OriginatingTime);
                 }
             }).Write("tags", store);*/
-                p.Diagnostics.Write("diagnostic", store);
+                // p.Diagnostics.Write("diagnostic", store);
                 p.RunAsync();
                 Console.ReadLine();
 

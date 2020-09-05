@@ -13,8 +13,8 @@
     {
         static void Main(string[] args)
         {
-            ExtractPose.Run(args);
-            //DoubleKinect.Run(args);
+            // ExtractPose.Run(args);
+            DoubleKinect.Run(args);
             //OpenCVTest.Run(args);
 
             /*     using (var p = Pipeline.Create(true))

@@ -16,21 +16,17 @@
             Logger.Initialize();
             Logger.LogMessage += DoubleKinect.k4aErrorMsg;
 
-            using (var p = Pipeline.Create(true))
+            using (var p = Pipeline.Create(enableDiagnostics: true))
             {
-                var store = Store.Create(p, "test", @"C:\Data\Stores");
+                var store = PsiStore.Create(p, "test", @"C:\Data\Stores\KinectTest");
 
                 var k4a1 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
                 {
                     OutputColor = true,
                     OutputDepth = true,
                     DeviceIndex = 0,
-                    BodyTrackerConfiguration = new AzureKinectBodyTrackerConfiguration()
-                    {
-                        CpuOnlyMode = false,
-                    }
                 });
-
+                /*
                 var k4a2 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
                 {
                     OutputColor = true,
@@ -41,13 +37,14 @@
                         CpuOnlyMode = false,
                     }
                 });
+                */
 
 
 
-                k4a1.Bodies.Write("b1", store);
-                k4a1.ColorImage.EncodeJpeg().Write("img1", store);
-                k4a2.ColorImage.EncodeJpeg().Write("img2", store);
-                k4a2.Bodies.Write("b2", store);
+                //k4a1.Bodies.Write("b1", store);
+                k4a1.ColorImage.EncodeJpeg().Write("azure1.color", store);
+                // k4a2.ColorImage.EncodeJpeg().Write("azure2.color", store);
+                //k4a2.Bodies.Write("b2", store);
 
                 p.RunAsync();
                 Console.ReadLine();
@@ -56,10 +53,9 @@
 
         private static void k4aErrorMsg(LogMessage obj)
         {
-            if (obj.LogLevel != LogLevel.Trace)
-            {
+            
                 Console.WriteLine(obj);
-            }
+            
         }
     }
 }
