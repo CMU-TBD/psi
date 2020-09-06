@@ -16,7 +16,14 @@ namespace TBD
 
 			void ArucoBoardDetector::SetCameraIntrinsics(array<double>^ intrinsics, array<double>^ radial, array<double>^ tangent)
 			{
-				*distCoeffs_ << radial[0], radial[1], tangent[0], tangent[1], radial[2], radial[3], radial[4], radial[5];
+				if (radial->Length > 2) 
+				{
+					*distCoeffs_ << radial[0], radial[1], tangent[0], tangent[1], radial[2], radial[3], radial[4], radial[5];
+				}
+				else
+				{
+					*distCoeffs_ << radial[0], radial[1], tangent[0], tangent[1];
+				}
 				SetCameraIntrinsics(intrinsics);
 			}
 

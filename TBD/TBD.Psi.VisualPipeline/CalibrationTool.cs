@@ -63,6 +63,7 @@ namespace TBD.Psi.VisualPipeline
                 var k21 = new KinectSensor(p, new KinectSensorConfiguration()
                 {
                     OutputColor = true,
+                    OutputCalibration = true,
                 });
 
                 calibrationMerger.AddSensor(k21, "k21");

@@ -18,8 +18,6 @@ namespace TBD.Psi.VisualPipeline.Components
     public class CalibrationMerger : Subpipeline, IProducer<(CoordinateSystem, string, CoordinateSystem, string)>
     {
         private Pipeline pipeline;
-        private List<AzureKinectSensor> azureKinectSensors;
-        private List<KinectSensor> kinectSensor;
         private Merge<(CoordinateSystem, string, CoordinateSystem, string)> merger;
         private List<Emitter<CoordinateSystem>> boardPoseEmitters = new List<Emitter<CoordinateSystem>>();
         private Connector<(CoordinateSystem, string, CoordinateSystem, string)> outConnector;
@@ -30,6 +28,7 @@ namespace TBD.Psi.VisualPipeline.Components
         private string dictName;
         private TimeSpan timeRange = TimeSpan.FromMilliseconds(50);
         private PsiExporter store;
+        private bool saveInputToStore = true;
 
         public CalibrationMerger(Pipeline p, PsiExporter store, int numX, int numY, double markerLength, double markerSeperation, string dictName)
             : base(p)
@@ -51,35 +50,36 @@ namespace TBD.Psi.VisualPipeline.Components
 
         public void AddSensor(AzureKinectSensor sensor)
         {
-            var imgReceiver = this.CreateInputConnectorFrom<Shared<Image>>(this.pipeline, $"imgFrom{sensor.Id}");
-            var calReceiver = this.CreateInputConnectorFrom<IDepthDeviceCalibrationInfo>(this.pipeline, $"CalFrom{sensor.Id}");
-            sensor.ColorImage.PipeTo(imgReceiver);
+            this.AddStreams(sensor.ColorImage, sensor.DepthDeviceCalibrationInfo, $"Azure{sensor.Name}");
+        }
 
-            // create board detector
-            var boardDetector = new BoardDetector(this, this.numX, this.numY, (float)this.markerLength, (float)this.markerSeperation, this.dictName);
-            var greyImg = imgReceiver.ToGray();
-            greyImg.EncodeJpeg(quality: 80).Write($"{sensor.Id}.img", this.store);
-            greyImg.PipeTo(boardDetector.ImageIn);
-            calReceiver.PipeTo(boardDetector.CalibrationIn);
-            boardDetector.Out.Write($"{sensor.Id}.pose", this.store);
-
-            // save the outgoing emitter
-            this.boardPoseEmitters.Add(boardDetector.Out);
+        public void AddSavedStreams(Emitter<Shared<Image>> imgInput, Emitter<IDepthDeviceCalibrationInfo> calInput, string name)
+        {
+            this.AddStreams(imgInput, calInput, name);
         }
 
         public void AddSensor(KinectSensor sensor, string name)
         {
+            this.AddStreams(sensor.ColorImage, sensor.DepthDeviceCalibrationInfo, name);
+        }
+
+        private void AddStreams(Emitter<Shared<Image>> imgInput, Emitter<IDepthDeviceCalibrationInfo> calInput, string name)
+        {
             var imgReceiver = this.CreateInputConnectorFrom<Shared<Image>>(this.pipeline, $"imgFrom{name}");
             var calReceiver = this.CreateInputConnectorFrom<IDepthDeviceCalibrationInfo>(this.pipeline, $"CalFrom{name}");
-            sensor.ColorImage.PipeTo(imgReceiver);
+            imgInput.PipeTo(imgReceiver);
+            calInput.PipeTo(calReceiver);
 
             // create board detector
             var boardDetector = new BoardDetector(this, this.numX, this.numY, (float)this.markerLength, (float)this.markerSeperation, this.dictName);
             var greyImg = imgReceiver.ToGray();
-            greyImg.EncodeJpeg(quality: 80).Write($"{name}.img", this.store);
             greyImg.PipeTo(boardDetector.ImageIn);
             calReceiver.PipeTo(boardDetector.CalibrationIn);
-            boardDetector.Out.Write($"{name}.pose", this.store);
+            if (this.saveInputToStore)
+            {
+                greyImg.EncodeJpeg(quality: 80).Write($"{name}.img", this.store);
+                boardDetector.Out.Write($"{name}.pose", this.store);
+            }
 
             // save the outgoing emitter
             this.boardPoseEmitters.Add(boardDetector.Out);
