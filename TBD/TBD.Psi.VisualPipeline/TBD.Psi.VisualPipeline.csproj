@@ -28,6 +28,7 @@
     <ProjectReference Include="..\..\Sources\Imaging\Microsoft.Psi.Imaging\Microsoft.Psi.Imaging.csproj" />
     <ProjectReference Include="..\..\Sources\Integrations\ROS\Microsoft.Psi.ROS\Microsoft.Psi.ROS.fsproj" />
     <ProjectReference Include="..\..\Sources\Kinect\Microsoft.Psi.AzureKinect.x64\Microsoft.Psi.AzureKinect.x64.csproj" />
+    <ProjectReference Include="..\..\Sources\Kinect\Microsoft.Psi.Kinect.Windows\Microsoft.Psi.Kinect.Windows.csproj" />
     <ProjectReference Include="..\TBD.Psi.OpenCV.Interop\TBD.Psi.OpenCV.Interop.vcxproj" />
     <ProjectReference Include="..\TBD.Psi.ROS\TBD.Psi.ROS.fsproj" />
     <ProjectReference Include="..\TBD.Psi.VisionComponents\TBD.Psi.VisionComponents.csproj" />
