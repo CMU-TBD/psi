@@ -47,7 +47,7 @@ namespace TBD.Psi.VisualPipeline
                 // create a calibration tool
                 var calibrationMerger = new CalibrationMerger(p, store, 4, 6, boardMarkerSize, boardMarkerDist, "h");
 
-                calibrationMerger.AddSensor(k4a1);
+                calibrationMerger.AddSensor(k4a1, "k4a1");
 
                 var k4a2 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
                 {
@@ -58,7 +58,18 @@ namespace TBD.Psi.VisualPipeline
                     DeviceIndex = 0,
                 });
 
-                calibrationMerger.AddSensor(k4a2);
+                calibrationMerger.AddSensor(k4a2, "k4a2");
+
+                var k4a3 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
+                {
+                    OutputColor = true,
+                    WiredSyncMode = WiredSyncMode.Standalone,
+                    OutputInfrared = true,
+                    Exposure = TimeSpan.FromTicks(100000),
+                    DeviceIndex = 2,
+                });
+
+                calibrationMerger.AddSensor(k4a3, "k4a3");
 
                 var k21 = new KinectSensor(p, new KinectSensorConfiguration()
                 {
@@ -69,7 +80,6 @@ namespace TBD.Psi.VisualPipeline
                 calibrationMerger.AddSensor(k21, "k21");
 
                 calibrationMerger.Write("result", store);
-
 
                 calibrationMerger.Do(m =>
                 {

@@ -20,6 +20,7 @@ namespace TBD.Psi.VisualPipeline.Components
         private Pipeline pipeline;
         private Merge<(CoordinateSystem, string, CoordinateSystem, string)> merger;
         private List<Emitter<CoordinateSystem>> boardPoseEmitters = new List<Emitter<CoordinateSystem>>();
+        private List<string> InputNames = new List<string>();
         private Connector<(CoordinateSystem, string, CoordinateSystem, string)> outConnector;
         private int numX;
         private int numY;
@@ -48,9 +49,9 @@ namespace TBD.Psi.VisualPipeline.Components
 
         public Emitter<(CoordinateSystem, string, CoordinateSystem, string)> Out => this.outConnector.Out;
 
-        public void AddSensor(AzureKinectSensor sensor)
+        public void AddSensor(AzureKinectSensor sensor, string name)
         {
-            this.AddStreams(sensor.ColorImage, sensor.DepthDeviceCalibrationInfo, $"Azure{sensor.Name}");
+            this.AddStreams(sensor.ColorImage, sensor.DepthDeviceCalibrationInfo, name);
         }
 
         public void AddSavedStreams(Emitter<Shared<Image>> imgInput, Emitter<IDepthDeviceCalibrationInfo> calInput, string name)
@@ -83,6 +84,7 @@ namespace TBD.Psi.VisualPipeline.Components
 
             // save the outgoing emitter
             this.boardPoseEmitters.Add(boardDetector.Out);
+            this.InputNames.Add(name);
         }
 
         private void PipelineStartEvent(object sender, PipelineRunEventArgs e)
@@ -91,11 +93,13 @@ namespace TBD.Psi.VisualPipeline.Components
             {
                 for (var j = i + 1; j < this.boardPoseEmitters.Count; j++)
                 {
+                    var name1 = this.InputNames[i];
+                    var name2 = this.InputNames[j];
                     // join and send to merger
                     var joiner = this.boardPoseEmitters[i].Join(this.boardPoseEmitters[j], this.timeRange).Select(m =>
                     {
                         var (pose1, pose2) = m;
-                        return (pose1, $"{i}", pose2, $"{j}");
+                        return (pose1, name1, pose2, name2);
                     });
 
                     var receiver = this.merger.AddInput($"CalibrationMerger{i}-{j}");
