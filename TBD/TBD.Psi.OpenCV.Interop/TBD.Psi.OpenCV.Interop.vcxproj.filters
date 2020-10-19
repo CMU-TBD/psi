@@ -21,9 +21,6 @@
     <ClCompile Include="ImageBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OpenCVOperations.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ArucoBoardDetector.h">
       <Filter>Header Files</Filter>
     </ClCompile>

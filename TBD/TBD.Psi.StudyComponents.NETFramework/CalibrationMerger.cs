@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TBD.Psi.VisualPipeline.Components
+namespace TBD.Psi.StudyComponents
 {
     using Microsoft.Psi;
     using Microsoft.Psi.Imaging;
@@ -14,11 +14,12 @@ namespace TBD.Psi.VisualPipeline.Components
     using MathNet.Spatial.Euclidean;
     using Microsoft.Psi.Components;
     using Microsoft.Psi.Data;
+    using TBD.Psi.OpenCV;
 
     public class CalibrationMerger : Subpipeline, IProducer<(CoordinateSystem, string, CoordinateSystem, string)>
     {
         private Pipeline pipeline;
-        private Merge<(CoordinateSystem, string, CoordinateSystem, string)> merger;
+        private Zip<(CoordinateSystem, string, CoordinateSystem, string)> zipper;
         private List<Emitter<CoordinateSystem>> boardPoseEmitters = new List<Emitter<CoordinateSystem>>();
         private List<string> InputNames = new List<string>();
         private Connector<(CoordinateSystem, string, CoordinateSystem, string)> outConnector;
@@ -26,26 +27,33 @@ namespace TBD.Psi.VisualPipeline.Components
         private int numY;
         private double markerLength;
         private double markerSeperation;
-        private string dictName;
+        private ArucoDictionary dictName;
         private TimeSpan timeRange = TimeSpan.FromMilliseconds(50);
-        private PsiExporter store;
-        private bool saveInputToStore = true;
+        private PsiExporter store = null;
+        private bool saveInputToStore = false;
 
         public CalibrationMerger(Pipeline p, PsiExporter store, int numX, int numY, double markerLength, double markerSeperation, string dictName)
-            : base(p)
+            : this(p, numX, numY, markerLength, markerSeperation, dictName)
         {
             this.store = store;
+            this.saveInputToStore = true;
+        }
+
+        public CalibrationMerger(Pipeline p, int numX, int numY, double markerLength, double markerSeperation, string dictName)
+            : base(p)
+        {
             this.numX = numX;
             this.numY = numY;
             this.markerLength = markerLength;
             this.markerSeperation = markerSeperation;
-            this.dictName = dictName;
+            this.dictName = (ArucoDictionary) Enum.Parse(typeof(ArucoDictionary), dictName);
             this.pipeline = p;
             this.pipeline.PipelineRun += this.PipelineStartEvent;
-            this.merger = new Merge<(CoordinateSystem, string, CoordinateSystem, string)>(this);
+            this.zipper = new Zip<(CoordinateSystem, string, CoordinateSystem, string)>(this);
             this.outConnector = this.CreateOutputConnectorTo<(CoordinateSystem, string, CoordinateSystem, string)>(p, nameof(this.outConnector));
-            this.merger.Select(m => m.Data).PipeTo(this.outConnector);
+            this.zipper.Select(m => m.First()).PipeTo(this.outConnector);
         }
+
 
         public Emitter<(CoordinateSystem, string, CoordinateSystem, string)> Out => this.outConnector.Out;
 
@@ -87,6 +95,27 @@ namespace TBD.Psi.VisualPipeline.Components
             this.InputNames.Add(name);
         }
 
+        public void AddStream(Emitter<Shared<Image>> imgInput, IDepthDeviceCalibrationInfo info, string name)
+        {
+            var imgReceiver = this.CreateInputConnectorFrom<Shared<Image>>(this.pipeline, $"imgFrom{name}");
+            imgInput.PipeTo(imgReceiver);
+
+            // create board detector
+            var boardDetector = new BoardDetector(this, this.numX, this.numY, (float)this.markerLength, (float)this.markerSeperation, this.dictName);
+            boardDetector.AddCalibrationInfo(info);
+            var greyImg = imgReceiver.ToGray();
+            greyImg.PipeTo(boardDetector.ImageIn);
+            if (this.saveInputToStore)
+            {
+                greyImg.EncodeJpeg(quality: 80).Write($"{name}.img", this.store);
+                boardDetector.Out.Write($"{name}.pose", this.store);
+            }
+
+            // save the outgoing emitter
+            this.boardPoseEmitters.Add(boardDetector.Out);
+            this.InputNames.Add(name);
+        }
+
         private void PipelineStartEvent(object sender, PipelineRunEventArgs e)
         {
             for (var i = 0; i < this.boardPoseEmitters.Count; i++)
@@ -101,8 +130,7 @@ namespace TBD.Psi.VisualPipeline.Components
                         var (pose1, pose2) = m;
                         return (pose1, name1, pose2, name2);
                     });
-
-                    var receiver = this.merger.AddInput($"CalibrationMerger{i}-{j}");
+                    var receiver = this.zipper.AddInput($"CalibrationMerger{i}-{j}");
                     joiner.PipeTo(receiver);
                 }
             }

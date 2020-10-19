@@ -50,14 +50,12 @@ namespace TBD
 				cv::aruco::detectMarkers(img, cvBoard->dictionary, corners, ids, cv::aruco::DetectorParameters::create(), rejectedCorners);
 				cv::aruco::refineDetectedMarkers(img, cvBoard, corners, ids, rejectedCorners);
 
-				// if there is more than 3 detected markers
-				if (ids.size() > 3) {
+				// if there is more than 3 detected markers and 0 exist.
+				if (ids.size() > 3 && std::find(ids.begin(), ids.end(), 0) != ids.end()) {
 					cv::Mat rvec, tvec;
 					cv::Mat obj_points, img_points;
-					// get the image points out
-					cv::aruco::getBoardObjectAndImagePoints(cvBoard, corners, ids, obj_points, img_points);
-					// try to solve the pnp problem
-					cv::solvePnP(obj_points, img_points, *cameraMat_, *distCoeffs_, rvec, tvec, false);
+					// estimate the board
+					cv::aruco::estimatePoseBoard(corners, ids, cvBoard, *cameraMat_, *distCoeffs_, rvec, tvec, false);
 					// Convert tvec and rvec to a transformation matrix
 					cv::Mat rot;
 					cv::Rodrigues(rvec, rot);

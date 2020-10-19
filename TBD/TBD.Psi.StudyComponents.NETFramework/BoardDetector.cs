@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Carnegie Mellon University. All rights reserved.
 // Licensed under the MIT license.
 
-namespace TBD.Psi.VisualPipeline.Components
+namespace TBD.Psi.StudyComponents
 {
     using MathNet.Numerics.LinearAlgebra;
     using MathNet.Spatial.Euclidean;
@@ -28,7 +28,7 @@ namespace TBD.Psi.VisualPipeline.Components
         /// <param name="markerSeperation">Length between each markers (in meters).</param>
         /// <param name="dictName">Name of Detectionary Used.</param>
         /// <param name="firstMarker">Index of first marker.</param>
-        public BoardDetector(Pipeline p, int markersX, int markersY, float markerLength, float markerSeperation, string dictName, int firstMarker = 0)
+        public BoardDetector(Pipeline p, int markersX, int markersY, float markerLength, float markerSeperation, ArucoDictionary dictName, int firstMarker = 0)
         {
             this.Out = p.CreateEmitter<CoordinateSystem>(this, nameof(this.Out));
             this.CalibrationIn = p.CreateReceiver<IDepthDeviceCalibrationInfo>(this, this.CalibrationCB, nameof(this.CalibrationIn));
@@ -68,7 +68,7 @@ namespace TBD.Psi.VisualPipeline.Components
             }
         }
 
-        private void CalibrationCB(IDepthDeviceCalibrationInfo info, Envelope env)
+        public void AddCalibrationInfo(IDepthDeviceCalibrationInfo info)
         {
             var intrinsicArr = new double[4];
             intrinsicArr[0] = info.ColorIntrinsics.FocalLengthXY.X;
@@ -77,6 +77,11 @@ namespace TBD.Psi.VisualPipeline.Components
             intrinsicArr[3] = info.ColorIntrinsics.PrincipalPoint.Y;
             this.detector.SetCameraIntrinsics(intrinsicArr, info.ColorIntrinsics.RadialDistortion.AsArray(), info.ColorIntrinsics.TangentialDistortion.AsArray());
             this.receiveCalibration = true;
+        }
+
+        private void CalibrationCB(IDepthDeviceCalibrationInfo info, Envelope env)
+        {
+            this.AddCalibrationInfo(info);
         }
 
     }

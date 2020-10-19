@@ -31,6 +31,7 @@
     <ProjectReference Include="..\..\Sources\Kinect\Microsoft.Psi.Kinect.Windows\Microsoft.Psi.Kinect.Windows.csproj" />
     <ProjectReference Include="..\TBD.Psi.OpenCV.Interop\TBD.Psi.OpenCV.Interop.vcxproj" />
     <ProjectReference Include="..\TBD.Psi.ROS\TBD.Psi.ROS.fsproj" />
+    <ProjectReference Include="..\TBD.Psi.StudyComponents.NETFramework\TBD.Psi.StudyComponents.NETFramework.csproj" />
     <ProjectReference Include="..\TBD.Psi.VisionComponents\TBD.Psi.VisionComponents.csproj" />
   </ItemGroup>
 </Project>

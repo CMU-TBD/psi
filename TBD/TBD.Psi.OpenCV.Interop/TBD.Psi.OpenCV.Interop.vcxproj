@@ -153,7 +153,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ArucoBoardDetector.cpp" />
-    <ClCompile Include="OpenCVOperations.cpp" />
     <ClCompile Include="ImageBuffer.cpp" />
     <ClCompile Include="ArucoBoardDetector.h" />
   </ItemGroup>

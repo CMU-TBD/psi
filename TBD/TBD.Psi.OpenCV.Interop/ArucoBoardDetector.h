@@ -21,7 +21,6 @@ namespace TBD
 				ArucoBoard^ board_;
 				cv::Mat1d* distCoeffs_;
 				cv::Mat1d* cameraMat_;
-				cv::aruco::DetectorParameters* detectParameters_;
 			public:
 
 				ArucoBoardDetector(ArucoBoard^ board) {
@@ -29,13 +28,11 @@ namespace TBD
 					distCoeffs_ = new cv::Mat_<double>(8, 1);
 					*distCoeffs_ << 0, 0, 0, 0, 0, 0, 0, 0;
 					cameraMat_ = new cv::Mat_<double>(3, 3);
-					detectParameters_ = new cv::aruco::DetectorParameters();
 				}
 
 				~ArucoBoardDetector() {
 					delete distCoeffs_;
 					delete cameraMat_;
-					delete detectParameters_;
 				}
 
 				void SetCameraIntrinsics(array<double>^ intrinsics, array<double>^ radianCoefficients, array<double>^ tangentialCoefficients);
