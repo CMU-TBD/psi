@@ -23,7 +23,7 @@ namespace TBD.Psi.Playground.NETFramework
                     OutputColor = true,
                     OutputDepth = true,
                     OutputCalibration = true,
-                    DeviceIndex = 2,
+                    DeviceIndex = 1,
                     Exposure = TimeSpan.FromMilliseconds(10),
                     WiredSyncMode = Microsoft.Azure.Kinect.Sensor.WiredSyncMode.Master,
                 });
@@ -38,7 +38,7 @@ namespace TBD.Psi.Playground.NETFramework
                     WiredSyncMode = Microsoft.Azure.Kinect.Sensor.WiredSyncMode.Subordinate,
                 });
 
-                var k4a3 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
+/*                var k4a3 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
                 {
                     OutputColor = true,
                     OutputDepth = true,
@@ -46,7 +46,7 @@ namespace TBD.Psi.Playground.NETFramework
                     DeviceIndex = 1,
                     Exposure = TimeSpan.FromMilliseconds(10),
                     WiredSyncMode = Microsoft.Azure.Kinect.Sensor.WiredSyncMode.Subordinate,
-                });
+                });*/
 
                 k4a1.ColorImage.EncodeJpeg(quality: 80).Write("azure1.color", store);
                 k4a1.DepthImage.EncodePng().Write("azure1.depth", store);
@@ -60,11 +60,11 @@ namespace TBD.Psi.Playground.NETFramework
                 k4a2.AzureKinectSensorCalibration.Write("azure2.calibration", store);
                 k4a2.InfraredImage.EncodePng().Write("azure2.infrared", store);
 
-                k4a3.ColorImage.EncodeJpeg(quality: 80).Write("azure3.color", store);
+/*                k4a3.ColorImage.EncodeJpeg(quality: 80).Write("azure3.color", store);
                 k4a3.DepthImage.EncodePng().Write("azure3.depth", store);
                 k4a3.DepthDeviceCalibrationInfo.Write("azure3.depth-Calibration", store);
                 k4a3.AzureKinectSensorCalibration.Write("azure3.calibration", store);
-                k4a3.InfraredImage.EncodePng().Write("azure3.infrared", store);
+                k4a3.InfraredImage.EncodePng().Write("azure3.infrared", store);*/
 
                 p.RunAsync();
                 Console.ReadLine();

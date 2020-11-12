@@ -50,8 +50,8 @@ namespace TBD
 				cv::aruco::detectMarkers(img, cvBoard->dictionary, corners, ids, cv::aruco::DetectorParameters::create(), rejectedCorners);
 				cv::aruco::refineDetectedMarkers(img, cvBoard, corners, ids, rejectedCorners);
 
-				// if there is more than 3 detected markers and 0 exist.
-				if (ids.size() > 3 && std::find(ids.begin(), ids.end(), 0) != ids.end()) {
+				// if we can see the whole board & all the points
+				if (ids.size() == cvBoard->ids.size() && std::find(ids.begin(), ids.end(), 0) != ids.end()) {
 					cv::Mat rvec, tvec;
 					cv::Mat obj_points, img_points;
 					// estimate the board

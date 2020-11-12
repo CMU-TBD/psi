@@ -16,7 +16,7 @@
             Charting.Run();
             //CalibrationRecording.Run();
             // ExtractPose.Run(args);
-            // SingleKinect.Run(args);
+            //SingleKinect.Run(args);
             //DoubleKinect.Run(args);
             //OpenCVTest.Run(args);
 

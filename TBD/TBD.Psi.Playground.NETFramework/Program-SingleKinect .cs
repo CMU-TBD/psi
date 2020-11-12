@@ -15,7 +15,7 @@
             // Start AzureKinect Loggers
             Logger.Initialize();
             Logger.LogMessage += SingleKinect.k4aErrorMsg;
-            int deviceIndex = 1;
+            int deviceIndex = 0;
 
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
@@ -30,6 +30,7 @@
                     {
                         TemporalSmoothing = 0.0f
                     },
+                    Exposure = TimeSpan.FromMilliseconds(12),
                 });
                 
                 k4a.ColorImage.EncodeJpeg(quality: 50).Write("color", store);

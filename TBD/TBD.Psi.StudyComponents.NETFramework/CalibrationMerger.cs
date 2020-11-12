@@ -28,7 +28,7 @@ namespace TBD.Psi.StudyComponents
         private double markerLength;
         private double markerSeperation;
         private ArucoDictionary dictName;
-        private TimeSpan timeRange = TimeSpan.FromMilliseconds(50);
+        private TimeSpan timeRange = TimeSpan.FromMilliseconds(30);
         private PsiExporter store = null;
         private bool saveInputToStore = false;
 
