@@ -34,7 +34,7 @@ namespace TBD.Psi.VisualPipeline
                         BodyTrackerConfiguration = new AzureKinectBodyTrackerConfiguration()
                         {
                             CpuOnlyMode = false,
-                            TemporalSmoothing = 0.1f,
+                            TemporalSmoothing = 0.0f,
                         },
                     });
 
@@ -47,6 +47,8 @@ namespace TBD.Psi.VisualPipeline
                 p.RunAsync();
                 Console.WriteLine("Press to End");
                 Console.ReadLine();
+                Console.WriteLine("Here");
+
             }
         }
     }

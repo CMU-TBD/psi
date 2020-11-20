@@ -15,11 +15,11 @@
             // Start AzureKinect Loggers
             Logger.Initialize();
             Logger.LogMessage += SingleKinect.k4aErrorMsg;
-            int deviceIndex = 0;
+            int deviceIndex = 2;
 
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
-                var store = PsiStore.Create(p, "single-cam-body", @"C:\Data\Stores\SingleCam");
+                var store = PsiStore.Create(p, "single-cam-body", @"C:\Data\Store\SingleCam");
 
                 var k4a = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
                 {
