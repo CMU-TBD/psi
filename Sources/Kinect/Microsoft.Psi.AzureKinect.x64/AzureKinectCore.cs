@@ -193,6 +193,11 @@ namespace Microsoft.Psi.AzureKinect
 
             this.device.SetColorControl(ColorControlCommand.PowerlineFrequency, ColorControlMode.Manual, (int)this.configuration.PowerlineFrequency);
 
+            if (this.configuration.Gain > -1)
+            {
+                this.device.SetColorControl(ColorControlCommand.Gain, ColorControlMode.Manual, this.configuration.Gain);
+            }
+
             this.device.StartCameras(new DeviceConfiguration()
             {
                 ColorFormat = this.configuration.ColorFormat,

@@ -89,6 +89,11 @@ namespace Microsoft.Psi.AzureKinect
         public PowerlineFrequencyTypes PowerlineFrequency { get; set; } = PowerlineFrequencyTypes.SixtyHz;
 
         /// <summary>
+        /// Gets or sets the gain of the camera.
+        /// </summary>
+        public int Gain { get; set; } = -1;
+
+        /// <summary>
         /// Gets or sets a value indicating whether the color stream is emitted.
         /// </summary>
         public bool OutputColor { get; set; } = true;
