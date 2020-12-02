@@ -17,6 +17,11 @@ namespace Microsoft.Psi.AzureKinect
         public enum PowerlineFrequencyTypes
         {
             /// <summary>
+            /// Use the default value or the powerline frequency set previously (reverts upon powercycle).
+            /// </summary>
+            Default = 0,
+
+            /// <summary>
             /// For powerline with 50Hz Frequency. (e.g. UK, Germany, Italy, etc).
             /// </summary>
             FiftyHz = 1,
