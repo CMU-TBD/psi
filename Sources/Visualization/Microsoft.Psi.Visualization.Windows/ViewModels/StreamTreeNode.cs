@@ -170,6 +170,25 @@ namespace Microsoft.Psi.Visualization.ViewModels
         public string LastMessageCreationTimeString => DateTimeFormatHelper.FormatDateTime(this.LastMessageCreationTime);
 
         /// <summary>
+        /// Gets the average message per second.
+        /// </summary>
+        [PropertyOrder(13)]
+        [DisplayName("Average Message Per Second")]
+        [Description("Estimated Message Per Second. Rough estimate")]
+        public double? AverageMessagePerSecond
+        {
+            get
+            {
+                    if (this.StreamMetadata != null && (this.LastMessageCreationTime - this.FirstMessageCreationTime).HasValue)
+                    {
+                        return this.StreamMetadata.MessageCount / (this.LastMessageCreationTime - this.FirstMessageCreationTime).Value.TotalSeconds;
+                    }
+
+                    return null;
+                }
+        }
+
+        /// <summary>
         /// Gets or sets the type of messages in this stream tree node.
         /// </summary>
         [Browsable(false)]
