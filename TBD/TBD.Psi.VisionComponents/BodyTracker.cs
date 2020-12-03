@@ -14,12 +14,12 @@ namespace TBD.Psi.VisionComponents
     /// <summary>
     /// Psi Componet that given a a merged bodies, track the user overtime.
     /// </summary>
-    public class BodyTracker : IConsumerProducer<List<List<AzureKinectBody>>, List<AzureKinectBody>>
+    public class BodyTracker : IConsumerProducer<List<List<HumanBody>>, List<HumanBody>>
     {
         private uint peopleIndex = 0;
         private TimeSpan removeThreshold = TimeSpan.FromSeconds(1);
         private Pipeline pipeline;
-        private Dictionary<uint, (AzureKinectBody, DateTime)> currTrackingPeople = new Dictionary<uint, (AzureKinectBody, DateTime)>();
+        private Dictionary<uint, (HumanBody, DateTime)> currTrackingPeople = new Dictionary<uint, (HumanBody, DateTime)>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BodyTracker"/> class.
@@ -28,19 +28,19 @@ namespace TBD.Psi.VisionComponents
         public BodyTracker(Pipeline pipeline)
         {
             this.pipeline = pipeline;
-            this.In = pipeline.CreateReceiver<List<List<AzureKinectBody>>>(this, this.BodiesCallback, nameof(this.In));
-            this.Out = pipeline.CreateEmitter<List<AzureKinectBody>>(this, nameof(this.Out));
+            this.In = pipeline.CreateReceiver<List<List<HumanBody>>>(this, this.BodiesCallback, nameof(this.In));
+            this.Out = pipeline.CreateEmitter<List<HumanBody>>(this, nameof(this.Out));
         }
 
         /// <inheritdoc/>
-        public Receiver<List<List<AzureKinectBody>>> In { get; private set; }
+        public Receiver<List<List<HumanBody>>> In { get; private set; }
 
         /// <inheritdoc/>
-        public Emitter<List<AzureKinectBody>> Out { get; private set; }
+        public Emitter<List<HumanBody>> Out { get; private set; }
 
-        private void BodiesCallback(List<List<AzureKinectBody>> msg, Envelope env)
+        private void BodiesCallback(List<List<HumanBody>> msg, Envelope env)
         {
-            var currentBodies = new List<AzureKinectBody>();
+            var currentBodies = new List<HumanBody>();
 
             // We don't know when this is called, so we going to remove stall data based on a previous threshold
             this.currTrackingPeople = this.currTrackingPeople.Where(pair => (this.pipeline.GetCurrentTime() - pair.Value.Item2) < this.removeThreshold)
@@ -72,7 +72,7 @@ namespace TBD.Psi.VisionComponents
                         // update the bodies with the first body
                         this.currTrackingPeople[key] = (candidate[0], env.OriginatingTime);
                         var body = candidate[0];
-                        body.TrackingId = key;
+                        body.Id = key;
                         currentBodies.Add(body);
                         found = true;
                         break;
@@ -85,7 +85,7 @@ namespace TBD.Psi.VisionComponents
                 }
 
                 // We cannot find a good match. It might be someone new
-                candidate[0].TrackingId = this.peopleIndex;
+                candidate[0].Id = this.peopleIndex;
                 this.currTrackingPeople[this.peopleIndex++] = (candidate[0], env.OriginatingTime);
                 currentBodies.Add(candidate[0]);
             }
@@ -93,7 +93,7 @@ namespace TBD.Psi.VisionComponents
             this.Out.Post(currentBodies, env.OriginatingTime);
         }
 
-        private bool MatchingBodies(AzureKinectBody tracked, List<AzureKinectBody> candidate)
+        private bool MatchingBodies(HumanBody tracked, List<HumanBody> candidate)
         {
             foreach (var body in candidate)
             {

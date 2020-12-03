@@ -14,11 +14,11 @@ namespace TBD.Psi.VisionComponents
     /// <summary>
     /// Psi Component that merges kinect bodies from multiple sources.
     /// </summary>
-    public class BodyMerger : Subpipeline, IProducer<List<List<AzureKinectBody>>>
+    public class BodyMerger : Subpipeline, IProducer<List<List<HumanBody>>>
     {
-        private readonly List<IProducer<List<AzureKinectBody>>> producerList = new List<IProducer<List<AzureKinectBody>>>();
-        private readonly Connector<List<List<AzureKinectBody>>> outConnector;
-        private IProducer<List<AzureKinectBody>> mainProducer;
+        private readonly List<IProducer<List<HumanBody>>> producerList = new List<IProducer<List<HumanBody>>>();
+        private readonly Connector<List<List<HumanBody>>> outConnector;
+        private IProducer<List<HumanBody>> mainProducer;
         private int inputConnectorIndex;
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace TBD.Psi.VisionComponents
             : base(pipeline, nameof(BodyMerger))
         {
             pipeline.PipelineRun += this.PipelineStartEvent;
-            this.outConnector = this.CreateOutputConnectorTo<List<List<AzureKinectBody>>>(pipeline, nameof(this.outConnector));
+            this.outConnector = this.CreateOutputConnectorTo<List<List<HumanBody>>>(pipeline, nameof(this.outConnector));
         }
 
         /// <summary>
@@ -37,23 +37,23 @@ namespace TBD.Psi.VisionComponents
         /// </summary>
         /// <param name="pipeline">Current pipeline.</param>
         /// <param name="mainProducer">The primary producer of AzureKinectBodies. This body will be used before others.</param>
-        public BodyMerger(Pipeline pipeline, IProducer<List<AzureKinectBody>> mainProducer)
+        public BodyMerger(Pipeline pipeline, IProducer<List<HumanBody>> mainProducer)
             : this(pipeline)
         {
-            var inConnector = this.CreateInputConnectorFrom<List<AzureKinectBody>>(mainProducer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
+            var inConnector = this.CreateInputConnectorFrom<List<HumanBody>>(mainProducer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
             mainProducer.PipeTo(inConnector);
             this.mainProducer = inConnector.Out;
         }
 
         /// <inheritdoc/>
-        public Emitter<List<List<AzureKinectBody>>> Out => this.outConnector.Out;
+        public Emitter<List<List<HumanBody>>> Out => this.outConnector.Out;
 
         /// <summary>
-        /// Add a Azure Kinect Body Stream.
+        /// Add a Body Stream.
         /// </summary>
         /// <param name="producer">Azure kinect body stream producer.</param>
         /// <param name="isMain">Whether this body is a main input or not.</param>
-        public void AddAzureKinectBodyStream(IProducer<List<AzureKinectBody>> producer, bool isMain = false)
+        public void AddHumanBodyStream(IProducer<List<HumanBody>> producer, bool isMain = false)
         {
             if (isMain)
             {
@@ -62,13 +62,13 @@ namespace TBD.Psi.VisionComponents
                     this.producerList.Add(this.mainProducer);
                 }
 
-                var inConnector = this.CreateInputConnectorFrom<List<AzureKinectBody>>(producer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
+                var inConnector = this.CreateInputConnectorFrom<List<HumanBody>>(producer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
                 producer.PipeTo(inConnector);
                 this.mainProducer = inConnector.Out;
             }
             else
             {
-                var inConnector = this.CreateInputConnectorFrom<List<AzureKinectBody>>(producer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
+                var inConnector = this.CreateInputConnectorFrom<List<HumanBody>>(producer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
                 producer.PipeTo(inConnector);
                 this.producerList.Add(inConnector.Out);
             }
@@ -76,9 +76,9 @@ namespace TBD.Psi.VisionComponents
 
         private void PipelineStartEvent(object sender, PipelineRunEventArgs e)
         {
-            var joiner = new Join<List<AzureKinectBody>, List<AzureKinectBody>, List<AzureKinectBody>, List<AzureKinectBody>>(
+            var joiner = new Join<List<HumanBody>, List<HumanBody>, List<HumanBody>, List<HumanBody>>(
               this.mainProducer.Out.Pipeline,
-              Reproducible.Nearest<List<AzureKinectBody>>(TimeSpan.FromMilliseconds(200)),
+              Reproducible.Nearest<List<HumanBody>>(TimeSpan.FromMilliseconds(200)),
               (m, secondaryArray) => m.Concat(secondaryArray.SelectMany(m => m)).ToList(),
               this.producerList.Count,
               null);
@@ -95,7 +95,7 @@ namespace TBD.Psi.VisionComponents
                 // For now, we going to use a first-come first server algorithm.
                 // TODO: In the future, some kind of Hungarian Algorithm or matchin
                 // algorithm should be used.
-                var mergedList = new List<List<AzureKinectBody>>();
+                var mergedList = new List<List<HumanBody>>();
                 var usedBodiesList = new List<int>();
                 for (int i = 0; i < listOfBodies.Count; i++)
                 {
@@ -106,7 +106,7 @@ namespace TBD.Psi.VisionComponents
                     }
 
                     // create a collection with this body inside 
-                    var currentCollection = new List<AzureKinectBody>()
+                    var currentCollection = new List<HumanBody>()
                     {
                         listOfBodies[i],
                     };
@@ -120,8 +120,8 @@ namespace TBD.Psi.VisionComponents
                             continue;
                         }
 
-                        // check if the values are meaningful.
-                        if (Utils.CompareAzureBodies(listOfBodies[i], listOfBodies[j]))
+                        // check if the values are meaningful
+                        if (HumanBody.CompareHumanBodies(listOfBodies[i], listOfBodies[j]))
                         {
                             usedBodiesList.Add(j);
                             currentCollection.Add(listOfBodies[j]);

@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <RuntimeIdentifier>x64</RuntimeIdentifier>
     <Platform>x64</Platform>
     <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
@@ -21,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\TBD.Psi.Components\TBD.Psi.Imaging.Windows\TBD.Psi.Imaging.Windows.csproj" />
     <ProjectReference Include="..\..\Sources\Audio\Microsoft.Psi.Audio.Windows\Microsoft.Psi.Audio.Windows.csproj" />
     <ProjectReference Include="..\..\Sources\Audio\Microsoft.Psi.Audio\Microsoft.Psi.Audio.csproj" />
     <ProjectReference Include="..\..\Sources\Calibration\Microsoft.Psi.Calibration\Microsoft.Psi.Calibration.csproj" />

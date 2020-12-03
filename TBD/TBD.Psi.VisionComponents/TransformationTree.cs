@@ -10,20 +10,17 @@ namespace TBD.Psi.VisionComponents
     using Microsoft.Psi;
     using Microsoft.Psi.Components;
 
-    public class TransformationTree : ISourceComponent
+    public class TransformationTree<T>
     {
-        private Pipeline p;
-        private bool running;
-        private System.Threading.Timer timer;
-        private TimeSpan rate;
-        private Dictionary<string, Dictionary<string, CoordinateSystem>> tree = new Dictionary<string, Dictionary<string, CoordinateSystem>>();
 
-        private void traverseTree(string parent, CoordinateSystem transform, List<CoordinateSystem> frameList)
+        private Dictionary<T, Dictionary<T, CoordinateSystem>> tree = new Dictionary<T, Dictionary<T, CoordinateSystem>>();
+
+        protected void traverseTree(T parent, CoordinateSystem transform, List<(T id, CoordinateSystem Pose)> frameList)
         {
             foreach(var child in this.tree[parent].Keys)
             {
-                var childTransfrom = transform.TransformBy(this.tree[parent][child]);
-                frameList.Add(childTransfrom);
+                var childTransfrom = this.tree[parent][child].TransformBy(transform);
+                frameList.Add((child, childTransfrom));
                 if (this.tree.ContainsKey(child))
                 {
                     this.traverseTree(child, childTransfrom, frameList);
@@ -31,30 +28,24 @@ namespace TBD.Psi.VisionComponents
             }
         }
 
-        private void timerCallback(object state)
+
+        public TransformationTree()
         {
-            var frameList = new List<CoordinateSystem>();
-            frameList.Add(new CoordinateSystem());
-            this.traverseTree("world", new CoordinateSystem(), frameList);
-            this.WorldFrameOutput.Post(frameList, this.p.GetCurrentTime());
         }
 
-        public TransformationTree(Pipeline p, double seconds = 1)
+        public List<(T, CoordinateSystem)> TraverseTree(T root, CoordinateSystem rootPose)
         {
-            this.p = p;
-            this.rate = TimeSpan.FromSeconds(seconds);
-            this.WorldFrameOutput = p.CreateEmitter<List<CoordinateSystem>>(this, nameof(this.WorldFrameOutput));
+            var poseList = new List<(T Id, CoordinateSystem Pose)>();
+            this.traverseTree(root, rootPose, poseList);
+            return poseList;
         }
 
-        public Emitter<List<CoordinateSystem>> WorldFrameOutput { private set; get; }
-
-
-        public bool UpdateTransformation(string frameA, string frameB, double[,] mat)
+        public bool UpdateTransformation(T frameA, T frameB, double[,] mat)
         {
             return this.UpdateTransformation(frameA, frameB, new CoordinateSystem(Matrix<double>.Build.DenseOfArray(mat)));
         }
 
-        public bool UpdateTransformation(string frameA, string frameB, CoordinateSystem transform)
+        public bool UpdateTransformation(T frameA, T frameB, CoordinateSystem transform)
         {
 
             if (this.tree.ContainsKey(frameA) || this.tree.ContainsKey(frameB))
@@ -63,12 +54,12 @@ namespace TBD.Psi.VisionComponents
                 if (this.tree.ContainsKey(frameA) && !this.tree.ContainsKey(frameB))
                 {
                     this.tree[frameA][frameB] = transform;
-                    this.tree[frameB] = new Dictionary<string, CoordinateSystem>();
+                    this.tree[frameB] = new Dictionary<T, CoordinateSystem>();
                 }
                 else if (!this.tree.ContainsKey(frameA) && this.tree.ContainsKey(frameB))
                 {
                     this.tree[frameB][frameA] = transform.Invert();
-                    this.tree[frameA] = new Dictionary<string, CoordinateSystem>();
+                    this.tree[frameA] = new Dictionary<T, CoordinateSystem>();
                 }
                 else
                 {
@@ -86,15 +77,15 @@ namespace TBD.Psi.VisionComponents
             else
             {
                 // for all of them.
-                this.tree[frameA] = new Dictionary<string, CoordinateSystem>();
-                this.tree[frameB] = new Dictionary<string, CoordinateSystem>();
+                this.tree[frameA] = new Dictionary<T, CoordinateSystem>();
+                this.tree[frameB] = new Dictionary<T, CoordinateSystem>();
                 this.tree[frameA][frameB] = transform;
 
             }
             return true;
         }
 
-        private CoordinateSystem recursiveSearchNode(string parent, string target)
+        protected CoordinateSystem recursiveSearchNode(T parent, T target)
         {
             // check end condition
             if (this.tree[parent].ContainsKey(target))
@@ -117,12 +108,18 @@ namespace TBD.Psi.VisionComponents
             return null;
         }
 
-        public CoordinateSystem SolveTransformation(string frameA, string frameB)
+        public CoordinateSystem SolveTransformation(T frameA, T frameB)
         {
             // check if both frames are in the tree
             if (!this.tree.ContainsKey(frameA) || !this.tree.ContainsKey(frameB))
             {
                 return null;
+            }
+
+            // if they are the same, return identity
+            if (EqualityComparer<T>.Default.Equals(frameA, frameB))
+            {
+                return new CoordinateSystem();
             }
 
             // start from A
@@ -138,19 +135,6 @@ namespace TBD.Psi.VisionComponents
                 return transform.Invert();
             }
             return transform;
-        }
-
-        public void Start(Action<DateTime> notifyCompletionTime)
-        {
-            // start the timer that generators the output
-            this.timer = new System.Threading.Timer(this.timerCallback, null, TimeSpan.Zero, this.rate);
-            notifyCompletionTime.Invoke(DateTime.MaxValue);
-        }
-
-        public void Stop(DateTime finalOriginatingTime, Action notifyCompleted)
-        {
-            this.timer.Dispose();
-            notifyCompleted();
         }
     }
 }

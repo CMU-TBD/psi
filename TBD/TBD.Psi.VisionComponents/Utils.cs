@@ -73,7 +73,7 @@ namespace TBD.Psi.VisionComponents
         /// <param name="rotTol">Tolerant to rotation between key joints (in radian).</param>
         /// <param name="keyJoints">List of key joints. </param>
         /// <returns>Whether the bodies are the same.</returns>
-        internal static bool CompareAzureBodies(AzureKinectBody body1, AzureKinectBody body2, double distTol = 0.5, double rotTol = 0.7, List<JointId> keyJoints = null)
+        internal static bool CompareAzureBodies(HumanBody body1, HumanBody body2, double distTol = 0.5, double rotTol = 0.7, List<JointId> keyJoints = null)
         {
             // Set the key joints if none is passed in
             if (keyJoints == null)
@@ -81,24 +81,7 @@ namespace TBD.Psi.VisionComponents
                 keyJoints = new List<JointId>() { JointId.Neck, JointId.SpineChest };
             }
 
-            // compare each key joint
-            foreach (var key in keyJoints)
-            {
-                if (body1.Joints[key].Confidence != JointConfidenceLevel.None && body2.Joints[key].Confidence != JointConfidenceLevel.None)
-                {
-                    var (transDiff, rotDiff) = CalculateDifference(body1.Joints[key].Pose, body2.Joints[key].Pose);
-                    if (transDiff > distTol && rotDiff > rotTol)
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            
-            return true;
+            return HumanBody.CompareHumanBodies(body1, body2, distTol, rotTol, keyJoints);
         }
 
         internal static System.Numerics.Quaternion GetQuaternionFromCoordinateSystem(CoordinateSystem cs)

@@ -5,6 +5,7 @@ namespace TBD.Psi.VisionComponents
 {
     using System.Collections.Generic;
     using Microsoft.Psi;
+    using System.Linq;
     using Microsoft.Psi.AzureKinect;
     using Microsoft.Ros;
     using RosMessageTypes = TBD.Psi.Ros.RosMessageTypes;
@@ -12,7 +13,7 @@ namespace TBD.Psi.VisionComponents
     /// <summary>
     /// Component to Send Azure Kinect Bodies to ROS.
     /// </summary>
-    public class ROSWorldSender : IConsumer<List<AzureKinectBody>>
+    public class ROSWorldSender : IConsumer<List<HumanBody>>
     {
         private const string TopicName = "/bodies";
         private const string RosMaster = "127.0.0.1";
@@ -28,7 +29,7 @@ namespace TBD.Psi.VisionComponents
         /// <param name="pipeline">Current pipeline.</param>
         public ROSWorldSender(Pipeline pipeline)
         {
-            this.In = pipeline.CreateReceiver<List<AzureKinectBody>>(this, this.ReceiveBodies, nameof(this.In));
+            this.In = pipeline.CreateReceiver<List<HumanBody>>(this, this.ReceiveBodies, nameof(this.In));
             this.node = new RosNode.Node(NodeName, RosSlave, RosMaster);
             this.bodyPub = this.node.CreatePublisher(RosMessageTypes.tbd_ros_msgs.HumanBodyArray.Def, TopicName, false);
         }
@@ -36,23 +37,25 @@ namespace TBD.Psi.VisionComponents
         /// <summary>
         /// Gets receiver for Azure Kinect Bodies.
         /// </summary>
-        public Receiver<List<AzureKinectBody>> In { get; private set; }
+        public Receiver<List<HumanBody>> In { get; private set; }
 
-        private void ReceiveBodies(List<AzureKinectBody> msg, Envelope env)
+        private void ReceiveBodies(List<HumanBody> msg, Envelope env)
         {
             var bodyList = new List<RosMessageTypes.tbd_ros_msgs.HumanBody.Kind>();
             foreach (var body in msg)
             {
                 var jointList = new List<RosMessageTypes.tbd_ros_msgs.HumanJoint.Kind>();
-                foreach (var joint in body.Joints)
+                foreach (var joint in body.GetJointPoses())
                 {
-                    var q = Utils.GetQuaternionFromCoordinateSystem(joint.Value.Pose);
+                    var pose = joint.Pose;
+                    var jointId = joint.Id;
+                    var q = Utils.GetQuaternionFromCoordinateSystem(pose);
                     var poseKind = new Microsoft.Ros.RosMessageTypes.Geometry.Pose.Kind(
-                        new Microsoft.Ros.RosMessageTypes.Geometry.Point.Kind(joint.Value.Pose.At(0, 3), joint.Value.Pose.At(1, 3), joint.Value.Pose.At(2, 3)),
+                        new Microsoft.Ros.RosMessageTypes.Geometry.Point.Kind(pose.At(0, 3), pose.At(1, 3), pose.At(2, 3)),
                         new Microsoft.Ros.RosMessageTypes.Geometry.Quaternion.Kind(q.X, q.Y, q.Z, q.W));
 
                     var jointKind = new RosMessageTypes.tbd_ros_msgs.HumanJoint.Kind(
-                        (byte)joint.Key,
+                        (byte)jointId,
                         poseKind);
                     jointList.Add(jointKind);
                 }
@@ -63,7 +66,7 @@ namespace TBD.Psi.VisionComponents
                         env.OriginatingTime,
                         "PsiWorld"
                     ),
-                    body.TrackingId,
+                    body.Id,
                     jointList);
                 bodyList.Add(bodyKind);
             }
