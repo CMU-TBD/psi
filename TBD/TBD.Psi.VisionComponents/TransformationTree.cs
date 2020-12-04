@@ -7,6 +7,7 @@ using System.Text;
 
 namespace TBD.Psi.VisionComponents
 {
+    using System.Linq;
     using Microsoft.Psi;
     using Microsoft.Psi.Components;
 
@@ -106,6 +107,17 @@ namespace TBD.Psi.VisionComponents
                 }
             }
             return null;
+        }
+
+
+        public bool Contains(T frame)
+        {
+            return this.tree.ContainsKey(frame);
+        }
+
+        public bool Contains(IEnumerable<T> frames)
+        {
+            return this.tree.Keys.Where(m => frames.Contains(m)).Any();
         }
 
         public CoordinateSystem SolveTransformation(T frameA, T frameB)

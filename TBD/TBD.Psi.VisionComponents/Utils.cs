@@ -73,7 +73,7 @@ namespace TBD.Psi.VisionComponents
         /// <param name="rotTol">Tolerant to rotation between key joints (in radian).</param>
         /// <param name="keyJoints">List of key joints. </param>
         /// <returns>Whether the bodies are the same.</returns>
-        internal static bool CompareAzureBodies(HumanBody body1, HumanBody body2, double distTol = 0.5, double rotTol = 0.7, List<JointId> keyJoints = null)
+        internal static bool CompareHumanBodies(HumanBody body1, HumanBody body2, double distTol = 0.5, double rotTol = 0.7, List<JointId> keyJoints = null)
         {
             // Set the key joints if none is passed in
             if (keyJoints == null)

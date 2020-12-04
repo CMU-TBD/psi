@@ -52,9 +52,12 @@ namespace TBD.Psi.VisionComponents
 
             foreach (var candidate in msg)
             {
+                // use a combined human body
+                var combinedBody = HumanBody.CombineBodies(candidate);
+
                 var found = false;
 
-                // see whether ther is a good match
+                // see whether ther is a good match for people we are already tracking
                 foreach (var key in this.currTrackingPeople.Keys)
                 {
                     // ignore if used
@@ -63,17 +66,15 @@ namespace TBD.Psi.VisionComponents
                         continue;
                     }
 
-                    // try to see if they are a good match
-                    if (this.MatchingBodies(this.currTrackingPeople[key].Item1, candidate))
+                    // see if they are a good match
+                    if (Utils.CompareHumanBodies(this.currTrackingPeople[key].Item1, combinedBody))
                     {
-                        // MATCH
+                        // Matched
                         matchedIndex.Add(key);
 
-                        // update the bodies with the first body
-                        this.currTrackingPeople[key] = (candidate[0], env.OriginatingTime);
-                        var body = candidate[0];
-                        body.Id = key;
-                        currentBodies.Add(body);
+                        // update the bodies
+                        this.currTrackingPeople[key] = (combinedBody, env.OriginatingTime);
+                        currentBodies.Add(combinedBody);
                         found = true;
                         break;
                     }
@@ -85,25 +86,12 @@ namespace TBD.Psi.VisionComponents
                 }
 
                 // We cannot find a good match. It might be someone new
-                candidate[0].Id = this.peopleIndex;
-                this.currTrackingPeople[this.peopleIndex++] = (candidate[0], env.OriginatingTime);
-                currentBodies.Add(candidate[0]);
+                combinedBody.Id = this.peopleIndex;
+                this.currTrackingPeople[this.peopleIndex++] = (combinedBody, env.OriginatingTime);
+                currentBodies.Add(combinedBody);
             }
 
             this.Out.Post(currentBodies, env.OriginatingTime);
-        }
-
-        private bool MatchingBodies(HumanBody tracked, List<HumanBody> candidate)
-        {
-            foreach (var body in candidate)
-            {
-                if (Utils.CompareAzureBodies(tracked, body))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }

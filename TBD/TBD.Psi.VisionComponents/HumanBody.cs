@@ -7,7 +7,7 @@ using System.Text;
 
 namespace TBD.Psi.VisionComponents
 {
-
+    using System.Linq;
 
     public class HumanBody
     {
@@ -62,7 +62,7 @@ namespace TBD.Psi.VisionComponents
         }
 
         public TransformationTree<JointId> BodyTree { get; } = new TransformationTree<JointId>();
-        public JointId RootId { get; } = JointId.SpineChest;
+        public JointId RootId { get; } = JointId.Pelvis;
         public CoordinateSystem RootPose { get; set; }
         public uint Id { get; set; }
 
@@ -76,7 +76,7 @@ namespace TBD.Psi.VisionComponents
                 if (leftEye != null && rightEye != null)
                 {
                     // the eyes start in the middle
-                    var origin = (leftEye.Origin.ToVector3D() + rightEye.Origin.ToVector3D())/2;
+                    var origin = (leftEye.Origin.ToVector3D() + rightEye.Origin.ToVector3D()) / 2;
                     var direction = leftEye.ZAxis;
                     return new Ray3D(origin.ToPoint3D(), direction);
                 }
@@ -95,7 +95,7 @@ namespace TBD.Psi.VisionComponents
                 {
                     // the eyes start in the middle
                     var origin = (leftClavicle.Origin.ToVector3D() + rightClavicle.Origin.ToVector3D()) / 2;
-                    var direction = (leftClavicle.XAxis + -1* rightClavicle.XAxis) / 2;
+                    var direction = (leftClavicle.XAxis + -1 * rightClavicle.XAxis) / 2;
                     return new Ray3D(origin.ToPoint3D(), direction);
                 }
                 return null;
@@ -134,5 +134,58 @@ namespace TBD.Psi.VisionComponents
             }
             return true;
         }
+
+        public static HumanBody CombineBodies(List<HumanBody> bodies)
+        {
+            if (bodies.Count > 1)
+            {
+                bodies[0].CombineBodies(bodies.Skip(1));
+            }
+            return bodies[0];
+        }
+
+        public void CombineBodies(IEnumerable<HumanBody> bodies)
+        {
+            // replace all the uncertain joints in the body with certain ones from the replacements
+            // Note, the bones are setup to be in the right hierarhical order, we don't have to worry about adding stuff for later
+            foreach (var bone in AzureKinectBody.Bones)
+            {
+                // ignore if we already know the position
+                if (this.BodyTree.Contains(bone.ChildJoint) && this.BodyTree.Contains(bone.ParentJoint))
+                {
+                    continue;
+                }
+                else if (this.BodyTree.Contains(bone.ParentJoint) || this.BodyTree.Contains(bone.ChildJoint))
+                {
+                    // we have the parent joint but not the child joint
+                    // look for the child joint in the bodies
+                    var options = new List<CoordinateSystem>();
+                    foreach (var b in bodies)
+                    {
+                        if (b.BodyTree.Contains(bone.ChildJoint) && b.BodyTree.Contains(bone.ParentJoint))
+                        {
+                            var transform = b.BodyTree.SolveTransformation(bone.ParentJoint, bone.ChildJoint);
+                            options.Add(transform);
+                        }
+                    }
+                    if (options.Count > 0)
+                    {
+                        // not sure how to merge it in a nice way, we use the first one for now.
+                        this.BodyTree.UpdateTransformation(bone.ParentJoint, bone.ChildJoint, options[0]);
+                    }
+                }
+            }
+
+            // Change the position of the person to be the average of the current set
+            var pointArr = bodies.Select(m => m.RootPose.Origin);
+            var currPoint = this.RootPose.Origin.ToVector3D();
+            foreach (var point in pointArr)
+            {
+                currPoint = currPoint + point.ToVector3D();
+            }
+            currPoint = currPoint.ScaleBy(1.0 / (pointArr.Count() + 1));
+            this.RootPose = new CoordinateSystem(new Point3D(currPoint.X, currPoint.Y, currPoint.Z), this.RootPose.XAxis, this.RootPose.YAxis, this.RootPose.ZAxis);
+        }
+
     }
 }
