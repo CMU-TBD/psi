@@ -93,8 +93,8 @@ namespace TBD.Psi.VisualPipeline
                 azure2.ColorImage.EncodeJpeg(90, DeliveryPolicy.LatestMessage).Write("azure2.color", store);
 
                 // Merge the who streams
-                var merger = new BodyMerger(pipeline, azure1BodiesInWorld);
-                merger.AddAzureKinectBodyStream(azure2BodiesInWorld);
+                var merger = new BodyMerger(pipeline, azure1BodiesInWorld.ChangeToHumanBodies());
+                merger.AddHumanBodyStream(azure2BodiesInWorld.ChangeToHumanBodies());
 
                 // Tracking of Bodies across time.
                 var tracker = new BodyTracker(pipeline);

@@ -41,8 +41,8 @@ namespace TBD.Psi.VisualPipeline
                 // input.OpenStream<Shared<EncodedImage>>("azure2.color").Write("azure2.color", store);
 
                 // Merge the who streams
-                var merger = new BodyMerger(p, body1);
-                merger.AddAzureKinectBodyStream(body2);
+                var merger = new BodyMerger(p, body1.ChangeToHumanBodies());
+                merger.AddHumanBodyStream(body2.ChangeToHumanBodies());
 
                 // Tracking of Bodies across time.
                 var tracker = new BodyTracker(p);

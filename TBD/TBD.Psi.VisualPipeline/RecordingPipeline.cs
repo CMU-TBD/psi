@@ -18,8 +18,8 @@ namespace TBD.Psi.VisualPipeline
             {
                 var store = PsiStore.Create(p, "record-pipeline", @"C:\Data\Store\Recording");
 
-                var kinectNum = 3;
-                var mainNum = 2;
+                var kinectNum = 2;
+                var mainNum = -1;
 
                 for (var i = 1; i <= kinectNum; i++)
                 {
@@ -30,7 +30,7 @@ namespace TBD.Psi.VisualPipeline
                         OutputCalibration = true,
                         DeviceIndex = i - 1,
                         Exposure = TimeSpan.FromMilliseconds(10),
-                        WiredSyncMode = mainNum == (i - 1) ? Microsoft.Azure.Kinect.Sensor.WiredSyncMode.Master : Microsoft.Azure.Kinect.Sensor.WiredSyncMode.Subordinate,
+                        WiredSyncMode = mainNum > 0 ? (mainNum == (i - 1) ? Microsoft.Azure.Kinect.Sensor.WiredSyncMode.Master : Microsoft.Azure.Kinect.Sensor.WiredSyncMode.Subordinate) : Microsoft.Azure.Kinect.Sensor.WiredSyncMode.Standalone,
                         BodyTrackerConfiguration = new AzureKinectBodyTrackerConfiguration()
                         {
                             CpuOnlyMode = false,
