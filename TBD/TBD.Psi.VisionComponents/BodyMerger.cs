@@ -12,7 +12,8 @@ namespace TBD.Psi.VisionComponents
     using Microsoft.Psi.Components;
 
     /// <summary>
-    /// Psi Component that merges kinect bodies from multiple sources.
+    /// A component that merges the body streams from multiple sources, and combine the bodies into a list, based on
+    /// how likely they are the same.
     /// </summary>
     public class BodyMerger : Subpipeline, IProducer<List<List<HumanBody>>>
     {

@@ -109,6 +109,14 @@ namespace TBD.Psi.VisionComponents
             return null;
         }
 
+        public List<T> FrameIds
+        {
+            get
+            {
+                return this.tree.Keys.ToList();
+            }
+        }
+
 
         public bool Contains(T frame)
         {

@@ -27,6 +27,7 @@ namespace Microsoft.Psi.AzureKinect.Visualization
 
         private Color color = Colors.White;
         private double inferredJointsOpacity = 30;
+        private double bodyOpacity = 100;
         private double boneDiameterMm = 20;
         private double jointRadiusMm = 15;
         private bool showBillboard = false;
@@ -71,6 +72,17 @@ namespace Microsoft.Psi.AzureKinect.Visualization
         {
             get { return this.inferredJointsOpacity; }
             set { this.Set(nameof(this.InferredJointsOpacity), ref this.inferredJointsOpacity, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the joints opacity.
+        /// </summary>
+        [DataMember]
+        [Description("Opacity for joints and bones.")]
+        public double BodyOpacity
+        {
+            get { return this.bodyOpacity; }
+            set { this.Set(nameof(this.BodyOpacity), ref this.bodyOpacity, value); }
         }
 
         /// <summary>
@@ -177,6 +189,7 @@ namespace Microsoft.Psi.AzureKinect.Visualization
             if (this.CurrentData != null)
             {
                 var trackedEntitiesBrush = new SolidColorBrush(this.Color);
+                trackedEntitiesBrush.Opacity = Math.Max(0, Math.Min(100, this.bodyOpacity));
                 var untrackedEntitiesBrush = new SolidColorBrush(
                     Color.FromArgb(
                         (byte)(Math.Max(0, Math.Min(100, this.InferredJointsOpacity)) * 2.55),

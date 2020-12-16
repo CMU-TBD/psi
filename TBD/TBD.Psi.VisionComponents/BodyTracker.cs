@@ -12,25 +12,28 @@ namespace TBD.Psi.VisionComponents
     using Microsoft.Psi.Components;
 
     /// <summary>
-    /// Psi Componet that given a a merged bodies, track the user overtime.
+    /// A memory component that takes a list of human bodies and determine where they are
     /// </summary>
     public class BodyTracker : IConsumerProducer<List<List<HumanBody>>, List<HumanBody>>
     {
         private uint peopleIndex = 0;
-        private TimeSpan removeThreshold = TimeSpan.FromSeconds(1);
+        private TimeSpan temporalTolerance;
         private Pipeline pipeline;
         private Dictionary<uint, (HumanBody, DateTime)> currTrackingPeople = new Dictionary<uint, (HumanBody, DateTime)>();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BodyTracker"/> class.
-        /// </summary>
-        /// <param name="pipeline">Current pipeline.</param>
-        public BodyTracker(Pipeline pipeline)
+        public BodyTracker(Pipeline p)
+            : this(p, TimeSpan.FromSeconds(0.5))
         {
-            this.pipeline = pipeline;
+        }
+
+        public BodyTracker(Pipeline p, TimeSpan temporalTolerance)
+        {
+            this.pipeline = p;
+            this.temporalTolerance = temporalTolerance;
             this.In = pipeline.CreateReceiver<List<List<HumanBody>>>(this, this.BodiesCallback, nameof(this.In));
             this.Out = pipeline.CreateEmitter<List<HumanBody>>(this, nameof(this.Out));
         }
+
 
         /// <inheritdoc/>
         public Receiver<List<List<HumanBody>>> In { get; private set; }
@@ -40,16 +43,20 @@ namespace TBD.Psi.VisionComponents
 
         private void BodiesCallback(List<List<HumanBody>> msg, Envelope env)
         {
+            // House keeping:
+            // remove previously tracked people outside of the temporal range.
+            this.currTrackingPeople = this.currTrackingPeople.Where(pair => (env.OriginatingTime - pair.Value.Item2) < this.temporalTolerance)
+                                                             .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            // Variables:
             var currentBodies = new List<HumanBody>();
 
-            // We don't know when this is called, so we going to remove stall data based on a previous threshold
-            this.currTrackingPeople = this.currTrackingPeople.Where(pair => (this.pipeline.GetCurrentTime() - pair.Value.Item2) < this.removeThreshold)
-                                                             .ToDictionary(pair => pair.Key, pair => pair.Value);
 
             // TODO: Better tracking
             // Currently, it does a first come first server algorithm.
             var matchedIndex = new List<uint>();
 
+            var diffCompare = new List<(int, double, double)>();
             foreach (var candidate in msg)
             {
                 // use a combined human body
@@ -66,17 +73,26 @@ namespace TBD.Psi.VisionComponents
                         continue;
                     }
 
-                    // see if they are a good match
-                    if (Utils.CompareHumanBodies(this.currTrackingPeople[key].Item1, combinedBody))
-                    {
-                        // Matched
-                        matchedIndex.Add(key);
+                    // potential list
+                    var jointList = new List<JointId>() { JointId.Pelvis, JointId.SpineChest, JointId.SpineNavel, JointId.ClavicleLeft, JointId.ClavicleRight, JointId.Neck };
 
-                        // update the bodies
-                        this.currTrackingPeople[key] = (combinedBody, env.OriginatingTime);
-                        currentBodies.Add(combinedBody);
-                        found = true;
-                        break;
+                    // get the difference between bodies
+                    var (matchedNum, transDiff, rotDiff) = HumanBody.CalculateDifferenceSum(this.currTrackingPeople[key].Item1, combinedBody, jointList);
+
+                    if (matchedNum > 0)
+                    {
+                        // check if they are under the tolerance.
+                        if ((transDiff/matchedNum) < 0.5 && (rotDiff/matchedNum) < 1.57)
+                        {
+                            // Matched
+                            matchedIndex.Add(key);
+                            // update the body id.
+                            combinedBody.Id = key;
+                            this.currTrackingPeople[key] = (combinedBody, env.OriginatingTime);
+                            currentBodies.Add(combinedBody);
+                            found = true;
+                            break;
+                        }
                     }
                 }
 
