@@ -9,6 +9,26 @@ namespace Microsoft.Psi.Imaging
     using System.Threading.Tasks;
 
     /// <summary>
+    /// Mode for determining final output size when rotating an image.
+    /// </summary>
+    public enum RotationFitMode
+    {
+        /// <summary>
+        /// Output image will always be the maximum width/height regardless of the specified
+        /// rotation amount. For instance, if rotating a 100x200 image by 10 degrees the output
+        /// image size will be 224x224. That is the diagonal length and the amount of the rotation
+        /// is irrelevant.
+        /// </summary>
+        Loose,
+
+        /// <summary>
+        /// Output image will be fit exactly. Thus if we rotate a 100x200 image by 10 degrees
+        /// the output image size will be 35x180.
+        /// </summary>
+        Tight,
+    }
+
+    /// <summary>
     /// Sampling mode used by various imaging operators.
     /// </summary>
     public enum SamplingMode
@@ -194,7 +214,7 @@ namespace Microsoft.Psi.Imaging
                 throw new ArgumentException("Destination image's width/height must match the source image width/height");
             }
 
-            if (image.PixelFormat == PixelFormat.Gray_16bpp)
+            if (image.PixelFormat == PixelFormat.Gray_16bpp || image.PixelFormat == PixelFormat.Gray_8bpp)
             {
                 // We can't handle this through GDI.
                 unsafe
@@ -224,7 +244,15 @@ namespace Microsoft.Psi.Imaging
                         byte* destinationColumn = destinationRow + xoffset;
                         for (int j = 0; j < image.Width; j++)
                         {
-                            ((ushort*)destinationColumn)[0] = ((ushort*)sourceColumn)[0];
+                            if (image.PixelFormat == PixelFormat.Gray_8bpp)
+                            {
+                                destinationColumn[0] = sourceColumn[0];
+                            }
+                            else
+                            {
+                                ((ushort*)destinationColumn)[0] = ((ushort*)sourceColumn)[0];
+                            }
+
                             sourceColumn += sourceBytesPerPixel;
                             destinationColumn += xstep;
                         }
@@ -277,7 +305,7 @@ namespace Microsoft.Psi.Imaging
             int scaledWidth = (int)Math.Abs(image.Width * scaleX);
             int scaledHeight = (int)Math.Abs(image.Height * scaleY);
             Image destImage = new Image(scaledWidth, scaledHeight, image.PixelFormat);
-            image.Scale(destImage, scaleX, scaleY, mode);
+            image.Resize(destImage, scaledWidth, scaledHeight, mode);
             return destImage;
         }
 
@@ -291,16 +319,152 @@ namespace Microsoft.Psi.Imaging
         /// <param name="mode">Sampling mode for sampling of pixels.</param>
         public static void Scale(this Image image, Image destImage, float scaleX, float scaleY, SamplingMode mode)
         {
-            if (scaleX == 0.0 || scaleY == 0.0)
-            {
-                throw new System.ArgumentOutOfRangeException("Unexpected scale factors");
-            }
-
             int scaledWidth = (int)Math.Abs(image.Width * scaleX);
             int scaledHeight = (int)Math.Abs(image.Height * scaleY);
-            if (destImage.Width != scaledWidth || destImage.Height != scaledHeight)
+            image.Resize(destImage, scaledWidth, scaledHeight, mode);
+        }
+
+        /// <summary>
+        /// Compares two images to see if they are identical (within some specified tolerance).
+        /// </summary>
+        /// <param name="image1">First image in comparison.</param>
+        /// <param name="image2">Second image in comparison.</param>
+        /// <param name="tolerance">Maximum allowable distance between pixels in RGB or Grayscale space.</param>
+        /// <param name="percentOutliersAllowed">Percetange of pixels allowed to be outside tolerance.</param>
+        /// <param name="errorMetrics">Error metrics across all pixels.</param>
+        /// <returns>True if images are considered identical. False otherwise.</returns>
+        public static bool Compare(this ImageBase image1, ImageBase image2, double tolerance, double percentOutliersAllowed, ref ImageError errorMetrics)
+        {
+            if (image1.GetType() != image2.GetType() ||
+                image1.PixelFormat != image2.PixelFormat ||
+                image1.Width != image2.Width ||
+                image1.Height != image2.Height)
             {
-                throw new ArgumentException($"Destination image must be size={scaledWidth}x{scaledHeight}.");
+                return false;
+            }
+
+            errorMetrics.MaxError = 0.0f;
+            errorMetrics.AvgError = 0.0f;
+            errorMetrics.NumberOutliers = 0;
+            double dist = 0.0f;
+            unsafe
+            {
+                int bytesPerPixel1 = image1.BitsPerPixel / 8;
+                int bytesPerPixel2 = image2.BitsPerPixel / 8;
+
+                byte* row1 = (byte*)image1.ImageData.ToPointer();
+                byte* row2 = (byte*)image2.ImageData.ToPointer();
+                for (int y = 0; y < image1.Height; y++)
+                {
+                    byte* col1 = row1;
+                    byte* col2 = row2;
+                    for (int x = 0; x < image1.Width; x++)
+                    {
+                        switch (image1.PixelFormat)
+                        {
+                            case PixelFormat.BGRA_32bpp:
+                                {
+                                    int dr = col1[0] - col2[0];
+                                    int dg = col1[1] - col2[1];
+                                    int db = col1[2] - col2[2];
+                                    int da = col1[3] - col2[3];
+                                    dist = (double)(dr * dr + dg * dg + db * db + da * da);
+                                }
+
+                                break;
+
+                            case PixelFormat.BGRX_32bpp:
+                            case PixelFormat.BGR_24bpp:
+                                {
+                                    int dr = col1[0] - col2[0];
+                                    int dg = col1[1] - col2[1];
+                                    int db = col1[2] - col2[2];
+                                    dist = (double)(dr * dr + dg * dg + db * db);
+                                }
+
+                                break;
+
+                            case PixelFormat.Gray_16bpp:
+                                {
+                                    int d = ((ushort*)col1)[0] - ((ushort*)col2)[0];
+                                    dist = (double)(d * d);
+                                }
+
+                                break;
+
+                            case PixelFormat.Gray_8bpp:
+                                {
+                                    int d = col1[0] - col2[0];
+                                    dist = (double)(d * d);
+                                }
+
+                                break;
+
+                            case PixelFormat.RGBA_64bpp:
+                                {
+                                    int dr = ((ushort*)col1)[0] - ((ushort*)col2)[0];
+                                    int dg = ((ushort*)col1)[1] - ((ushort*)col2)[1];
+                                    int db = ((ushort*)col1)[2] - ((ushort*)col2)[2];
+                                    int da = ((ushort*)col1)[3] - ((ushort*)col2)[3];
+                                    dist = (double)(dr * dr + dg * dg + db * db + da * da);
+                                }
+
+                                break;
+
+                            case PixelFormat.Undefined:
+                            default:
+                                throw new ArgumentException("Unsupported image format");
+                        }
+
+                        if (dist > errorMetrics.MaxError)
+                        {
+                            errorMetrics.MaxError = dist;
+                        }
+
+                        errorMetrics.AvgError += dist;
+                        if (dist > tolerance * tolerance)
+                        {
+                            errorMetrics.NumberOutliers++;
+                        }
+
+                        col1 += bytesPerPixel1;
+                        col2 += bytesPerPixel2;
+                    }
+
+                    row1 += image1.Stride;
+                    row2 += image2.Stride;
+                }
+            }
+
+            errorMetrics.AvgError /= (double)(image1.Width * image1.Height);
+            errorMetrics.MaxError = Math.Sqrt(errorMetrics.MaxError);
+
+            return errorMetrics.NumberOutliers <= percentOutliersAllowed * image1.Width * image1.Height;
+        }
+
+        /// <summary>
+        /// Resizes an image by the specified scale factors using the specified sampling mode.
+        /// </summary>
+        /// <param name="image">Image to resize.</param>
+        /// <param name="destImage">Image to store scaled results.</param>
+        /// <param name="newWidth">Desired output width in pixels.</param>
+        /// <param name="newHeight">Desired output height in pixels.</param>
+        /// <param name="mode">Sampling mode for sampling of pixels.</param>
+        public static void Resize(this Image image, Image destImage, float newWidth, float newHeight, SamplingMode mode)
+        {
+            if (destImage.PixelFormat != image.PixelFormat)
+            {
+                throw new ArgumentOutOfRangeException("destImage.PixelFormat", "destination image pixel format doesn't match source image pixel format");
+            }
+
+            if (newWidth <= 0.0f || newHeight <= 0.0f)
+            {
+                throw new System.ArgumentOutOfRangeException("Pixel width/height must be greater than 0");
+            }
+
+            if (destImage.Width != newWidth || destImage.Height != newHeight)
+            {
+                throw new ArgumentException($"Destination image must be size={newWidth}x{newHeight}.");
             }
 
             if (image.PixelFormat == PixelFormat.Gray_16bpp)
@@ -310,9 +474,25 @@ namespace Microsoft.Psi.Imaging
                     "Convert to a supported format such as color or 8bpp grayscale first.");
             }
 
-            int dstWidth = (int)(image.Width * scaleX);
-            int dstHeight = (int)(image.Height * scaleY);
-            using var bitmap = new Bitmap(dstWidth, dstHeight, PixelFormatHelper.ToSystemPixelFormat(image.PixelFormat));
+            // If our image is 8bpp we won't be able to call Graphics.FromImage because
+            // that call doesn't support the 8bpp pixel format. See:
+            // https://docs.microsoft.com/en-us/dotnet/api/system.drawing.graphics.fromimage?view=dotnet-plat-ext-3.1
+            // for details.
+            //
+            // To work around this issue, we will convert the image to 24bpp, perform the resize,
+            // and then convert back to 8bpp.
+            if (image.PixelFormat == PixelFormat.Gray_8bpp)
+            {
+                int stride = 4 * ((image.Width * 3 + 3) / 2); // Rounding to nearest word boundary
+                using Image tmpImage = new Image(image.Width, image.Height, stride, PixelFormat.BGR_24bpp);
+                image.CopyTo(tmpImage);
+                using Image resizedImage = new Image((int)newWidth, (int)newHeight, PixelFormat.BGR_24bpp);
+                tmpImage.Resize(resizedImage, newWidth, newHeight, mode);
+                destImage.CopyFrom(resizedImage);
+                return;
+            }
+
+            using var bitmap = new Bitmap((int)newWidth, (int)newHeight, PixelFormatHelper.ToSystemPixelFormat(image.PixelFormat));
             using var graphics = Graphics.FromImage(bitmap);
             graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
             switch (mode)
@@ -339,6 +519,8 @@ namespace Microsoft.Psi.Imaging
                     break;
             }
 
+            float scaleX = newWidth / image.Width;
+            float scaleY = newHeight / image.Height;
             graphics.ScaleTransform(scaleX, scaleY);
 
             using (var managedimg = image.ToBitmap())
@@ -353,15 +535,15 @@ namespace Microsoft.Psi.Imaging
         /// Resize an image.
         /// </summary>
         /// <param name="image">Image to resize.</param>
-        /// <param name="destImage">Image where to store resized source image.</param>
         /// <param name="finalWidth">Final width of desired output.</param>
         /// <param name="finalHeight">Final height of desired output.</param>
         /// <param name="samplingMode">Method for sampling pixels when rescaling.</param>
-        public static void Resize(this Image image, Image destImage, float finalWidth, float finalHeight, SamplingMode samplingMode = SamplingMode.Bilinear)
+        /// <returns>Returns a new image resized to the specified width/height.</returns>
+        public static Image Resize(this Image image, int finalWidth, int finalHeight, SamplingMode samplingMode = SamplingMode.Bilinear)
         {
-            float scaleX = finalWidth / image.Width;
-            float scaleY = finalHeight / image.Height;
-            image.Scale(destImage, scaleX, scaleY, samplingMode);
+            Image destImage = new Image(finalWidth, finalHeight, image.PixelFormat);
+            image.Resize(destImage, finalWidth, finalHeight, samplingMode);
+            return destImage;
         }
 
         /// <summary>
@@ -370,16 +552,17 @@ namespace Microsoft.Psi.Imaging
         /// <param name="image">Image to rotate.</param>
         /// <param name="angleInDegrees">Number of degrees to rotate in counter clockwise direction.</param>
         /// <param name="mode">Pixel resampling method.</param>
+        /// <param name="fit">Used to describe the fit of the output image. Tight=output image is cropped to match exactly the required size. Loose=output image will be maximum size possible (i.e. length of source image diagonal).</param>
         /// <returns>Rotated image.</returns>
-        public static Image Rotate(this Image image, float angleInDegrees, SamplingMode mode)
+        public static Image Rotate(this Image image, float angleInDegrees, SamplingMode mode, RotationFitMode fit = RotationFitMode.Tight)
         {
             int rotatedWidth;
             int rotatedHeight;
             float originx;
             float originy;
-            DetermineRotatedWidthHeight(image.Width, image.Height, angleInDegrees, out rotatedWidth, out rotatedHeight, out originx, out originy);
+            DetermineRotatedWidthHeight(image.Width, image.Height, angleInDegrees, fit, out rotatedWidth, out rotatedHeight, out originx, out originy);
             Image rotatedImage = new Image(rotatedWidth, rotatedHeight, image.PixelFormat);
-            image.Rotate(rotatedImage, angleInDegrees, mode);
+            image.Rotate(rotatedImage, angleInDegrees, mode, fit);
             return rotatedImage;
         }
 
@@ -390,12 +573,42 @@ namespace Microsoft.Psi.Imaging
         /// <param name="destImage">Image where to store rotated source image.</param>
         /// <param name="angleInDegrees">Number of degrees to rotate in counter clockwise direction.</param>
         /// <param name="mode">Pixel resampling method.</param>
-        public static void Rotate(this Image image, Image destImage, float angleInDegrees, SamplingMode mode)
+        /// <param name="fit">Used to describe the fit of the output image. Tight=output image is cropped to match exactly the required size. Loose=output image will be maximum size possible (i.e. length of source image diagonal).</param>
+        public static void Rotate(this Image image, Image destImage, float angleInDegrees, SamplingMode mode, RotationFitMode fit = RotationFitMode.Tight)
         {
+            if (destImage.PixelFormat != image.PixelFormat)
+            {
+                throw new ArgumentOutOfRangeException("destImage.PixelFormat", "destination image pixel format doesn't match source image pixel format");
+            }
+
             int rotatedWidth;
             int rotatedHeight;
             float originx, originy;
-            DetermineRotatedWidthHeight(image.Width, image.Height, angleInDegrees, out rotatedWidth, out rotatedHeight, out originx, out originy);
+            DetermineRotatedWidthHeight(image.Width, image.Height, angleInDegrees, fit, out rotatedWidth, out rotatedHeight, out originx, out originy);
+
+            if (rotatedWidth != destImage.Width || rotatedHeight != destImage.Height)
+            {
+                throw new ArgumentException($"Destination image must be size={rotatedWidth}x{rotatedHeight}.");
+            }
+
+            // If our image is 8bpp we won't be able to call Graphics.FromImage because
+            // that call doesn't support the 8bpp pixel format. See:
+            // https://docs.microsoft.com/en-us/dotnet/api/system.drawing.graphics.fromimage?view=dotnet-plat-ext-3.1
+            // for details.
+            //
+            // To work around this issue, we will convert the image to 24bpp, perform the rotation,
+            // and then convert back to 8bpp.
+            if (image.PixelFormat == PixelFormat.Gray_8bpp)
+            {
+                int stride = 4 * ((image.Width * 3 + 3) / 2); // Rounding to nearest word boundary
+                using Image tmpImage = new Image(image.Width, image.Height, stride, PixelFormat.BGR_24bpp);
+                image.CopyTo(tmpImage);
+                using Image rotatedImage = new Image(rotatedWidth, rotatedHeight, PixelFormat.BGR_24bpp);
+                tmpImage.Rotate(rotatedImage, angleInDegrees, mode, fit);
+                destImage.CopyFrom(rotatedImage);
+                return;
+            }
+
             using var bitmap = new Bitmap(rotatedWidth, rotatedHeight, PixelFormatHelper.ToSystemPixelFormat(image.PixelFormat));
             using var graphics = Graphics.FromImage(bitmap);
             graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
@@ -462,14 +675,19 @@ namespace Microsoft.Psi.Imaging
         /// <returns>The cropped image.</returns>
         public static Image Crop(this Image image, Image croppedImage, int left, int top, int width, int height)
         {
+            if (croppedImage.PixelFormat != image.PixelFormat)
+            {
+                throw new ArgumentOutOfRangeException("croppedImage.PixelFormat", "destination image pixel format doesn't match source image pixel format");
+            }
+
             if (croppedImage.Width < width)
             {
-                throw new ArgumentOutOfRangeException("destImage.Width", "destination image width is too small");
+                throw new ArgumentOutOfRangeException("croppedImage.Width", "destination image width is too small");
             }
 
             if (croppedImage.Height < height)
             {
-                throw new ArgumentOutOfRangeException("destImage.Height", "destination image height is too small");
+                throw new ArgumentOutOfRangeException("croppedImage.Height", "destination image height is too small");
             }
 
             if ((left < 0) || (left >= image.Width))
@@ -545,14 +763,19 @@ namespace Microsoft.Psi.Imaging
         /// <param name="height">The height of the region to crop.</param>
         public static void Crop(this DepthImage image, DepthImage croppedImage, int left, int top, int width, int height)
         {
+            if (croppedImage.PixelFormat != image.PixelFormat)
+            {
+                throw new ArgumentOutOfRangeException("croppedImage.PixelFormat", "destination image pixel format doesn't match source image pixel format");
+            }
+
             if (croppedImage.Width < width)
             {
-                throw new ArgumentOutOfRangeException("destImage.Width", "destination image width is too small");
+                throw new ArgumentOutOfRangeException("croppedImage.Width", "destination image width is too small");
             }
 
             if (croppedImage.Height < height)
             {
-                throw new ArgumentOutOfRangeException("destImage.Height", "destination image height is too small");
+                throw new ArgumentOutOfRangeException("croppedImage.Height", "destination image height is too small");
             }
 
             if ((left < 0) || (left > (image.Width - 1)))
@@ -712,11 +935,12 @@ namespace Microsoft.Psi.Imaging
         /// <param name="imageWidth">Width (in pixels) of original image.</param>
         /// <param name="imageHeight">Height (in pixels) of original image.</param>
         /// <param name="angleInDegrees">Angle (in degrees) of rotation being applied.</param>
+        /// <param name="fit">Used to describe the fit of the output image. Tight=output image is cropped to match exactly the required size. Loose=output image will be maximum size possible (i.e. length of source image diagonal).</param>
         /// <param name="rotatedWidth">Outputs the rotated image's width.</param>
         /// <param name="rotatedHeight">Outputs the rotated image's height.</param>
         /// <param name="originx">The X coordinate of the origin after rotation (maybe negative).</param>
         /// <param name="originy">The Y coordinate of the origin after rotation (maybe negative).</param>
-        public static void DetermineRotatedWidthHeight(int imageWidth, int imageHeight, float angleInDegrees, out int rotatedWidth, out int rotatedHeight, out float originx, out float originy)
+        public static void DetermineRotatedWidthHeight(int imageWidth, int imageHeight, float angleInDegrees, RotationFitMode fit, out int rotatedWidth, out int rotatedHeight, out float originx, out float originy)
         {
             float ca = (float)System.Math.Cos(angleInDegrees * System.Math.PI / 180.0f);
             float sa = (float)System.Math.Sin(angleInDegrees * System.Math.PI / 180.0f);
@@ -727,10 +951,25 @@ namespace Microsoft.Psi.Imaging
             AddRotatedPointToBBox((float)(imageWidth - 1), 0.0f, ref minx, ref miny, ref maxx, ref maxy, ca, sa);
             AddRotatedPointToBBox((float)(imageWidth - 1), (float)(imageHeight - 1), ref minx, ref miny, ref maxx, ref maxy, ca, sa);
             AddRotatedPointToBBox(0.0f, (float)(imageHeight - 1), ref minx, ref miny, ref maxx, ref maxy, ca, sa);
-            rotatedWidth = (int)(maxx - minx + 1);
-            rotatedHeight = (int)(maxy - miny + 1);
-            originx = minx;
-            originy = miny;
+            int computedWidth = (int)(maxx - minx + 1);
+            int computedHeight = (int)(maxy - miny + 1);
+            if (fit == RotationFitMode.Tight)
+            {
+                rotatedWidth = computedWidth;
+                rotatedHeight = computedHeight;
+                originx = minx;
+                originy = miny;
+            }
+            else
+            {
+                float diagonal = (float)Math.Sqrt(imageWidth * imageWidth + imageHeight * imageHeight);
+                int additionalOffsetX = ((int)diagonal - computedWidth) / 2;
+                int additionalOffsetY = ((int)diagonal - computedHeight) / 2;
+                rotatedWidth = (int)diagonal;
+                rotatedHeight = (int)diagonal;
+                originx = minx - additionalOffsetX;
+                originy = miny - additionalOffsetY;
+            }
         }
 
         private static void AddRotatedPointToBBox(float x, float y, ref float minx, ref float miny, ref float maxx, ref float maxy, float ca, float sa)
@@ -773,11 +1012,33 @@ namespace Microsoft.Psi.Imaging
         /// <param name="width">Width of line.</param>
         public static void DrawRectangle(this Image image, Rectangle rect, Color color, int width)
         {
-            using Bitmap bm = image.ToBitmap(false);
+            Image sourceImage = image;
+
+            // If our image is 8bpp we won't be able to call Graphics.FromImage because
+            // that call doesn't support the 8bpp pixel format. See:
+            // https://docs.microsoft.com/en-us/dotnet/api/system.drawing.graphics.fromimage?view=dotnet-plat-ext-3.1
+            // for details.
+            //
+            // To work around this issue, we will convert the image to 24bpp, perform the operation,
+            // and then convert back to 8bpp.
+            if (image.PixelFormat == PixelFormat.Gray_8bpp)
+            {
+                int stride = 4 * ((image.Width * 3 + 3) / 2); // Rounding to nearest word boundary
+                sourceImage = new Image(image.Width, image.Height, stride, PixelFormat.BGR_24bpp);
+                image.CopyTo(sourceImage);
+            }
+
+            using Bitmap bm = sourceImage.ToBitmap(false);
             using var graphics = Graphics.FromImage(bm);
             using var pen = new Pen(new SolidBrush(color));
             pen.Width = width;
             graphics.DrawRectangle(pen, rect);
+
+            if (image.PixelFormat == PixelFormat.Gray_8bpp)
+            {
+                image.CopyFrom(sourceImage);
+                sourceImage.Dispose();
+            }
         }
 
         /// <summary>
@@ -790,11 +1051,33 @@ namespace Microsoft.Psi.Imaging
         /// <param name="width">Width of line.</param>
         public static void DrawLine(this Image image, Point p0, Point p1, Color color, int width)
         {
-            using Bitmap bm = image.ToBitmap(false);
+            Image sourceImage = image;
+
+            // If our image is 8bpp we won't be able to call Graphics.FromImage because
+            // that call doesn't support the 8bpp pixel format. See:
+            // https://docs.microsoft.com/en-us/dotnet/api/system.drawing.graphics.fromimage?view=dotnet-plat-ext-3.1
+            // for details.
+            //
+            // To work around this issue, we will convert the image to 24bpp, perform the operation,
+            // and then convert back to 8bpp.
+            if (image.PixelFormat == PixelFormat.Gray_8bpp)
+            {
+                int stride = 4 * ((image.Width * 3 + 3) / 2); // Rounding to nearest word boundary
+                sourceImage = new Image(image.Width, image.Height, stride, PixelFormat.BGR_24bpp);
+                image.CopyTo(sourceImage);
+            }
+
+            using Bitmap bm = sourceImage.ToBitmap(false);
             using var graphics = Graphics.FromImage(bm);
             using var pen = new Pen(new SolidBrush(color));
             pen.Width = width;
             graphics.DrawLine(pen, p0, p1);
+
+            if (image.PixelFormat == PixelFormat.Gray_8bpp)
+            {
+                image.CopyFrom(sourceImage);
+                sourceImage.Dispose();
+            }
         }
 
         /// <summary>
@@ -807,11 +1090,33 @@ namespace Microsoft.Psi.Imaging
         /// <param name="width">Width of line.</param>
         public static void DrawCircle(this Image image, Point p0, int radius, Color color, int width)
         {
-            using Bitmap bm = image.ToBitmap(false);
+            Image sourceImage = image;
+
+            // If our image is 8bpp we won't be able to call Graphics.FromImage because
+            // that call doesn't support the 8bpp pixel format. See:
+            // https://docs.microsoft.com/en-us/dotnet/api/system.drawing.graphics.fromimage?view=dotnet-plat-ext-3.1
+            // for details.
+            //
+            // To work around this issue, we will convert the image to 24bpp, perform the operation,
+            // and then convert back to 8bpp.
+            if (image.PixelFormat == PixelFormat.Gray_8bpp)
+            {
+                int stride = 4 * ((image.Width * 3 + 3) / 2); // Rounding to nearest word boundary
+                sourceImage = new Image(image.Width, image.Height, stride, PixelFormat.BGR_24bpp);
+                image.CopyTo(sourceImage);
+            }
+
+            using Bitmap bm = sourceImage.ToBitmap(false);
             using var graphics = Graphics.FromImage(bm);
             using var pen = new Pen(new SolidBrush(color));
             pen.Width = width;
             graphics.DrawEllipse(pen, p0.X - radius, p0.Y - radius, 2 * radius, 2 * radius);
+
+            if (image.PixelFormat == PixelFormat.Gray_8bpp)
+            {
+                image.CopyFrom(sourceImage);
+                sourceImage.Dispose();
+            }
         }
 
         /// <summary>
@@ -825,14 +1130,36 @@ namespace Microsoft.Psi.Imaging
         /// <param name="fontSize">Size of font. Optional.</param>
         public static void DrawText(this Image image, string str, Point p0, Color color = default(Color), string font = "Arial", float fontSize = 24.0f)
         {
+            Image sourceImage = image;
+
+            // If our image is 8bpp we won't be able to call Graphics.FromImage because
+            // that call doesn't support the 8bpp pixel format. See:
+            // https://docs.microsoft.com/en-us/dotnet/api/system.drawing.graphics.fromimage?view=dotnet-plat-ext-3.1
+            // for details.
+            //
+            // To work around this issue, we will convert the image to 24bpp, perform the operation,
+            // and then convert back to 8bpp.
+            if (image.PixelFormat == PixelFormat.Gray_8bpp)
+            {
+                int stride = 4 * ((image.Width * 3 + 3) / 2); // Rounding to nearest word boundary
+                sourceImage = new Image(image.Width, image.Height, stride, PixelFormat.BGR_24bpp);
+                image.CopyTo(sourceImage);
+            }
+
             font ??= "Arial";
-            using Bitmap bm = image.ToBitmap(false);
+            using Bitmap bm = sourceImage.ToBitmap(false);
             using var graphics = Graphics.FromImage(bm);
             using Font drawFont = new Font(font, fontSize);
             using SolidBrush drawBrush = new SolidBrush(color);
             using StringFormat drawFormat = new StringFormat();
             drawFormat.FormatFlags = 0;
             graphics.DrawString(str, drawFont, drawBrush, p0.X, p0.Y, drawFormat);
+
+            if (image.PixelFormat == PixelFormat.Gray_8bpp)
+            {
+                image.CopyFrom(sourceImage);
+                sourceImage.Dispose();
+            }
         }
     }
 
@@ -850,6 +1177,11 @@ namespace Microsoft.Psi.Imaging
         /// <param name="maskImage">Masking image. If null then ignored.</param>
         public static void CopyTo(this Image srcImage, Image destImage, Image maskImage)
         {
+            if (destImage.PixelFormat != srcImage.PixelFormat)
+            {
+                throw new ArgumentOutOfRangeException("destImage.PixelFormat", "destination image pixel format doesn't match source image pixel format");
+            }
+
             if (srcImage.Width != destImage.Width || srcImage.Height != destImage.Height)
             {
                 throw new System.Exception(Image.ExceptionDescriptionSourceDestImageMismatch);
@@ -868,6 +1200,11 @@ namespace Microsoft.Psi.Imaging
         /// <param name="rect">Rectangle to copy.</param>
         public static void CopyTo(this Image srcImage, Image destImage, Rectangle rect)
         {
+            if (destImage.PixelFormat != srcImage.PixelFormat)
+            {
+                throw new ArgumentOutOfRangeException("destImage.PixelFormat", "destination image pixel format doesn't match source image pixel format");
+            }
+
             if (srcImage.Width != destImage.Width || srcImage.Height != destImage.Height)
             {
                 throw new ArgumentException(Image.ExceptionDescriptionSourceDestImageMismatch);
@@ -886,6 +1223,11 @@ namespace Microsoft.Psi.Imaging
         /// <param name="destTopLeftPoint">Top left corner of destination image where to copy to.</param>
         public static void CopyTo(this Image srcImage, Rectangle srcRect, Image destImage, Point destTopLeftPoint)
         {
+            if (destImage.PixelFormat != srcImage.PixelFormat)
+            {
+                throw new ArgumentOutOfRangeException("destImage.PixelFormat", "destination image pixel format doesn't match source image pixel format");
+            }
+
             if (srcImage.Width != destImage.Width || srcImage.Height != destImage.Height)
             {
                 throw new System.Exception(Image.ExceptionDescriptionSourceDestImageMismatch);
@@ -930,6 +1272,11 @@ namespace Microsoft.Psi.Imaging
         /// <param name="maskImage">Masking image. If null then ignored.</param>
         public static void CopyTo(this Image srcImage, Rectangle srcRect, Image destImage, Point destTopLeftCorner, Image maskImage)
         {
+            if (destImage.PixelFormat != srcImage.PixelFormat)
+            {
+                throw new ArgumentOutOfRangeException("destImage.PixelFormat", "destination image pixel format doesn't match source image pixel format");
+            }
+
             if (maskImage != null)
             {
                 if (srcImage.Width != maskImage.Width || srcImage.Height != maskImage.Height)
@@ -1118,6 +1465,11 @@ namespace Microsoft.Psi.Imaging
         /// <param name="destImage">Destination image where to store inverted results.</param>
         public static void Invert(this Image srcImage, Image destImage)
         {
+            if (destImage.PixelFormat != srcImage.PixelFormat)
+            {
+                throw new ArgumentOutOfRangeException("destImage.PixelFormat", "destination image pixel format doesn't match source image pixel format");
+            }
+
             if (srcImage.Width != destImage.Width || srcImage.Height != destImage.Height)
             {
                 throw new System.Exception(Image.ExceptionDescriptionSourceDestImageMismatch);
@@ -1352,6 +1704,11 @@ namespace Microsoft.Psi.Imaging
         /// <param name="type">Type of thresholding to perform.</param>
         public static void Threshold(this Image srcImage, Image destImage, int threshold, int maxvalue, Threshold type)
         {
+            if (srcImage.PixelFormat != destImage.PixelFormat)
+            {
+                throw new ArgumentOutOfRangeException("destImage.PixelFormat", "destination image pixel format doesn't match source image pixel format");
+            }
+
             unsafe
             {
                 int bytesPerPixel = srcImage.PixelFormat.GetBytesPerPixel();
@@ -1518,6 +1875,11 @@ namespace Microsoft.Psi.Imaging
         /// <param name="destImage">Destination image where to store difference image.</param>
         public static void AbsDiff(this Image imageA, Image imageB, Image destImage)
         {
+            if (imageA.PixelFormat != destImage.PixelFormat || imageB.PixelFormat != destImage.PixelFormat)
+            {
+                throw new ArgumentOutOfRangeException("destImage.PixelFormat", "destination image pixel format doesn't match source image pixel format");
+            }
+
             if (imageA.Width != imageB.Width || imageA.Height != imageB.Height || imageA.PixelFormat != imageB.PixelFormat)
             {
                 throw new ArgumentException("Images sizes/types don't match");
