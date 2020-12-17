@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TBD.Psi.Study.PostProcessing": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
