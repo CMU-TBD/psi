@@ -7,7 +7,3 @@ This is a fork of [Platform for Situated Intelligence](https://github.com/micros
 	* Enable editting of AzureBody ID after creation. This lets us convert bodies from Kinect 2 to Azure Kinect. 
 * Microsoft.Psi.AudioCapture
     * Make the audio capture 16KHz by default
-* PsiStoreTool
-	* Ability to Isolate specific streams from a given PsiStore.
-* Microsoft.Psi.PsiStudio
-	* Streams now also tell you the average messages per second in the right side bar.

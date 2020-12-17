@@ -35,7 +35,8 @@ namespace TBD.Psi.VisionComponents
                         var (pose, confidence) = m[i].Joints[key];
 
                         // update Pose
-                        m[i].Joints[key] = (wantedToAzure.TransformBy(pose), confidence);
+                        pose = new CoordinateSystem(wantedToAzure * pose);
+                        m[i].Joints[key] = (pose, confidence);
                     }
                 }
                 return m;

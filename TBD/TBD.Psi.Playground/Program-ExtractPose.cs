@@ -15,7 +15,7 @@
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             using (var p = Pipeline.Create())
             {
-                var store = PsiStore.Open(p, "test", @"C:\Data\pose_store");
+                var store = Store.Open(p, "test", @"C:\Data\pose_store");
                 var pose1 = store.OpenStream<CoordinateSystem>("board1pose");
                 var pose2 = store.OpenStream<CoordinateSystem>("board2pose");
 

@@ -331,7 +331,7 @@ namespace TBD.Psi.Visualization.Windows
             {
                 var origin = this.CurrentData.RootPose.Origin;
                 this.billboard.Position = new Win3D.Point3D(origin.X, origin.Y, origin.Z + (this.BillboardHeightCm / 100.0));
-                this.billboard.Text = this.CurrentData.Id.ToString();
+                this.billboard.Text = this.CurrentData.ToString();
             }
         }
 

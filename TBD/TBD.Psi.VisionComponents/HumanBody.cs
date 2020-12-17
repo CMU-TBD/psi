@@ -17,23 +17,6 @@ namespace TBD.Psi.VisionComponents
         {
         }
 
-        public HumanBody(HumanBody copy)
-        {
-            // copy properties.
-            this.RootPose = copy.RootPose;
-            this.Id = copy.Id;
-
-            // copy the tree 
-            var bonesHierarchy = AzureKinectBody.Bones;
-            foreach(var pair in bonesHierarchy)
-            {
-                if (copy.BodyTree.Contains(pair.ParentJoint) && copy.BodyTree.Contains(pair.ChildJoint))
-                {
-                    this.BodyTree.UpdateTransformation(pair.ParentJoint, pair.ChildJoint, copy.BodyTree.SolveTransformation(pair.ParentJoint, pair.ChildJoint));
-                }
-            }
-        }
-
         public bool FromAzureKinectBody(AzureKinectBody body)
         {
             // try to form a tree
@@ -125,68 +108,13 @@ namespace TBD.Psi.VisionComponents
             return this.BodyTree.SolveTransformation(this.RootId, jointId)?.TransformBy(InRealWorld ? this.RootPose : new CoordinateSystem());
         }
 
-        public static bool CompareHumanBodies(HumanBody body1, HumanBody body2, double distTol = 0.3, double rotTol = 1.5707, List<JointId> keyJoints = null)
+        public static bool CompareHumanBodies(HumanBody body1, HumanBody body2, double distTol = 0.5, double rotTol = 0.7, List<JointId> keyJoints = null)
         {
-            // None of the keyjoints are passed in, we just compare neck and spine chest
+            // Set the key joints if none is passed in
             if (keyJoints == null)
             {
                 keyJoints = new List<JointId>() { JointId.Neck, JointId.SpineChest };
             }
-
-            var (matched, transDiff, rotDiff) = CalculateDifference(body1, body2, keyJoints);
-            if (matched)
-            {
-                if (rotDiff/keyJoints.Count() < rotTol && transDiff/keyJoints.Count() < distTol)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public static (int mathces, double transDiffSum, double rotDiffSum) CalculateDifferenceSum(HumanBody body1, HumanBody body2, List<JointId> keyJoints = null)
-        {
-            // first get a list of joints that are both present!
-            var b1Frames = body1.BodyTree.FrameIds;
-            var pairedFrames = body2.BodyTree.FrameIds.Where(m => b1Frames.Contains(m));
-
-            if (keyJoints != null)
-            {
-                pairedFrames = pairedFrames.Where(m => keyJoints.Contains(m));
-            }
-
-            var transDiffSum = 0.0;
-            var rotDiffSum = 0.0;
-            foreach (var paired in pairedFrames)
-            {
-                var b2Pose = body2.BodyTree.SolveTransformation(body2.RootId, paired).TransformBy(body2.RootPose);
-                var b1Pose = body1.BodyTree.SolveTransformation(body1.RootId, paired).TransformBy(body1.RootPose);
-
-                // calculate the difference
-                var (transDiff, rotDiff) = Utils.CalculateDifference(b1Pose, b2Pose);
-
-                transDiffSum += Math.Abs(transDiff);
-                rotDiffSum += Math.Abs(rotDiff);
-            }
-            return (pairedFrames.Count(), transDiffSum, rotDiffSum);
-        }
-
-        public static (bool matched, double transDiff, double rotDiff) CalculateDifference(HumanBody body1, HumanBody body2, List<JointId> keyJoints)
-        {
-            // None of the keyjoints are passed in, we just compare neck and spine chest
-            if (keyJoints == null)
-            {
-                keyJoints = new List<JointId>() { JointId.Neck, JointId.SpineChest };
-            }
-
-            // first check if the bodies have the key joints
-            if (!keyJoints.All(j => body1.BodyTree.Contains(j) && body2.BodyTree.Contains(j)))
-            {
-                return (false, -1, -1);
-            }
-
-            var transDiffSum = 0.0;
-            var rotDiffSum = 0.0;
 
             //compare those joints
             foreach (var key in keyJoints)
@@ -198,27 +126,28 @@ namespace TBD.Psi.VisionComponents
                 // calculate the difference
                 var (transDiff, rotDiff) = Utils.CalculateDifference(b1Pose, b2Pose);
 
-                transDiffSum += Math.Abs(transDiff);
-                rotDiffSum += Math.Abs(rotDiff);
+                // check if they are within reason.
+                if (transDiff > distTol && rotDiff > rotTol)
+                {
+                    return false;
+                }
             }
-            return (true, transDiffSum, rotDiffSum);
+            return true;
         }
 
         public static HumanBody CombineBodies(List<HumanBody> bodies)
         {
-            // create a new Human Body
-            var mergedBody = new HumanBody(bodies[0]);
             if (bodies.Count > 1)
             {
-                mergedBody.CombineBodies(bodies.Skip(0));
+                bodies[0].CombineBodies(bodies.Skip(1));
             }
-            return mergedBody;
+            return bodies[0];
         }
 
         public void CombineBodies(IEnumerable<HumanBody> bodies)
         {
             // replace all the uncertain joints in the body with certain ones from the replacements
-            // Note, because the bones are setup to be in the right hierarhical order, we don't have to worry about adding stuff for later
+            // Note, the bones are setup to be in the right hierarhical order, we don't have to worry about adding stuff for later
             foreach (var bone in AzureKinectBody.Bones)
             {
                 // ignore if we already know the position
@@ -229,7 +158,7 @@ namespace TBD.Psi.VisionComponents
                 else if (this.BodyTree.Contains(bone.ParentJoint) || this.BodyTree.Contains(bone.ChildJoint))
                 {
                     // we have the parent joint but not the child joint
-                    // look for the child joint in the other bodies
+                    // look for the child joint in the bodies
                     var options = new List<CoordinateSystem>();
                     foreach (var b in bodies)
                     {
@@ -248,12 +177,11 @@ namespace TBD.Psi.VisionComponents
             }
 
             // Change the position of the person to be the average of the current set
-            // Currently, only updates the position.
             var pointArr = bodies.Select(m => m.RootPose.Origin);
             var currPoint = this.RootPose.Origin.ToVector3D();
             foreach (var point in pointArr)
             {
-                currPoint += point.ToVector3D();
+                currPoint = currPoint + point.ToVector3D();
             }
             currPoint = currPoint.ScaleBy(1.0 / (pointArr.Count() + 1));
             this.RootPose = new CoordinateSystem(new Point3D(currPoint.X, currPoint.Y, currPoint.Z), this.RootPose.XAxis, this.RootPose.YAxis, this.RootPose.ZAxis);

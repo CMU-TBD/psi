@@ -1283,14 +1283,12 @@ namespace Microsoft.Psi.PsiStudio
             // classes, display the security warning before proceeding.
             if ((this.AppSettings.AdditionalAssembliesList != null) && (this.AppSettings.AdditionalAssembliesList.Count > 0))
             {
-                // Ignore security warnings.
-                // AdditionalAssembliesWindow dlg = new AdditionalAssembliesWindow(Application.Current.MainWindow, this.AppSettings.AdditionalAssembliesList);
+                AdditionalAssembliesWindow dlg = new AdditionalAssembliesWindow(Application.Current.MainWindow, this.AppSettings.AdditionalAssembliesList);
 
-                // if (dlg.ShowDialog() == true)
-                // {
-                additionalAssemblies.AddRange(this.AppSettings.AdditionalAssembliesList);
-
-                // }
+                if (dlg.ShowDialog() == true)
+                {
+                    additionalAssemblies.AddRange(this.AppSettings.AdditionalAssembliesList);
+                }
             }
 
             // Initialize the visualizer map
