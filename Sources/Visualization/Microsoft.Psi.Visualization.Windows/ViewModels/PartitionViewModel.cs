@@ -181,6 +181,12 @@ namespace Microsoft.Psi.Visualization.ViewModels
         public TimeInterval OriginatingTimeInterval => this.streamTreeRoot.OriginatingTimeInterval;
 
         /// <summary>
+        /// Gets the time interval (earliest to latest) of the messages in this session.
+        /// </summary>
+        [Browsable(false)]
+        public TimeInterval ModelTimeInterval => this.streamTreeRoot.ModelTimeInterval;
+
+        /// <summary>
         /// Gets the originating time of the first message in the partition.
         /// </summary>
         [Browsable(false)]

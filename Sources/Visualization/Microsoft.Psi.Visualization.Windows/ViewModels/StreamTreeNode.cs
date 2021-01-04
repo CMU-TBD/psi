@@ -411,6 +411,28 @@ namespace Microsoft.Psi.Visualization.ViewModels
         }
 
         /// <summary>
+        /// Gets the time interval (earliest to latest) of the messages in this session.
+        /// </summary>
+        [Browsable(false)]
+        public TimeInterval ModelTimeInterval
+        {
+            get
+            {
+                if (this.IsStream)
+                {
+                    return new TimeInterval(this.FirstMessageOriginatingTime.Value, this.LastMessageCreationTime.Value);
+                }
+                else
+                {
+                    return TimeInterval.Coverage(
+                        this.children
+                            .Where(p => p.ModelTimeInterval.Left > DateTime.MinValue && p.ModelTimeInterval.Right < DateTime.MaxValue)
+                            .Select(p => p.ModelTimeInterval));
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether this stream tree node can expand members.
         /// </summary>
         /// <returns>True if the node type has members and is not an auto-generated nullable type, otherwise false.</returns>
