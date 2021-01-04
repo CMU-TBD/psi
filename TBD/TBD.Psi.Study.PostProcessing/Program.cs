@@ -10,10 +10,10 @@ namespace TBD.Psi.Study.PostProcessing
     {
         static void Main(string[] args)
         {
-            //BoardDetectionProcess.Run();
+            BoardDetectionProcess.Run();
             //BoardDetectionProcessDebug.Run();
             //BodyMergerDebug.Run();
-            BodyMergerDebugLab.Run();
+            //BodyMergerDebugLab.Run();
         }
     }
 }

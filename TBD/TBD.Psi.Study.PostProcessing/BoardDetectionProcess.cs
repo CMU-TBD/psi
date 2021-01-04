@@ -36,7 +36,7 @@ namespace TBD.Psi.Study.PostProcessing
 
                 // open different streams
                 var input = PsiStore.Open(p, "calibration-recording", @"C:\Data\Store\calibration-recording\calibration-recording.0006");
-
+                 
                 for(var i = 0; i <= camNum; i++)
                 {
                     if (input.AvailableStreams.Any(m => m.Name == $"azure{i}.color"))

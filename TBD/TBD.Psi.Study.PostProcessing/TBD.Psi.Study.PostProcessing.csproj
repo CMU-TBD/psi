@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\psi\Sources\Imaging\Microsoft.Psi.Imaging.Windows\Microsoft.Psi.Imaging.Windows.csproj" />
-    <ProjectReference Include="..\psi\TBD\TBD.Psi.VisionComponents\TBD.Psi.VisionComponents.csproj" />
+    <ProjectReference Include="..\..\Sources\Imaging\Microsoft.Psi.Imaging.Windows\Microsoft.Psi.Imaging.Windows.csproj" />
+    <ProjectReference Include="..\TBD.Psi.StudyComponents.NETFramework\TBD.Psi.StudyComponents.NETFramework.csproj" />
+    <ProjectReference Include="..\TBD.Psi.VisionComponents\TBD.Psi.VisionComponents.csproj" />
   </ItemGroup>
 </Project>

@@ -3,6 +3,7 @@
 
 namespace TBD.Psi.StudyComponents
 {
+    using System;
     using MathNet.Numerics.LinearAlgebra;
     using MathNet.Spatial.Euclidean;
     using Microsoft.Psi;
@@ -15,6 +16,7 @@ namespace TBD.Psi.StudyComponents
     /// </summary>
     internal class BoardDetector : IProducer<CoordinateSystem>
     {
+        private Pipeline pipeline;
         private bool receiveCalibration = false;
         private ArucoBoardDetector detector;
 
@@ -30,6 +32,7 @@ namespace TBD.Psi.StudyComponents
         /// <param name="firstMarker">Index of first marker.</param>
         public BoardDetector(Pipeline p, int markersX, int markersY, float markerLength, float markerSeperation, ArucoDictionary dictName, int firstMarker = 0)
         {
+            this.pipeline = p;
             this.Out = p.CreateEmitter<CoordinateSystem>(this, nameof(this.Out));
             this.CalibrationIn = p.CreateReceiver<IDepthDeviceCalibrationInfo>(this, this.CalibrationCB, nameof(this.CalibrationIn));
             this.ImageIn = p.CreateReceiver<Shared<Image>>(this, this.ImageCB, nameof(this.ImageIn));
@@ -60,12 +63,12 @@ namespace TBD.Psi.StudyComponents
                 if (mat != null)
                 {
                     var cs_mat = Matrix<double>.Build.DenseOfArray(mat);
-
                     // OpenCV's coordinate system is Z-forward, X-right and Y-down. Change it to the Psi Standard format
                     var kinectBasis = new CoordinateSystem(default, UnitVector3D.ZAxis, UnitVector3D.XAxis.Negate(), UnitVector3D.YAxis.Negate());
                     this.Out.Post(new CoordinateSystem(kinectBasis.Transpose() * cs_mat), env.OriginatingTime);
                 }
             }
+
         }
 
         public void AddCalibrationInfo(IDepthDeviceCalibrationInfo info)
