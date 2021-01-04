@@ -128,6 +128,16 @@ namespace Microsoft.Psi.Visualization.ViewModels
                     .Select(p => p.OriginatingTimeInterval));
 
         /// <summary>
+        /// Gets the time interval (earliest to latest, originating + creation) of the messages in this session.
+        /// </summary>
+        [Browsable(false)]
+        public TimeInterval ModelTimeInterval =>
+            TimeInterval.Coverage(
+                this.partitionViewModels
+                    .Where(p => p.ModelTimeInterval.Left > DateTime.MinValue && p.ModelTimeInterval.Right < DateTime.MaxValue)
+                    .Select(p => p.ModelTimeInterval));
+
+        /// <summary>
         /// Gets the collection of partitions in this session.
         /// </summary>
         [Browsable(false)]
