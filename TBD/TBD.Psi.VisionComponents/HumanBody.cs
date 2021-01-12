@@ -22,8 +22,11 @@ namespace TBD.Psi.VisionComponents
             // try to form a tree
             // step 1 find a base link, for now we will use spine chest
             var (rootPose, rootConfidence) = body.Joints[this.RootId];
-            // ignore if root is unclear
-            if (rootConfidence != Microsoft.Azure.Kinect.BodyTracking.JointConfidenceLevel.Medium)
+
+            int minimumConfidenceLevel = (int)JointConfidenceLevel.Low;
+
+            // ignore if we cannot find the root pose.
+            if ((int)rootConfidence < minimumConfidenceLevel)
             {
                 return false;
             }
@@ -37,12 +40,32 @@ namespace TBD.Psi.VisionComponents
             {
                 var (childPose, childConfidence) = body.Joints[pair.ChildJoint];
                 var (parentPose, parentConfidence) = body.Joints[pair.ParentJoint];
-                // find the transformation between them
-                var transform = childPose.TransformBy(parentPose.Invert());
                 // only add them if they are both highly confident?
-                if (childConfidence == Microsoft.Azure.Kinect.BodyTracking.JointConfidenceLevel.Medium && parentConfidence == Microsoft.Azure.Kinect.BodyTracking.JointConfidenceLevel.Medium)
+                if ((int)childConfidence >= minimumConfidenceLevel && (int)parentConfidence >= minimumConfidenceLevel)
                 {
+                    // find the transformation between them & save it 
+                    var transform = childPose.TransformBy(parentPose.Invert());
                     this.BodyTree.UpdateTransformation(pair.ParentJoint, pair.ChildJoint, transform);
+                }
+                else if ((int)childConfidence >= minimumConfidenceLevel)
+                {
+/*                    // only the child joint is found, but the parent didn't.
+                    // recursively see if the parent's parent is available.
+                    var parentJointId = pair.ParentJoint;
+                    var ancestorJointId = pair.ParentJoint;
+                    while (ancestorJointId != this.RootId)
+                    {
+                        ancestorJointId = bonesHierarchy.Where(m => m.ChildJoint == parentJointId).First().ParentJoint;
+                        // see if ancestorjoint is available
+                        var (ancestorPose, ancestorConfidence) = body.Joints[ancestorJointId];
+                        if (ancestorConfidence >= Microsoft.Azure.Kinect.BodyTracking.JointConfidenceLevel.Low)
+                        {
+                            // find the transformation between them & save it 
+                            var transform = childPose.TransformBy(ancestorPose.Invert());
+                            this.BodyTree.UpdateTransformation(ancestorJointId, pair.ChildJoint, transform);
+                            break;
+                        }
+                    }       */             
                 }
             }
 
@@ -114,6 +137,12 @@ namespace TBD.Psi.VisionComponents
             if (keyJoints == null)
             {
                 keyJoints = new List<JointId>() { JointId.Neck, JointId.SpineChest };
+            }
+
+            // make sure the bodies has the key joints
+            if(!body1.BodyTree.Contains(keyJoints) || !body2.BodyTree.Contains(keyJoints))
+            {
+                return false;
             }
 
             //compare those joints

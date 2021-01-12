@@ -17,6 +17,7 @@ namespace TBD.Psi.VisionComponents
     public class BodyTracker : IConsumerProducer<List<List<HumanBody>>, List<HumanBody>>
     {
         private uint peopleIndex = 0;
+        private DeliveryPolicy deliveryPolicy;
         private TimeSpan removeThreshold = TimeSpan.FromSeconds(1);
         private Pipeline pipeline;
         private Dictionary<uint, (HumanBody, DateTime)> currTrackingPeople = new Dictionary<uint, (HumanBody, DateTime)>();
@@ -25,8 +26,9 @@ namespace TBD.Psi.VisionComponents
         /// Initializes a new instance of the <see cref="BodyTracker"/> class.
         /// </summary>
         /// <param name="pipeline">Current pipeline.</param>
-        public BodyTracker(Pipeline pipeline)
+        public BodyTracker(Pipeline pipeline, DeliveryPolicy defaultDeliveryPolicy = null)
         {
+            this.deliveryPolicy = defaultDeliveryPolicy ?? DeliveryPolicy.Unlimited;
             this.pipeline = pipeline;
             this.In = pipeline.CreateReceiver<List<List<HumanBody>>>(this, this.BodiesCallback, nameof(this.In));
             this.Out = pipeline.CreateEmitter<List<HumanBody>>(this, nameof(this.Out));

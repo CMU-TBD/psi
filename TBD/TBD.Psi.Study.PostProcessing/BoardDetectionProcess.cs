@@ -68,7 +68,10 @@ namespace TBD.Psi.Study.PostProcessing
                     poseCollection[m.Item2][m.Item4].Item2.Add(m.Item3);
                 });
 
-                p.Run();
+                p.ProposeReplayTime(TimeInterval.LeftBounded(DateTime.UtcNow));
+                Generators.Repeat(p, true, 2, TimeSpan.FromSeconds(500));
+
+                p.Run(ReplayDescriptor.ReplayAll);
 
                 var lines = new List<string>();
                 var lx = new List<string>();

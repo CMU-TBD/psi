@@ -48,22 +48,24 @@ namespace TBD
 				// Detect and refine the image
 				// TODO figure out a way to avoid creating a pointer again
 				cv::aruco::detectMarkers(img, cvBoard->dictionary, corners, ids, cv::aruco::DetectorParameters::create(), rejectedCorners);
-				cv::aruco::refineDetectedMarkers(img, cvBoard, corners, ids, rejectedCorners);
+				// cv::aruco::refineDetectedMarkers(img, cvBoard, corners, ids, rejectedCorners);
 
 				// if we can see the whole board & all the points
 				if (ids.size() == cvBoard->ids.size() && std::find(ids.begin(), ids.end(), 0) != ids.end()) {
-					cv::Mat rvec, tvec;
 					cv::Mat obj_points, img_points;
 					// estimate the board
-					cv::aruco::estimatePoseBoard(corners, ids, cvBoard, *cameraMat_, *distCoeffs_, rvec, tvec, false);
+					cv::aruco::estimatePoseBoard(corners, ids, cvBoard, *cameraMat_, *distCoeffs_, *rvecPtr, *tvecPtr, false);
 					// Convert tvec and rvec to a transformation matrix
+					double p1 = tvecPtr->at<double>(0);
+					double p2 = tvecPtr->at<double>(1);
+					double p3 = tvecPtr->at<double>(2);
 					cv::Mat rot;
-					cv::Rodrigues(rvec, rot);
+					cv::Rodrigues(*rvecPtr, rot);
 					return gcnew array<double, 2>(4, 4)
 					{
-						{ rot.at<double>(0), rot.at<double>(1), rot.at<double>(2), tvec.at<double>(0)},
-						{ rot.at<double>(3), rot.at<double>(4), rot.at<double>(5), tvec.at<double>(1) },
-						{ rot.at<double>(6), rot.at<double>(7), rot.at<double>(8), tvec.at<double>(2) },
+						{ rot.at<double>(0), rot.at<double>(1), rot.at<double>(2), tvecPtr->at<double>(0)},
+						{ rot.at<double>(3), rot.at<double>(4), rot.at<double>(5), tvecPtr->at<double>(1) },
+						{ rot.at<double>(6), rot.at<double>(7), rot.at<double>(8), tvecPtr->at<double>(2) },
 						{ 0, 0, 0, 1 },
 					};
 				}

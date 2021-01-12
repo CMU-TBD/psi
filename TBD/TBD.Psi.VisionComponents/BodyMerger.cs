@@ -18,6 +18,7 @@ namespace TBD.Psi.VisionComponents
     {
         private readonly List<IProducer<List<HumanBody>>> producerList = new List<IProducer<List<HumanBody>>>();
         private readonly Connector<List<List<HumanBody>>> outConnector;
+        private DeliveryPolicy deliveryPolicy;
         private IProducer<List<HumanBody>> mainProducer;
         private int inputConnectorIndex;
 
@@ -25,10 +26,11 @@ namespace TBD.Psi.VisionComponents
         /// Initializes a new instance of the <see cref="BodyMerger"/> class.
         /// </summary>
         /// <param name="pipeline">Current pipeline.</param>
-        public BodyMerger(Pipeline pipeline)
-            : base(pipeline, nameof(BodyMerger))
+        public BodyMerger(Pipeline pipeline, DeliveryPolicy defaultDeliveryPolicy = null)
+            : base(pipeline, nameof(BodyMerger), defaultDeliveryPolicy ?? DeliveryPolicy.Unlimited)
         {
             pipeline.PipelineRun += this.PipelineStartEvent;
+            this.deliveryPolicy = defaultDeliveryPolicy ?? DeliveryPolicy.Unlimited;
             this.outConnector = this.CreateOutputConnectorTo<List<List<HumanBody>>>(pipeline, nameof(this.outConnector));
         }
 
@@ -41,7 +43,7 @@ namespace TBD.Psi.VisionComponents
             : this(pipeline)
         {
             var inConnector = this.CreateInputConnectorFrom<List<HumanBody>>(mainProducer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
-            mainProducer.PipeTo(inConnector);
+            mainProducer.PipeTo(inConnector, this.deliveryPolicy);
             this.mainProducer = inConnector.Out;
         }
 
@@ -63,13 +65,13 @@ namespace TBD.Psi.VisionComponents
                 }
 
                 var inConnector = this.CreateInputConnectorFrom<List<HumanBody>>(producer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
-                producer.PipeTo(inConnector);
+                producer.PipeTo(inConnector, this.deliveryPolicy);
                 this.mainProducer = inConnector.Out;
             }
             else
             {
                 var inConnector = this.CreateInputConnectorFrom<List<HumanBody>>(producer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
-                producer.PipeTo(inConnector);
+                producer.PipeTo(inConnector, this.deliveryPolicy);
                 this.producerList.Add(inConnector.Out);
             }
         }
@@ -83,10 +85,10 @@ namespace TBD.Psi.VisionComponents
               this.producerList.Count,
               null);
 
-            this.mainProducer.PipeTo(joiner.InPrimary, DeliveryPolicy.LatestMessage);
+            this.mainProducer.PipeTo(joiner.InPrimary, this.deliveryPolicy);
             for (var i = 0; i < this.producerList.Count; i++)
             {
-                this.producerList[i].PipeTo(joiner.InSecondaries[i]);
+                this.producerList[i].PipeTo(joiner.InSecondaries[i], this.deliveryPolicy);
             }
 
             joiner.Out.Select((listOfBodies, e) =>
@@ -132,7 +134,7 @@ namespace TBD.Psi.VisionComponents
                 }
 
                 return mergedList;
-            }).Out.PipeTo(this.outConnector);
+            }, this.deliveryPolicy).Out.PipeTo(this.outConnector, this.deliveryPolicy);
         }
     }
 }

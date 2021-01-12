@@ -16,14 +16,14 @@ namespace TBD.Psi.VisionComponents
     /// </summary>
     public static class OperatorExtensions
     {
-     
+
         /// <summary>
         /// Change the Coordinate System of Each Azure Kinect Body.
         /// </summary>
         /// <param name="producer">Procuder of Azure Kinect Bodies.</param>
         /// <param name="wantedToAzure">Transformation from desire to azure frame.</param>
         /// <returns>Azure Kinect Bodies in transformed frame.</returns>
-        public static IProducer<List<AzureKinectBody>> ChangeToFrame(this IProducer<List<AzureKinectBody>> producer, CoordinateSystem wantedToAzure)
+        public static IProducer<List<AzureKinectBody>> ChangeToFrame(this IProducer<List<AzureKinectBody>> producer, CoordinateSystem wantedToAzure, DeliveryPolicy deliveryPolicy = null)
         {
             return producer.Select(m =>
             {
@@ -32,18 +32,15 @@ namespace TBD.Psi.VisionComponents
                 {
                     foreach (var key in m[i].Joints.Keys.ToList())
                     {
-                        var (pose, confidence) = m[i].Joints[key];
-
-                        // update Pose
-                        pose = new CoordinateSystem(wantedToAzure * pose);
-                        m[i].Joints[key] = (pose, confidence);
+                        // update the pose
+                        m[i].Joints[key] = (m[i].Joints[key].Pose.TransformBy(wantedToAzure), m[i].Joints[key].Confidence);
                     }
                 }
                 return m;
-            });
+            }, deliveryPolicy);
         }
 
-        public static IProducer<List<HumanBody>> ChangeToFrame(this IProducer<List<HumanBody>> producer, CoordinateSystem wantedToAzure)
+        public static IProducer<List<HumanBody>> ChangeToFrame(this IProducer<List<HumanBody>> producer, CoordinateSystem wantedToAzure, DeliveryPolicy deliveryPolicy = null)
         {
             return producer.Select(m =>
             {
@@ -51,13 +48,13 @@ namespace TBD.Psi.VisionComponents
                 for (var i = 0; i < m.Count; i++)
                 {
                     // just need to update the root
-                    m[i].RootPose = new CoordinateSystem(wantedToAzure * m[i].RootPose);
+                    m[i].RootPose = m[i].RootPose.TransformBy(wantedToAzure);
                 }
                 return m;
-            });
+            }, deliveryPolicy);
         }
 
-        public static IProducer<List<HumanBody>> ChangeToHumanBodies(this IProducer<List<AzureKinectBody>> producer)
+        public static IProducer<List<HumanBody>> ChangeToHumanBodies(this IProducer<List<AzureKinectBody>> producer, DeliveryPolicy deliveryPolicy = null)
         {
             return producer.Select(m =>
             {
@@ -70,7 +67,7 @@ namespace TBD.Psi.VisionComponents
                     }
                     return null;
                 }).Where(m => m != null).ToList();
-            });
+            }, deliveryPolicy);
         }
         /*
                 /// <summary>
