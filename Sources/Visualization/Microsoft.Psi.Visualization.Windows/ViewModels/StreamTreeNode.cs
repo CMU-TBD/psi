@@ -439,7 +439,9 @@ namespace Microsoft.Psi.Visualization.ViewModels
             {
                 if (this.IsStream)
                 {
-                    return new TimeInterval(this.FirstMessageOriginatingTime.Value, this.LastMessageCreationTime.Value);
+                    return new TimeInterval(
+                        this.FirstMessageOriginatingTime.Value < this.FirstMessageCreationTime.Value ? this.FirstMessageOriginatingTime.Value : this.FirstMessageCreationTime.Value,
+                        this.LastMessageOriginatingTime.Value < this.LastMessageCreationTime.Value ? this.LastMessageCreationTime.Value : this.LastMessageOriginatingTime.Value);
                 }
                 else
                 {
