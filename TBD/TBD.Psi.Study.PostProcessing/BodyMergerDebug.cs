@@ -79,7 +79,7 @@ namespace TBD.Psi.Study.PostProcessing
                 tracker.Write("tracked", store);
                 p.Diagnostics.Write("diagnostics", store);
 
-                p.Run(ReplayDescriptor.ReplayAll);
+                p.Run();
             }
         }
     }

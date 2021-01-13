@@ -251,7 +251,15 @@ namespace TBD.Psi.Visualization.Windows
                             visualJoint.Radius = this.JointRadiusMm / 1000.0;
                         }
 
-                        visualJoint.Fill = trackedEntitiesBrush;
+                        // get confidence
+                        if (this.CurrentData.getJointConfidenceLevel((JointId)jointId) == JointConfidenceLevel.Low)
+                        {
+                            visualJoint.Fill = untrackedEntitiesBrush;
+                        }
+                        else
+                        {
+                            visualJoint.Fill = trackedEntitiesBrush;
+                        }
                         visualJoint.Transform = new Win3D.TranslateTransform3D(jointPosition.X, jointPosition.Y, jointPosition.Z);
                         visualJoint.PhiDiv = this.PolygonResolution;
                         visualJoint.ThetaDiv = this.PolygonResolution;
@@ -283,7 +291,14 @@ namespace TBD.Psi.Visualization.Windows
                         visualBone.Point1 = new Win3D.Point3D(joint1Position.OffsetX, joint1Position.OffsetY, joint1Position.OffsetZ);
                         visualBone.Point2 = new Win3D.Point3D(joint2Position.OffsetX, joint2Position.OffsetY, joint2Position.OffsetZ);
 
-                        visualBone.Fill = trackedEntitiesBrush;
+                        if (this.CurrentData.getJointConfidenceLevel(bone.ChildJoint) == JointConfidenceLevel.Low)
+                        {
+                            visualBone.Fill = untrackedEntitiesBrush;
+                        }
+                        else
+                        {
+                            visualBone.Fill = trackedEntitiesBrush;
+                        }
                         
                         visualBone.ThetaDiv = this.PolygonResolution;
 
@@ -331,7 +346,7 @@ namespace TBD.Psi.Visualization.Windows
             {
                 var origin = this.CurrentData.RootPose.Origin;
                 this.billboard.Position = new Win3D.Point3D(origin.X, origin.Y, origin.Z + (this.BillboardHeightCm / 100.0));
-                this.billboard.Text = this.CurrentData.ToString();
+                this.billboard.Text = this.CurrentData.Id.ToString();
             }
         }
 

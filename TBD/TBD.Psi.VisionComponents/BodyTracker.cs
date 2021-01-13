@@ -75,6 +75,7 @@ namespace TBD.Psi.VisionComponents
                         matchedIndex.Add(key);
 
                         // update the bodies
+                        combinedBody.Id = key;
                         this.currTrackingPeople[key] = (combinedBody, env.OriginatingTime);
                         currentBodies.Add(combinedBody);
                         found = true;

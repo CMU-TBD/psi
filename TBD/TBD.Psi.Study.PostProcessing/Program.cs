@@ -12,8 +12,8 @@ namespace TBD.Psi.Study.PostProcessing
         {
             //BoardDetectionProcess.Run();
             //BoardDetectionProcessDebug.Run();
-            //BodyMergerDebug.Run();
-            BodyMergerDebugLab.Run();
+            BodyMergerDebug.Run();
+            //BodyMergerDebugLab.Run();
         }
     }
 }

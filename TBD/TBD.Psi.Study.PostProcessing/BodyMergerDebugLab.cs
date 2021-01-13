@@ -42,9 +42,9 @@
 
                 // save image for debugging
                 var imgStream = input.OpenStream<Shared<EncodedImage>>("azure1.color");
-                // imgStream.Write("color1", store);
+                imgStream.Write("color1", store);
                 var imgStream2 = input.OpenStream<Shared<EncodedImage>>("azure2.color");
-                // imgStream2.Write("color2", store);
+                imgStream2.Write("color2", store);
 
                 var bodies1Origin = input.OpenStream<List<AzureKinectBody>>("azure1.bodies");
                 //var bodies1 = input.OpenStream<List<AzureKinectBody>>("azure1.bodies");
