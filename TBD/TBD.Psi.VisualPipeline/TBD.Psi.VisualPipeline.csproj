@@ -28,6 +28,6 @@
     <ProjectReference Include="..\TBD.Psi.OpenCV.Interop\TBD.Psi.OpenCV.Interop.vcxproj" />
     <ProjectReference Include="..\TBD.Psi.ROS\TBD.Psi.ROS.fsproj" />
     <ProjectReference Include="..\TBD.Psi.StudyComponents.NETFramework\TBD.Psi.StudyComponents.NETFramework.csproj" />
-    <ProjectReference Include="..\TBD.Psi.VisionComponents\TBD.Psi.VisionComponents.csproj" />
+    <ProjectReference Include="..\TBD.Psi.VisionComponents\TBD.Psi.VisionComponents.x64.csproj" />
   </ItemGroup>
 </Project>

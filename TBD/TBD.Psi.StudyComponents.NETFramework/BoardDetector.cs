@@ -81,7 +81,7 @@ namespace TBD.Psi.StudyComponents
             this.detector.SetCameraIntrinsics(intrinsicArr, info.ColorIntrinsics.RadialDistortion.AsArray(), info.ColorIntrinsics.TangentialDistortion.AsArray());
             this.receiveCalibration = true;
         }
-
+         
         private void CalibrationCB(IDepthDeviceCalibrationInfo info, Envelope env)
         {
             this.AddCalibrationInfo(info);

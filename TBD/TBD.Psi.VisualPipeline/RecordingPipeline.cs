@@ -18,7 +18,7 @@ namespace TBD.Psi.VisualPipeline
             {
                 var store = PsiStore.Create(p, "record-pipeline", @"C:\Data\Store\Recording");
 
-                var kinectNum = 2;
+                var kinectNum = 1;
                 var mainNum = -1;
 
                 for (var i = 1; i <= kinectNum; i++)

@@ -183,7 +183,7 @@ namespace PsiStoreTool
             string tempFolderPath = Path.Combine(path, $"Copy-{Guid.NewGuid()}");
 
             // copy only the wanted streams by name to the new path
-            Store.Copy((store, path), (store, tempFolderPath), null, s => s.Name == stream, false);
+            PsiStore.Copy((store, path), (store, tempFolderPath), null, s => s.Name == stream, false);
 
             // create a SafeCopy folder in which to save the original store files
             var safeCopyPath = Path.Combine(path, $"Original-{Guid.NewGuid()}");

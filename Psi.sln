@@ -204,7 +204,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.Playground.NETFrame
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TBD.Psi.OpenCV.Interop", "TBD\TBD.Psi.OpenCV.Interop\TBD.Psi.OpenCV.Interop.vcxproj", "{2C5D274D-A138-41A4-84A2-99467C3F33B7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.VisionComponents", "TBD\TBD.Psi.VisionComponents\TBD.Psi.VisionComponents.csproj", "{A16B898F-541C-4DFE-9B3A-6CB095AA1E36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.VisionComponents.x64", "TBD\TBD.Psi.VisionComponents\TBD.Psi.VisionComponents.x64.csproj", "{A16B898F-541C-4DFE-9B3A-6CB095AA1E36}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.Playground", "TBD\TBD.Psi.Playground\TBD.Psi.Playground.csproj", "{DBD69EC2-01F9-42DF-8C8F-4B6CC8B8CEE0}"
 EndProject
@@ -219,6 +219,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.Nuget.Isolated", "TBD\TBD.Psi.Nuget.Isolated\TBD.Psi.Nuget.Isolated.csproj", "{DCFD463A-8F7C-4547-870E-4F65F1D6BCDD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.Study.Local", "TBD\TBD.Psi.Study.Local\TBD.Psi.Study.Local.csproj", "{8844241E-E965-42A6-8D9D-A12246D37DD9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TBD.Psi.Study.Lab.Windows.x64", "TBD\TBD.Psi.Study.Lab.Windows.x64\TBD.Psi.Study.Lab.Windows.x64.csproj", "{F2DE86A5-ECAE-4958-8DBD-6E269761019C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1044,6 +1046,13 @@ Global
 		{8844241E-E965-42A6-8D9D-A12246D37DD9}.Release|x64.Build.0 = Release|Any CPU
 		{8844241E-E965-42A6-8D9D-A12246D37DD9}.Release|x86.ActiveCfg = Release|Any CPU
 		{8844241E-E965-42A6-8D9D-A12246D37DD9}.Release|x86.Build.0 = Release|Any CPU
+		{F2DE86A5-ECAE-4958-8DBD-6E269761019C}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{F2DE86A5-ECAE-4958-8DBD-6E269761019C}.Debug|x64.ActiveCfg = Debug|x64
+		{F2DE86A5-ECAE-4958-8DBD-6E269761019C}.Debug|x64.Build.0 = Debug|x64
+		{F2DE86A5-ECAE-4958-8DBD-6E269761019C}.Debug|x86.ActiveCfg = Debug|x64
+		{F2DE86A5-ECAE-4958-8DBD-6E269761019C}.Release|Any CPU.ActiveCfg = Release|x64
+		{F2DE86A5-ECAE-4958-8DBD-6E269761019C}.Release|x64.ActiveCfg = Release|x64
+		{F2DE86A5-ECAE-4958-8DBD-6E269761019C}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1140,6 +1149,7 @@ Global
 		{7547DC33-6DFE-46DE-BBCA-B39EB6DBA985} = {E228820A-569C-4B5E-8481-262043A0F786}
 		{DCFD463A-8F7C-4547-870E-4F65F1D6BCDD} = {E228820A-569C-4B5E-8481-262043A0F786}
 		{8844241E-E965-42A6-8D9D-A12246D37DD9} = {E228820A-569C-4B5E-8481-262043A0F786}
+		{F2DE86A5-ECAE-4958-8DBD-6E269761019C} = {E228820A-569C-4B5E-8481-262043A0F786}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EAF15EE9-DCC5-411B-A9E5-7C2F3D132331}

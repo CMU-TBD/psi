@@ -49,7 +49,6 @@ namespace TBD
 				// TODO figure out a way to avoid creating a pointer again
 				cv::aruco::detectMarkers(img, cvBoard->dictionary, corners, ids, cv::aruco::DetectorParameters::create(), rejectedCorners);
 				// cv::aruco::refineDetectedMarkers(img, cvBoard, corners, ids, rejectedCorners);
-
 				// if we can see the whole board & all the points
 				if (ids.size() == cvBoard->ids.size() && std::find(ids.begin(), ids.end(), 0) != ids.end()) {
 					cv::Mat obj_points, img_points;
