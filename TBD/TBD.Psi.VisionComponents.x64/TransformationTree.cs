@@ -14,7 +14,7 @@ namespace TBD.Psi.VisionComponents
     public class TransformationTree<T>
     {
 
-        private Dictionary<T, Dictionary<T, CoordinateSystem>> tree = new Dictionary<T, Dictionary<T, CoordinateSystem>>();
+        protected Dictionary<T, Dictionary<T, CoordinateSystem>> tree = new Dictionary<T, Dictionary<T, CoordinateSystem>>();
 
         protected void traverseTree(T parent, CoordinateSystem transform, List<(T id, CoordinateSystem Pose)> frameList)
         {
@@ -120,26 +120,26 @@ namespace TBD.Psi.VisionComponents
             return this.tree.Keys.Where(m => frames.Contains(m)).Any();
         }
 
-        public CoordinateSystem SolveTransformation(T frameA, T frameB)
+        public CoordinateSystem SolveTransformation(T parentFrameKey, T childFrameKey)
         {
             // check if both frames are in the tree
-            if (!this.tree.ContainsKey(frameA) || !this.tree.ContainsKey(frameB))
+            if (!this.tree.ContainsKey(parentFrameKey) || !this.tree.ContainsKey(childFrameKey))
             {
                 return null;
             }
 
             // if they are the same, return identity
-            if (EqualityComparer<T>.Default.Equals(frameA, frameB))
+            if (EqualityComparer<T>.Default.Equals(parentFrameKey, childFrameKey))
             {
                 return new CoordinateSystem();
             }
 
             // start from A
-            var transform = this.recursiveSearchNode(frameA, frameB);
+            var transform = this.recursiveSearchNode(parentFrameKey, childFrameKey);
             if(transform == null)
             {
                 // search the otherway in case they are above it
-                transform = this.recursiveSearchNode(frameB, frameA);
+                transform = this.recursiveSearchNode(childFrameKey, parentFrameKey);
                 if (transform == null)
                 {
                     return null;

@@ -9,7 +9,9 @@
             // RecordTestStreams.Run();
 
             // Post Processing
-            PostProcessBoardDetection.Run();
+            // PostProcessBoardDetection.Run();
+            // PostProcessDepthImageStaging.Run();
+            PostProcessBodyMergerTest.Run();
         }
     }
 }

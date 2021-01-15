@@ -72,12 +72,21 @@ namespace TBD.Psi.VisionComponents
             {
                 var inConnector = this.CreateInputConnectorFrom<List<HumanBody>>(producer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
                 producer.PipeTo(inConnector, this.deliveryPolicy);
-                this.producerList.Add(inConnector.Out);
+                if (this.mainProducer == null)
+                {
+                    this.mainProducer = inConnector.Out;
+                }
+                else
+                {
+                    this.producerList.Add(inConnector.Out);
+
+                }
             }
         }
 
         private void PipelineStartEvent(object sender, PipelineRunEventArgs e)
         {
+
             var joiner = new Join<List<HumanBody>, List<HumanBody>, List<HumanBody>, List<HumanBody>>(
               this.mainProducer.Out.Pipeline,
               Reproducible.Nearest<List<HumanBody>>(TimeSpan.FromMilliseconds(200)),

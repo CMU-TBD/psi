@@ -19,8 +19,7 @@ namespace TBD.Psi.StudyComponents
     public class CalibrationMerger : Subpipeline, IProducer<(CoordinateSystem, string, CoordinateSystem, string)>
     {
         private Pipeline pipeline;
-        //private Zip<(CoordinateSystem, string, CoordinateSystem, string)> zipper;
-        private Merge<(CoordinateSystem, string, CoordinateSystem, string)> zipper;
+        private Zip<(CoordinateSystem, string, CoordinateSystem, string)> zipper;
         private List<Emitter<CoordinateSystem>> boardPoseEmitters = new List<Emitter<CoordinateSystem>>();
         private List<string> InputNames = new List<string>();
         private Connector<(CoordinateSystem, string, CoordinateSystem, string)> outConnector;
@@ -29,7 +28,7 @@ namespace TBD.Psi.StudyComponents
         private double markerLength;
         private double markerSeperation;
         private ArucoDictionary dictName;
-        private TimeSpan timeRange = TimeSpan.FromMilliseconds(10);
+        private TimeSpan timeRange = TimeSpan.FromMilliseconds(30);
         private PsiExporter store = null;
         private bool saveInputToStore = false;
 
@@ -50,12 +49,10 @@ namespace TBD.Psi.StudyComponents
             this.dictName = (ArucoDictionary) Enum.Parse(typeof(ArucoDictionary), dictName);
             this.pipeline = p;
             this.pipeline.PipelineRun += this.PipelineStartEvent;
-            //this.zipper = new Zip<(CoordinateSystem, string, CoordinateSystem, string)>(this);
-            this.zipper = new Merge<(CoordinateSystem, string, CoordinateSystem, string)>(this);
+            this.zipper = new Zip<(CoordinateSystem, string, CoordinateSystem, string)>(this);
 
             this.outConnector = this.CreateOutputConnectorTo<(CoordinateSystem, string, CoordinateSystem, string)>(p, nameof(this.outConnector));
-            //this.zipper.Select(m => m.First()).PipeTo(this.outConnector);
-            this.zipper.Select(m => m.Data).PipeTo(this.outConnector);
+            this.zipper.Select(m => m.First()).PipeTo(this.outConnector);
         }
 
 

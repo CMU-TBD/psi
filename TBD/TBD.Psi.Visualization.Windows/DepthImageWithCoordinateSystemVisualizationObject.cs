@@ -20,7 +20,7 @@ namespace TBD.Psi.Visualization.Windows
     /// <summary>
     /// Represents a depth image 3D point cloud visualization object.
     /// </summary>
-    [VisualizationObject("3D Point Cloud With Manual Focal Length")]
+    [VisualizationObject("3D Point Cloud With Origin CoordinateSystem")]
     public class DepthImageWithCoordinateSystemVisualizationObject : ModelVisual3DVisualizationObject<(Shared<EncodedDepthImage>, CoordinateSystem)>
     {
         private readonly DepthImagePointCloudVisual3D depthImagePointCloudVisual3D;
@@ -31,9 +31,6 @@ namespace TBD.Psi.Visualization.Windows
         private double pointSize = 1.0;
         private int sparsity = 3;
         private Color frustumColor = Colors.DimGray;
-        private double imagePlaneDistanceCm = 100;
-        private double focalLengthX = 500;
-        private double focalLengthY = 500;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DepthImageAsPointCloudVisualizationObject"/> class.
@@ -50,7 +47,6 @@ namespace TBD.Psi.Visualization.Windows
             this.cameraIntrinsicsVisual3D = new CameraIntrinsicsVisual3D()
             {
                 Color = this.frustumColor,
-                ImagePlaneDistanceCm = this.imagePlaneDistanceCm,
             };
         }
 
@@ -102,42 +98,6 @@ namespace TBD.Psi.Visualization.Windows
             set { this.Set(nameof(this.FrustumColor), ref this.frustumColor, value); }
         }
 
-        /// <summary>
-        /// Gets or sets the image plane distance.
-        /// </summary>
-        [DataMember]
-        [DisplayName("Image Plane Distance (cm)")]
-        [Description("The image plane distance in centimeters.")]
-        public double ImagePlaneDistanceCm
-        {
-            get { return this.imagePlaneDistanceCm; }
-            set { this.Set(nameof(this.ImagePlaneDistanceCm), ref this.imagePlaneDistanceCm, value); }
-        }
-
-        /// <summary>
-        /// Gets or sets the focal length in the X dimension.
-        /// </summary>
-        [DataMember]
-        [DisplayName("Focal Length X")]
-        [Description("The focal length in the X dimension.")]
-        public double FocalLengthX
-        {
-            get { return this.focalLengthX; }
-            set { this.Set(nameof(this.FocalLengthX), ref this.focalLengthX, value); }
-        }
-
-        /// <summary>
-        /// Gets or sets the focal length in the Y dimension.
-        /// </summary>
-        [DataMember]
-        [DisplayName("Focal Length Y")]
-        [Description("The focal length in the Y dimension.")]
-        public double FocalLengthY
-        {
-            get { return this.focalLengthY; }
-            set { this.Set(nameof(this.FocalLengthY), ref this.focalLengthY, value); }
-        }
-
         /// <inheritdoc/>
         public override void UpdateData()
         {
@@ -164,14 +124,6 @@ namespace TBD.Psi.Visualization.Windows
             {
                 this.cameraIntrinsicsVisual3D.Color = this.FrustumColor;
             }
-            else if (propertyName == nameof(this.ImagePlaneDistanceCm))
-            {
-                this.cameraIntrinsicsVisual3D.ImagePlaneDistanceCm = this.ImagePlaneDistanceCm;
-            }
-            else if (propertyName == nameof(this.FocalLengthX) || propertyName == nameof(this.FocalLengthY))
-            {
-                this.UpdateVisuals();
-            }
             else if (propertyName == nameof(this.Visible))
             {
                 this.UpdateVisibility();
@@ -185,6 +137,7 @@ namespace TBD.Psi.Visualization.Windows
             {
                 this.depthImagePointCloudVisual3D.UpdatePointCloud(this.CurrentData.Item1?.Resource?.Decode(new DepthImageFromStreamDecoder()), this.intrinsics, this.CurrentData.Item2);
                 this.cameraIntrinsicsVisual3D.Intrinsics = this.intrinsics;
+                this.cameraIntrinsicsVisual3D.Position = this.CurrentData.Item2;
             }
         }
 
@@ -205,8 +158,8 @@ namespace TBD.Psi.Visualization.Windows
                 var width = this.CurrentData.Item1.Resource.Width;
                 var height = this.CurrentData.Item1.Resource.Height;
                 var transform = Matrix<double>.Build.Dense(3, 3);
-                transform[0, 0] = this.FocalLengthX;
-                transform[1, 1] = this.FocalLengthY;
+                transform[0, 0] = 500;
+                transform[1, 1] = 500;
                 transform[2, 2] = 1;
                 transform[0, 2] = width / 2.0;
                 transform[1, 2] = height / 2.0;

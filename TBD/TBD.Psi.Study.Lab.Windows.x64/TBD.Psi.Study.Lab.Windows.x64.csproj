@@ -11,7 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Sources\Imaging\Microsoft.Psi.Imaging.Windows\Microsoft.Psi.Imaging.Windows.csproj" />
     <ProjectReference Include="..\..\Sources\Kinect\Microsoft.Psi.Kinect.Windows\Microsoft.Psi.Kinect.Windows.csproj" />
-    <ProjectReference Include="..\TBD.Psi.StudyComponents.NETFramework\TBD.Psi.StudyComponents.NETFramework.csproj" />
-    <ProjectReference Include="..\TBD.Psi.VisionComponents\TBD.Psi.VisionComponents.x64.csproj" />
+    <ProjectReference Include="..\TBD.Psi.StudyComponents.Windows\TBD.Psi.StudyComponents.Windows.csproj" />
+    <ProjectReference Include="..\TBD.Psi.VisionComponents.x64\TBD.Psi.VisionComponents.x64.csproj" />
   </ItemGroup>
 </Project>
