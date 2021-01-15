@@ -293,6 +293,80 @@ namespace Microsoft.Psi.Imaging
         }
 
         /// <summary>
+        /// Flips a depth image along a specified axis.
+        /// </summary>
+        /// <param name="image">Image to flip.</param>
+        /// <param name="mode">Axis along which to flip.</param>
+        /// <returns>A new flipped image.</returns>
+        public static DepthImage Flip(this DepthImage image, FlipMode mode)
+        {
+            var destImage = new DepthImage(image.Width, image.Height);
+            image.Flip(destImage, mode);
+            return destImage;
+        }
+
+        /// <summary>
+        /// Flips a depth image along a specified axis.
+        /// </summary>
+        /// <param name="image">Image to flip.</param>
+        /// <param name="destImage">Destination image where to store results.</param>
+        /// <param name="mode">Axis along which to flip.</param>
+        public static void Flip(this DepthImage image, DepthImage destImage, FlipMode mode)
+        {
+            if (image.Width != destImage.Width || image.Height != destImage.Height)
+            {
+                throw new ArgumentException("Destination image's width/height must match the source image width/height");
+            }
+
+            // Depth Image always has the Gray_16bpp format. uses the unsafe method.
+            // We can't handle this through GDI.
+            unsafe
+            {
+                int sourceBytesPerPixel = image.PixelFormat.GetBytesPerPixel();
+                int destinationBytesPerPixel = destImage.PixelFormat.GetBytesPerPixel();
+                byte* sourceRow = (byte*)image.ImageData.ToPointer();
+                byte* destinationRow = (byte*)destImage.ImageData.ToPointer();
+                int ystep = destImage.Stride;
+                if (mode == FlipMode.AlongHorizontalAxis)
+                {
+                    destinationRow += destImage.Stride * (image.Height - 1);
+                    ystep = -destImage.Stride;
+                }
+
+                int xstep = destinationBytesPerPixel;
+                int xoffset = 0;
+                if (mode == FlipMode.AlongVerticalAxis)
+                {
+                    xoffset = destinationBytesPerPixel * (destImage.Width - 1);
+                    xstep = -destinationBytesPerPixel;
+                }
+
+                for (int i = 0; i < image.Height; i++)
+                {
+                    byte* sourceColumn = sourceRow;
+                    byte* destinationColumn = destinationRow + xoffset;
+                    for (int j = 0; j < image.Width; j++)
+                    {
+                        if (image.PixelFormat == PixelFormat.Gray_8bpp)
+                        {
+                            destinationColumn[0] = sourceColumn[0];
+                        }
+                        else
+                        {
+                            ((ushort*)destinationColumn)[0] = ((ushort*)sourceColumn)[0];
+                        }
+
+                        sourceColumn += sourceBytesPerPixel;
+                        destinationColumn += xstep;
+                    }
+
+                    sourceRow += image.Stride;
+                    destinationRow += ystep;
+                }
+            }
+        }
+
+        /// <summary>
         /// Resizes an image by the specified scale factors using the specified sampling mode.
         /// </summary>
         /// <param name="image">Image to resize.</param>

@@ -239,6 +239,34 @@ namespace Microsoft.Psi.Imaging
         }
 
         /// <summary>
+        /// Flips a shared depth image about the horizontal or vertical axis.
+        /// </summary>
+        /// <param name="source">Depth image to flip.</param>
+        /// <param name="mode">Axis about which to flip.</param>
+        /// <param name="deliveryPolicy">An optional delivery policy.</param>
+        /// <param name="sharedImageAllocator">Optional depth image allocator to create new shared image.</param>
+        /// <returns>A producer that generates flip images.</returns>
+        public static IProducer<Shared<DepthImage>> Flip(this IProducer<Shared<DepthImage>> source, FlipMode mode, DeliveryPolicy<Shared<DepthImage>> deliveryPolicy = null, Func<int, int, Shared<DepthImage>> sharedImageAllocator = null)
+        {
+            if (mode == FlipMode.None)
+            {
+                // just post original image in the case of a no-op
+                return source;
+            }
+            else
+            {
+                sharedImageAllocator ??= DepthImagePool.GetOrCreate;
+                return source.Process<Shared<DepthImage>, Shared<DepthImage>>(
+                    (sharedImage, envelope, emitter) =>
+                    {
+                        using var flippedSharedImage = sharedImageAllocator(sharedImage.Resource.Width, sharedImage.Resource.Height);
+                        sharedImage.Resource.Flip(flippedSharedImage.Resource, mode);
+                        emitter.Post(flippedSharedImage, envelope.OriginatingTime);
+                    }, deliveryPolicy);
+            }
+        }
+
+        /// <summary>
         /// Rotates a shared image by the specified angle.
         /// </summary>
         /// <param name="source">Image to rotate.</param>
