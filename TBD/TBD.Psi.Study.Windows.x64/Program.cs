@@ -1,4 +1,4 @@
-﻿namespace TBD.Psi.Study.Lab
+﻿namespace TBD.Psi.Study
 {
     using System;
     class Program
@@ -7,6 +7,8 @@
         {
             // For recording in post-processing
             // RecordTestStreams.Run();
+
+            // For Running Live
 
             // Post Processing
             // PostProcessBoardDetection.Run();

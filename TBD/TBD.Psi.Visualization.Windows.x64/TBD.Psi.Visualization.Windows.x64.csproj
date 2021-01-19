@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Sources\Visualization\Microsoft.Psi.Visualization.Windows\Microsoft.Psi.Visualization.Windows.csproj" />
-    <ProjectReference Include="..\TBD.Psi.VisionComponents.x64\TBD.Psi.VisionComponents.x64.csproj" />
+    <ProjectReference Include="..\TBD.Psi.StudyComponents.x64\TBD.Psi.StudyComponents.x64.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />

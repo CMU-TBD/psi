@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace TBD.Psi.VisionComponents
+namespace TBD.Psi.StudyComponents
 {
     using System.Linq;
     using Microsoft.Psi;

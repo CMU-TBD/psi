@@ -13,6 +13,7 @@
     <ProjectReference Include="..\..\Sources\Kinect\Microsoft.Psi.AzureKinect.x64\Microsoft.Psi.AzureKinect.x64.csproj" />
     <ProjectReference Include="..\..\Sources\Kinect\Microsoft.Psi.Kinect.Windows\Microsoft.Psi.Kinect.Windows.csproj" />
     <ProjectReference Include="..\TBD.Psi.OpenCV.Interop\TBD.Psi.OpenCV.Interop.vcxproj" />
+    <ProjectReference Include="..\TBD.Psi.StudyComponents.x64\TBD.Psi.StudyComponents.x64.csproj" />
   </ItemGroup>
 
 </Project>

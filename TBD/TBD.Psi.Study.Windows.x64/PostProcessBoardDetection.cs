@@ -1,6 +1,6 @@
 ﻿
 
-namespace TBD.Psi.Study.Lab
+namespace TBD.Psi.Study
 {
     using System;
     using System.Collections.Generic;

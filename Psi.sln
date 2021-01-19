@@ -200,13 +200,13 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "TBD.Psi.ROS", "TBD\TBD.Psi.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TBD.Psi.OpenCV.Interop", "TBD\TBD.Psi.OpenCV.Interop\TBD.Psi.OpenCV.Interop.vcxproj", "{2C5D274D-A138-41A4-84A2-99467C3F33B7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.VisionComponents.x64", "TBD\TBD.Psi.VisionComponents.x64\TBD.Psi.VisionComponents.x64.csproj", "{A16B898F-541C-4DFE-9B3A-6CB095AA1E36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.StudyComponents.x64", "TBD\TBD.Psi.StudyComponents.x64\TBD.Psi.StudyComponents.x64.csproj", "{A16B898F-541C-4DFE-9B3A-6CB095AA1E36}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.StudyComponents.Windows", "TBD\TBD.Psi.StudyComponents.Windows\TBD.Psi.StudyComponents.Windows.csproj", "{20F9DA12-5B51-4C62-9F2B-EF134DCB6670}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.StudyComponents.Windows.x64", "TBD\TBD.Psi.StudyComponents.Windows.x64\TBD.Psi.StudyComponents.Windows.x64.csproj", "{20F9DA12-5B51-4C62-9F2B-EF134DCB6670}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.Visualization.Windows", "TBD\TBD.Psi.Visualization.Windows\TBD.Psi.Visualization.Windows.csproj", "{7547DC33-6DFE-46DE-BBCA-B39EB6DBA985}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.Visualization.Windows.x64", "TBD\TBD.Psi.Visualization.Windows.x64\TBD.Psi.Visualization.Windows.x64.csproj", "{7547DC33-6DFE-46DE-BBCA-B39EB6DBA985}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.Study.Lab.Windows.x64", "TBD\TBD.Psi.Study.Lab.Windows.x64\TBD.Psi.Study.Lab.Windows.x64.csproj", "{F2DE86A5-ECAE-4958-8DBD-6E269761019C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.Study.Windows.x64", "TBD\TBD.Psi.Study.Windows.x64\TBD.Psi.Study.Windows.x64.csproj", "{F2DE86A5-ECAE-4958-8DBD-6E269761019C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

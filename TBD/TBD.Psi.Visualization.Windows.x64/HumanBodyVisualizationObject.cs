@@ -17,7 +17,7 @@ namespace TBD.Psi.Visualization.Windows
     using Microsoft.Psi.Visualization.VisualizationObjects;
     using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
     using Win3D = System.Windows.Media.Media3D;
-    using TBD.Psi.VisionComponents;
+    using TBD.Psi.StudyComponents;
 
     [VisualizationObject("Human Body")]
     public class HumanBodyVisualizationObject : ModelVisual3DVisualizationObject<HumanBody>

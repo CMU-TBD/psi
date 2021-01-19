@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Carnegie Mellon University. All rights reserved.
 // Licensed under the MIT license.
 
-namespace TBD.Psi.VisionComponents
+namespace TBD.Psi.StudyComponents
 {
     using System.Collections.Generic;
     using Microsoft.Psi;

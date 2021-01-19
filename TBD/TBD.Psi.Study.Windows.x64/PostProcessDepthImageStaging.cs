@@ -1,6 +1,6 @@
 ﻿
 
-namespace TBD.Psi.Study.Lab
+namespace TBD.Psi.Study
 {
     using System;
     using System.IO;
@@ -9,7 +9,7 @@ namespace TBD.Psi.Study.Lab
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Psi;
-    using TBD.Psi.VisionComponents;
+    using TBD.Psi.StudyComponents;
     using Microsoft.Psi.Imaging;
 
     public class PostProcessDepthImageStaging
