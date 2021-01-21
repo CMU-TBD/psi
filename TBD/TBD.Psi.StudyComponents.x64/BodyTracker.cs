@@ -20,7 +20,7 @@ namespace TBD.Psi.StudyComponents
         private DeliveryPolicy deliveryPolicy;
         private TimeSpan removeThreshold = TimeSpan.FromSeconds(1);
         private Pipeline pipeline;
-        private Dictionary<uint, (HumanBody, DateTime)> currTrackingPeople = new Dictionary<uint, (HumanBody, DateTime)>();
+        private Dictionary<uint, (HumanBody body, DateTime time)> currTrackingPeople = new Dictionary<uint, (HumanBody, DateTime)>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BodyTracker"/> class.
@@ -44,19 +44,16 @@ namespace TBD.Psi.StudyComponents
         {
             var currentBodies = new List<HumanBody>();
 
-            // We don't know when this is called, so we going to remove stall data based on a previous threshold
-            this.currTrackingPeople = this.currTrackingPeople.Where(pair => (this.pipeline.GetCurrentTime() - pair.Value.Item2) < this.removeThreshold)
+            // remove stall data (bodies last seen beyond a threshold).
+            this.currTrackingPeople = this.currTrackingPeople.Where(pair => (env.OriginatingTime - pair.Value.time) < this.removeThreshold)
                                                              .ToDictionary(pair => pair.Key, pair => pair.Value);
-
             // TODO: Better tracking
             // Currently, it does a first come first server algorithm.
             var matchedIndex = new List<uint>();
 
             foreach (var candidate in msg)
             {
-                // use a combined human body
-                var combinedBody = HumanBody.CombineBodies(candidate);
-
+                var combinedBody = HumanBody.CombineBodies(candidate);  // use a combined human body
                 var found = false;
 
                 // see whether ther is a good match for people we are already tracking
@@ -69,7 +66,7 @@ namespace TBD.Psi.StudyComponents
                     }
 
                     // see if they are a good match
-                    if (Utils.CompareHumanBodies(this.currTrackingPeople[key].Item1, combinedBody))
+                    if (HumanBody.CompareHumanBodies(this.currTrackingPeople[key].body, combinedBody))
                     {
                         // Matched
                         matchedIndex.Add(key);

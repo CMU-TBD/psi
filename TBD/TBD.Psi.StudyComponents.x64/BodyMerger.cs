@@ -141,7 +141,6 @@ namespace TBD.Psi.StudyComponents
 
                     mergedList.Add(currentCollection);
                 }
-
                 return mergedList;
             }, this.deliveryPolicy).Out.PipeTo(this.outConnector, this.deliveryPolicy);
         }

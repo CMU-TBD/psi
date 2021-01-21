@@ -22,10 +22,15 @@ namespace TBD.Psi.Study
             {
                 // INFORMATION
                 // board information
-                var boardMarkerSize = 0.115f;
+/*                var boardMarkerSize = 0.115f;
                 var boardMarkerDist = 0.023f;
                 var boardXNum = 2;
-                var boardYNum = 3;
+                var boardYNum = 3;*/
+
+                var boardMarkerSize = 0.077f;
+                var boardMarkerDist = 0.00151f;
+                var boardXNum = 4;
+                var boardYNum = 6;
 
 
                 // Stores

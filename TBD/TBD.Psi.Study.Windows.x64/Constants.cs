@@ -12,17 +12,30 @@ namespace TBD.Psi.Study
         public static int JPEGEncodeQuality = 75;
 
         // Lab 2021-01-13
+        /*        public static string OperatingDirectory = @"C:\Data\Lab-Store\2020-12-11";
+                public static string CalibrationRecordingPath = @"calibration-recordings\calibration-recording.0006";
+                public static string CalibrationCSVPath = @"C:\Data\Cal\result-lab.csv";
+                public static string TestRecordingPath = @"recordings\record-pipeline.0014";
+                public static string TransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab-2.json";
+                public static Dictionary<string, string> SensorCorrespondMap = new Dictionary<string, string>()
+                        {
+                            { "azure1", "topCam"},
+                            { "azure2", "mainCam"},
+                        };*/
+
+        // Lab 2021-01-13
         /*        public static string OperatingDirectory = @"C:\Data\Lab-Store\2021-01-13";
                 public static string CalibrationRecordingPath = @"calibration-recordings\calibration-recording.0000";
                 public static string CalibrationCSVPath = @"C:\Data\Cal\result-lab.csv";
                 public static string TestRecordingPath = @"recordings\record-pipeline.0004";
                 public static string TransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab.json";
                 public static Dictionary<string, string> SensorCorrespondMap = new Dictionary<string, string>()
-                {
-                    { "azure1", "topCam"},
-                    { "azure2", "mainCam"},
-                    { "k2d1", "leftCam"},
-                };*/
+                        {
+                            { "azure1", "topCam"},
+                            { "azure2", "mainCam"},
+                            { "k2d1", "leftCam"},
+                        };*/
+
 
         // Hallway 2020-11-18
         public static string OperatingDirectory = @"C:\Data\Hallway-Store\2020-11-18";

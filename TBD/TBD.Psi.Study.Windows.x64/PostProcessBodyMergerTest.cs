@@ -34,9 +34,9 @@
                 }
 
                 // create the components
-                var merger = new BodyMerger(p, DeliveryPolicy.LatestMessage);
-                var tracker = new BodyTracker(p, DeliveryPolicy.LatestMessage);
-                merger.PipeTo(tracker, DeliveryPolicy.LatestMessage);
+                var merger = new BodyMerger(p);
+                var tracker = new BodyTracker(p);
+                merger.PipeTo(tracker);
                 tracker.Write("trackedBodies", outputStore);
 
                 // add azure bodies into the body mergers
@@ -49,16 +49,19 @@
                     var transform = transformationTree.SolveTransformation("world", frameName);
                     // open stream
                     var bodiesOrigin = inputStore.OpenStream<List<AzureKinectBody>>(azureBodyStreamName);
-                    var bodies = bodiesOrigin.ChangeToFrame(transform, DeliveryPolicy.LatestMessage);
+                    var bodies = bodiesOrigin.ChangeToFrame(transform);
                     bodies.Write($"{frameName}.bodies", outputStore);
                     // add to merger
-                    merger.AddHumanBodyStream(bodies.ChangeToHumanBodies(DeliveryPolicy.LatestMessage));
+                    merger.AddHumanBodyStream(bodies.ChangeToHumanBodies());
                 }
 
                 p.Diagnostics.Write("diagnostics", outputStore);
-                // Note to self: Cannot run at maximum speed due to the need to use pipeline time to 
-                // calibrate missing data.
-                p.Run(ReplayDescriptor.ReplayAll); 
+
+                // setting time for debug purposes
+                //var replayDescriptor = new ReplayDescriptor(inputStore.MessageOriginatingTimeInterval.Left + TimeSpan.FromSeconds(23.5), TimeSpan.FromSeconds(2));
+                var replayDescriptor = ReplayDescriptor.ReplayAll;
+
+                p.Run(replayDescriptor); 
             }
         }
     }

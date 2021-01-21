@@ -64,26 +64,6 @@ namespace TBD.Psi.StudyComponents
             return (dist, rotDiff);
         }
 
-        /// <summary>
-        /// Using heuristics to decide if the two bodies are the same. Default checks only the neck and chest joints.
-        /// </summary>
-        /// <param name="body1">Body 1.</param>
-        /// <param name="body2">Body 2.</param>
-        /// <param name="distTol">Tolerant to distance between key joints (in meters).</param>
-        /// <param name="rotTol">Tolerant to rotation between key joints (in radian).</param>
-        /// <param name="keyJoints">List of key joints. </param>
-        /// <returns>Whether the bodies are the same.</returns>
-        internal static bool CompareHumanBodies(HumanBody body1, HumanBody body2, double distTol = 0.5, double rotTol = 0.7, List<JointId> keyJoints = null)
-        {
-            // Set the key joints if none is passed in
-            if (keyJoints == null)
-            {
-                keyJoints = new List<JointId>() { JointId.Neck, JointId.SpineChest };
-            }
-
-            return HumanBody.CompareHumanBodies(body1, body2, distTol, rotTol, keyJoints);
-        }
-
         internal static System.Numerics.Quaternion GetQuaternionFromCoordinateSystem(CoordinateSystem cs)
         {
 

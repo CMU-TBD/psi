@@ -7,6 +7,7 @@ using System.Text;
 
 namespace TBD.Psi.StudyComponents
 {
+    using Microsoft.Psi;
     using System.Linq;
 
     public class HumanBody
@@ -147,7 +148,7 @@ namespace TBD.Psi.StudyComponents
             return this.BodyTree.SolveTransformation(this.RootId, jointId)?.TransformBy(InRealWorld ? this.RootPose : new CoordinateSystem());
         }
 
-        public static bool CompareHumanBodies(HumanBody body1, HumanBody body2, double distTol = 0.5, double rotTol = 0.7, List<JointId> keyJoints = null)
+        public static bool CompareHumanBodies(HumanBody body1, HumanBody body2, double distTol = 0.4, double rotTol = 0.7, List<JointId> keyJoints = null)
         {
             // Set the key joints if none is passed in
             if (keyJoints == null)
@@ -172,7 +173,9 @@ namespace TBD.Psi.StudyComponents
                 var (transDiff, rotDiff) = Utils.CalculateDifference(b1Pose, b2Pose);
 
                 // check if they are within reason.
-                if (transDiff > distTol && rotDiff > rotTol)
+                // The old code check if the rotation difference is out a certain tolerance. It was too sensitive to bad body
+                // rotations especially estimated eyes or body orientation.
+                if (transDiff > distTol)
                 {
                     return false;
                 }
@@ -180,13 +183,19 @@ namespace TBD.Psi.StudyComponents
             return true;
         }
 
+        /// <summary>
+        /// Combine the bodies in the given list in a new body. 
+        /// </summary>
+        /// <param name="bodies">List of human bodies to combine.</param>
+        /// <returns>New combined human body.</returns>
         public static HumanBody CombineBodies(List<HumanBody> bodies)
         {
+            var newBody = bodies[0].DeepClone();
             if (bodies.Count > 1)
             {
-                bodies[0].CombineBodies(bodies.Skip(1));
+                newBody.CombineBodies(bodies.Skip(1));
             }
-            return bodies[0];
+            return newBody;
         }
 
         public void CombineBodies(IEnumerable<HumanBody> bodies)
