@@ -48,6 +48,17 @@ namespace Microsoft.Psi
         /// <summary>
         /// Initializes a new instance of the <see cref="ReplayDescriptor"/> class.
         /// </summary>
+        /// <param name="start">Starting message time.</param>
+        /// <param name="duration">Length of time to replay after starting time.</param>
+        /// <param name="enforceReplayClock">Whether to enforce replay clock (optional).</param>
+        public ReplayDescriptor(DateTime start, TimeSpan duration, bool enforceReplayClock = true)
+            : this(new TimeInterval(start, start + duration), enforceReplayClock)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ReplayDescriptor"/> class.
+        /// </summary>
         /// <param name="interval">Time interval to replay.</param>
         /// <param name="enforceReplayClock">Whether to enforce replay clock.</param>
         public ReplayDescriptor(TimeInterval interval, bool enforceReplayClock = true)
