@@ -23,32 +23,32 @@ namespace TBD.Psi.Study
             {
                 // INFORMATION
                 // board information
-/*                var boardMarkerSize = 0.115f;
+                var boardMarkerSize = 0.115f;
                 var boardMarkerDist = 0.023f;
                 var boardXNum = 2;
-                var boardYNum = 3;*/
+                var boardYNum = 3;
 
-                var boardMarkerSize = 0.077f;
+/*                var boardMarkerSize = 0.077f;
                 var boardMarkerDist = 0.00151f;
                 var boardXNum = 4;
-                var boardYNum = 6;
+                var boardYNum = 6;*/
 
+                var deliveryPolicy = DeliveryPolicy.SynchronousOrThrottle;
 
                 // Stores
                 var inputStore = PsiStore.Open(p, "calibration-recording", Path.Combine(Constants.OperatingDirectory, Constants.CalibrationRecordingPath));
                 var outputStore = PsiStore.Create(p, "board-detection", Path.Combine(Constants.OperatingDirectory, @"post-board"));
 
                 // create the calibration tool
-                var calibrationMerger = new CalibrationMerger(p, outputStore, boardXNum, boardYNum, boardMarkerSize, boardMarkerDist, "DICT_4X4_100");
+                var calibrationMerger = new CalibrationMerger(p, outputStore, boardXNum, boardYNum, boardMarkerSize, boardMarkerDist, "DICT_4X4_100", deliveryPolicy);
 
                 // list of color streams
-                var index = 1;
                 var colorStreams = inputStore.AvailableStreams.Where(s => s.Name.EndsWith(".color"));
                 foreach (var colorStream in colorStreams)
                 {
                     var deviceName = colorStream.Name.Remove(colorStream.Name.Length - 6);
                     // see if there is a corresponding calibration stream for the color stream
-                    var calibrationStreamName = deviceName + ".depth-Calibration";
+                    var calibrationStreamName = deviceName + ".depth-calibration";
                     if (inputStore.AvailableStreams.Select(s => s.Name).Contains(calibrationStreamName))
                     {
                         Console.WriteLine($"Adding Calibration of {deviceName}");
@@ -56,12 +56,12 @@ namespace TBD.Psi.Study
                         var calibration = inputStore.OpenStream<IDepthDeviceCalibrationInfo>(calibrationStreamName);
                         if (deviceName.StartsWith("k2"))
                         {
-                            calibrationMerger.AddSavedStreams(color.Decode().Flip(FlipMode.AlongVerticalAxis).Out, calibration.Out, deviceName);
+                            calibrationMerger.AddSavedStreams(color.Decode(deliveryPolicy).Flip(FlipMode.AlongVerticalAxis, deliveryPolicy).Out, calibration.Out, deviceName);
 
                         }
                         else
                         {
-                            calibrationMerger.AddSavedStreams(color.Decode().Out, calibration.Out, deviceName);
+                            calibrationMerger.AddSavedStreams(color.Decode(deliveryPolicy).Out, calibration.Out, deviceName);
                         }
                     }
                 }
@@ -86,7 +86,7 @@ namespace TBD.Psi.Study
                      }
                      poseCollection[m.Item2][m.Item4].Item1.Add(new CoordinateSystem(m.Item1));
                      poseCollection[m.Item2][m.Item4].Item2.Add(new CoordinateSystem(m.Item3));
-                 });
+                 }, deliveryPolicy);
 
                 p.ProposeReplayTime(TimeInterval.LeftBounded(DateTime.UtcNow));
                 Generators.Repeat(p, true, 2, TimeSpan.FromSeconds(180));

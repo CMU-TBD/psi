@@ -27,16 +27,18 @@ namespace TBD.Psi.StudyComponents
         private int numY;
         private double markerLength;
         private double markerSeperation;
+        private DeliveryPolicy deliveryPolicy;
         private ArucoDictionary dictName;
         private TimeSpan timeRange = TimeSpan.FromMilliseconds(30);
         private PsiExporter store = null;
         private bool saveInputToStore = false;
 
-        public CalibrationMerger(Pipeline p, PsiExporter store, int numX, int numY, double markerLength, double markerSeperation, string dictName)
+        public CalibrationMerger(Pipeline p, PsiExporter store, int numX, int numY, double markerLength, double markerSeperation, string dictName, DeliveryPolicy deliveryPolicy = null)
             : this(p, numX, numY, markerLength, markerSeperation, dictName)
         {
             this.store = store;
             this.saveInputToStore = true;
+            this.deliveryPolicy = deliveryPolicy ?? DeliveryPolicy.Unlimited;
         }
 
         public CalibrationMerger(Pipeline p, int numX, int numY, double markerLength, double markerSeperation, string dictName)
@@ -52,7 +54,7 @@ namespace TBD.Psi.StudyComponents
             this.zipper = new Zip<(CoordinateSystem, string, CoordinateSystem, string)>(this);
 
             this.outConnector = this.CreateOutputConnectorTo<(CoordinateSystem, string, CoordinateSystem, string)>(p, nameof(this.outConnector));
-            this.zipper.Select(m => m.First()).PipeTo(this.outConnector);
+            this.zipper.Select(m => m.First(), this.deliveryPolicy).PipeTo(this.outConnector, this.deliveryPolicy);
         }
 
 
@@ -77,17 +79,17 @@ namespace TBD.Psi.StudyComponents
         {
             var imgReceiver = this.CreateInputConnectorFrom<Shared<Image>>(this.pipeline, $"imgFrom{name}");
             var calReceiver = this.CreateInputConnectorFrom<IDepthDeviceCalibrationInfo>(this.pipeline, $"CalFrom{name}");
-            imgInput.PipeTo(imgReceiver);
+            imgInput.PipeTo(imgReceiver, this.deliveryPolicy);
             calInput.PipeTo(calReceiver);
 
             // create board detector
             var boardDetector = new BoardDetector(this, this.numX, this.numY, (float)this.markerLength, (float)this.markerSeperation, this.dictName);
-            var greyImg = imgReceiver.ToGray();
-            greyImg.PipeTo(boardDetector.ImageIn);
+            var greyImg = imgReceiver.ToGray(deliveryPolicy);
+            greyImg.PipeTo(boardDetector.ImageIn, deliveryPolicy);
             calReceiver.PipeTo(boardDetector.CalibrationIn);
             if (this.saveInputToStore)
             {
-                greyImg.EncodeJpeg(quality: 80).Write($"{name}.img", this.store);
+                greyImg.EncodeJpeg(quality: 80, deliveryPolicy).Write($"{name}.img", this.store);
                 boardDetector.Out.Write($"{name}.pose", this.store);
             }
 
@@ -126,13 +128,13 @@ namespace TBD.Psi.StudyComponents
                     var name1 = this.InputNames[i];
                     var name2 = this.InputNames[j];
                     // join and send to merger
-                    var joiner = this.boardPoseEmitters[i].Join(this.boardPoseEmitters[j], this.timeRange).Select(m =>
+                    var joiner = this.boardPoseEmitters[i].Join(this.boardPoseEmitters[j], this.timeRange, this.deliveryPolicy, this.deliveryPolicy).Select(m =>
                     {
                         var (pose1, pose2) = m;
                         return (pose1, name1, pose2, name2);
-                    });
+                    }, this.deliveryPolicy);
                     var receiver = this.zipper.AddInput($"CalibrationMerger{i}-{j}");
-                    joiner.PipeTo(receiver);
+                    joiner.PipeTo(receiver, this.deliveryPolicy);
                 }
             }
         }

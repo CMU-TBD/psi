@@ -11,6 +11,11 @@ namespace TBD.Psi.Study
         // General
         public static int JPEGEncodeQuality = 75;
 
+        // recording constants
+        public static string RecordMainDirectory = @"E:\Data\Lab-Store";
+        public static string RecordFolderName = @"recordings";
+        public static string RecordStoreName = @"recording";
+
         // Lab 2020-12-11
         /*        public static string OperatingDirectory = @"C:\Data\Lab-Store\2020-12-11";
                 public static string CalibrationRecordingPath = @"calibration-recordings\calibration-recording.0006";
@@ -24,7 +29,7 @@ namespace TBD.Psi.Study
                         };*/
 
         // Lab 2021-01-13
-        public static string OperatingDirectory = @"E:\Data\Lab-Store\2021-01-13";
+/*        public static string OperatingDirectory = @"E:\Data\Lab-Store\2021-01-13";
         public static string CalibrationRecordingPath = @"calibration-recordings\calibration-recording.0000";
         public static string CalibrationCSVPath = @"E:\Data\Cal\result-lab.csv";
         public static string TestRecordingPath = @"recordings\record-pipeline.0004";
@@ -33,6 +38,20 @@ namespace TBD.Psi.Study
                         {
                             { "azure1", "topCam"},
                             { "azure2", "mainCam"},
+                            { "k2d1", "leftCam"},
+                        };*/
+
+        // Lab 2021-01-13
+        public static string OperatingDirectory = @"E:\Data\Lab-Store\2021-01-27";
+        public static string CalibrationRecordingPath = @"calibration-recordings\calibration-recording.0003";
+        public static string CalibrationCSVPath = @"E:\Data\Cal\result-lab-2021-01-27.csv";
+        public static string TestRecordingPath = @"recordings\record-pipeline.0004";
+        public static string TransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab-2021-01-27.json";
+        public static Dictionary<string, string> SensorCorrespondMap = new Dictionary<string, string>()
+                        {
+                            { "azure1", "topCam"},
+                            { "azure2", "mainCam"},
+                            { "azure3", "midCam"},
                             { "k2d1", "leftCam"},
                         };
 

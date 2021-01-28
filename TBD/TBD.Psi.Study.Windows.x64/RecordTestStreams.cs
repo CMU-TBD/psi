@@ -1,6 +1,7 @@
 ﻿namespace TBD.Psi.Study
 {
     using System;
+    using System.IO;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
@@ -17,13 +18,15 @@
         {
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
-                var store = PsiStore.Create(p, "calibration-recording", @"C:\Data\Lab-Store\recordings");
+                //create path
+                var storePath = Path.Combine(Constants.RecordMainDirectory, DateTime.Today.ToString("yyyy-MM-dd"), Constants.RecordFolderName);
+                var store = PsiStore.Create(p, Constants.RecordStoreName, storePath);
 
                 // general settings
-                var azureKinectNum = 1;
+                var azureKinectNum = 3;
                 var kinect2Num = 1;
                 var mainNum = -1;
-                var recordBodies = false;
+                var recordBodies = true;
 
                 for (var i = 1; i <= azureKinectNum; i++)
                 {
@@ -48,10 +51,10 @@
 
                     var k4a = new AzureKinectSensor(p, configuration);
 
-                    //k4a.ColorImage.EncodeJpeg(quality: 80).Write($"azure{(mainNum != i ? i : 0)}.color", store);
+                    k4a.ColorImage.EncodeJpeg(quality: Constants.JPEGEncodeQuality).Write($"azure{(mainNum != i ? i : 0)}.color", store);
                     k4a.DepthDeviceCalibrationInfo.Write($"azure{(mainNum != i ? i : 0)}.depth-calibration", store);
-                    //k4a.Bodies.Write($"azure{(mainNum != i ? i : 0)}.bodies", store);
-                    //k4a.DepthImage.EncodePng().Write($"azure{(mainNum != i ? i : 0)}.depth", store);
+                    k4a.Bodies.Write($"azure{(mainNum != i ? i : 0)}.bodies", store);
+                    k4a.DepthImage.EncodePng().Write($"azure{(mainNum != i ? i : 0)}.depth", store);
                 }
 
                 for (var i = 1; i <= kinect2Num; i++)
@@ -64,11 +67,10 @@
                         OutputBodies = recordBodies
                     });
 
-                    //k2.ColorImage.EncodeJpeg(quality: 80).Write($"k2d{i}.color", store);
+                    k2.ColorImage.EncodeJpeg(quality: Constants.JPEGEncodeQuality).Write($"k2d{i}.color", store);
                     k2.DepthDeviceCalibrationInfo.Write($"k2d{i}.depth-calibration", store);
-                    //k2.Bodies.Write($"k2d{i}.bodies", store);
-                    //k2.DepthImage.EncodePng().Write($"k2d{i}.depth", store);
-                    k2.DepthDeviceCalibrationInfo.Do(s => Console.WriteLine($"Receive Calibration:{s}"));
+                    k2.Bodies.Write($"k2d{i}.bodies", store);
+                    k2.DepthImage.EncodePng().Write($"k2d{i}.depth", store);
                 }
 
                 p.Diagnostics.Write("diagnostics", store);

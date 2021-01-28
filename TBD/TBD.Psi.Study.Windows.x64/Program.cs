@@ -6,13 +6,13 @@
         static void Main(string[] args)
         {
             // For recording in post-processing
-            // RecordTestStreams.Run();
+            RecordTestStreams.Run();
 
             // For Running Live
 
             // Post Processing
             // PostProcessBoardDetection.Run();
-            PostProcessDepthImageStaging.Run();
+            // PostProcessDepthImageStaging.Run();
             // PostProcessBodyMergerTest.Run();
         }
     }
