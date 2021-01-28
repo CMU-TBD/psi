@@ -18,6 +18,7 @@ namespace TBD.Psi.Study
     {
         public static void Run()
         {
+            var start_time = DateTime.Now;
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
                 // INFORMATION
@@ -115,6 +116,7 @@ namespace TBD.Psi.Study
                 }
                 System.IO.File.WriteAllLines(Constants.CalibrationCSVPath, lx);
             }
+            Console.WriteLine($"total time:{(DateTime.Now - start_time).TotalSeconds}");
         }
     }
 }

@@ -12,8 +12,8 @@
 
             // Post Processing
             // PostProcessBoardDetection.Run();
-            // PostProcessDepthImageStaging.Run();
-            PostProcessBodyMergerTest.Run();
+            PostProcessDepthImageStaging.Run();
+            // PostProcessBodyMergerTest.Run();
         }
     }
 }
