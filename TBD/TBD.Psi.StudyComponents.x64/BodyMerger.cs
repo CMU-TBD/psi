@@ -20,7 +20,6 @@ namespace TBD.Psi.StudyComponents
         private readonly Connector<List<List<HumanBody>>> outConnector;
         private DeliveryPolicy deliveryPolicy;
         private IProducer<List<HumanBody>> mainProducer;
-        private int inputConnectorIndex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BodyMerger"/> class.
@@ -42,7 +41,7 @@ namespace TBD.Psi.StudyComponents
         public BodyMerger(Pipeline pipeline, IProducer<List<HumanBody>> mainProducer)
             : this(pipeline)
         {
-            var inConnector = this.CreateInputConnectorFrom<List<HumanBody>>(mainProducer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
+            var inConnector = this.CreateInputConnectorFrom<List<HumanBody>>(mainProducer.Out.Pipeline, $"inCon-{mainProducer.Out.Name}");
             mainProducer.PipeTo(inConnector, this.deliveryPolicy);
             this.mainProducer = inConnector.Out;
         }
@@ -64,13 +63,13 @@ namespace TBD.Psi.StudyComponents
                     this.producerList.Add(this.mainProducer);
                 }
 
-                var inConnector = this.CreateInputConnectorFrom<List<HumanBody>>(producer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
+                var inConnector = this.CreateInputConnectorFrom<List<HumanBody>>(producer.Out.Pipeline, $"inCon-{producer.Out.Name}");
                 producer.PipeTo(inConnector, this.deliveryPolicy);
                 this.mainProducer = inConnector.Out;
             }
             else
             {
-                var inConnector = this.CreateInputConnectorFrom<List<HumanBody>>(producer.Out.Pipeline, $"inCon{this.inputConnectorIndex++}");
+                var inConnector = this.CreateInputConnectorFrom<List<HumanBody>>(producer.Out.Pipeline, $"inCon-{producer.Out.Name}");
                 producer.PipeTo(inConnector, this.deliveryPolicy);
                 if (this.mainProducer == null)
                 {

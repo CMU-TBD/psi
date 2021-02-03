@@ -8,15 +8,13 @@
             // For recording in post-processing
             // RecordTestStreams.Run();
 
-            Example.Run();
-
             // For Running Live
             // RunLive.Run();
 
             // Post Processing
             // PostProcessBoardDetection.Run();
             // PostProcessDepthImageStaging.Run();
-            // PostProcessBodyMergerTest.Run();
+            PostProcessBodyMergerTest.Run();
         }
     }
 }

@@ -11,6 +11,7 @@
     using Microsoft.Psi.AzureKinect;
     using Microsoft.Psi.Kinect;
     using Microsoft.Psi.Imaging;
+    using TBD.Psi.StudyComponents;
 
     public class RecordTestStreams
     {
@@ -27,6 +28,9 @@
                 var kinect2Num = 1;
                 var mainNum = -1;
                 var recordBodies = true;
+
+                // Validation components
+                var bodyStreamValidator = new StreamValidator(p);
 
                 for (var i = 1; i <= azureKinectNum; i++)
                 {
@@ -53,7 +57,11 @@
 
                     k4a.ColorImage.EncodeJpeg(quality: Constants.JPEGEncodeQuality).Write($"azure{(mainNum != i ? i : 0)}.color", store);
                     k4a.DepthDeviceCalibrationInfo.Write($"azure{(mainNum != i ? i : 0)}.depth-calibration", store);
-                    k4a.Bodies.Write($"azure{(mainNum != i ? i : 0)}.bodies", store);
+                    if (recordBodies)
+                    {
+                        bodyStreamValidator.AddStream(k4a.Bodies);
+                        k4a.Bodies.Write($"azure{(mainNum != i ? i : 0)}.bodies", store);
+                    }
                     k4a.DepthImage.EncodePng().Write($"azure{(mainNum != i ? i : 0)}.depth", store);
                 }
 
@@ -69,7 +77,12 @@
 
                     k2.ColorImage.EncodeJpeg(quality: Constants.JPEGEncodeQuality).Write($"k2d{i}.color", store);
                     k2.DepthDeviceCalibrationInfo.Write($"k2d{i}.depth-calibration", store);
-                    k2.Bodies.Write($"k2d{i}.bodies", store);
+                    if (recordBodies)
+                    {
+                        bodyStreamValidator.AddStream(k2.Bodies);
+                        k2.Bodies.Write($"k2d{i}.bodies", store);
+                    }
+                    
                     k2.DepthImage.EncodePng().Write($"k2d{i}.depth", store);
                 }
 
