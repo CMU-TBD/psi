@@ -19,6 +19,7 @@ namespace Microsoft.Psi.Common.Interpolators
         private readonly RelativeTimeInterval relativeTimeInterval;
         private readonly bool orDefault;
         private readonly T defaultValue;
+        private readonly bool waitForAll;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FirstAvailableInterpolator{T}"/> class.
@@ -26,7 +27,8 @@ namespace Microsoft.Psi.Common.Interpolators
         /// <param name="relativeTimeInterval">The relative time interval within which to search for the first message.</param>
         /// <param name="orDefault">Indicates whether to output a default value when no result is found.</param>
         /// <param name="defaultValue">An optional default value to use.</param>
-        public FirstAvailableInterpolator(RelativeTimeInterval relativeTimeInterval, bool orDefault, T defaultValue = default)
+        /// <param name="waitForAll">Indicates whether to wait for input from all streams.</param>
+        public FirstAvailableInterpolator(RelativeTimeInterval relativeTimeInterval, bool orDefault, T defaultValue = default, bool waitForAll = false)
         {
             if (!relativeTimeInterval.LeftEndpoint.Bounded)
             {
@@ -41,6 +43,7 @@ namespace Microsoft.Psi.Common.Interpolators
             this.relativeTimeInterval = relativeTimeInterval;
             this.orDefault = orDefault;
             this.defaultValue = defaultValue;
+            this.waitForAll = waitForAll;
         }
 
         /// <inheritdoc/>
@@ -49,6 +52,11 @@ namespace Microsoft.Psi.Common.Interpolators
             // If no messages available,
             if (messages.Count() == 0)
             {
+                if (this.waitForAll)
+                {
+                    return InterpolationResult<T>.InsufficientData();
+                }
+
                 // Then depending on orDefault, either create a default value or return does not exist.
                 return this.orDefault ?
                     InterpolationResult<T>.Create(this.defaultValue, DateTime.MinValue) :

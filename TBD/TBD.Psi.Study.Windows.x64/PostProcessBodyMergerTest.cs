@@ -10,6 +10,7 @@
     using TBD.Psi.StudyComponents;
     using Microsoft.Psi.Imaging;
     using Microsoft.Psi.AzureKinect;
+    using Microsoft.Psi.Calibration;
 
     public class PostProcessBodyMergerTest
     {
@@ -29,8 +30,12 @@
                 // redirect all color streams
                 foreach (var colorStreamName in inputStore.AvailableStreams.Where(s => s.Name.EndsWith("color")).Select(s => s.Name))
                 {
-                    var frameName = Constants.SensorCorrespondMap[colorStreamName.Split('.')[0]];
-                    inputStore.OpenStream<Shared<EncodedImage>>(colorStreamName).Write($"{frameName}.color", outputStore);
+                    var deviceName = colorStreamName.Split('.')[0];
+                    var frameName = Constants.SensorCorrespondMap[deviceName];
+                    var calibrationStream = inputStore.OpenStream<IDepthDeviceCalibrationInfo>($"{deviceName}.depth-calibration");
+                    // get transformation to global frame
+                    var transform = transformationTree.SolveTransformation("world", frameName);
+                    inputStore.OpenStream<Shared<EncodedImage>>(colorStreamName).Join(calibrationStream.First(), Reproducible.Nearest<IDepthDeviceCalibrationInfo>()).Select(m => (m.Item1, m.Item2.ColorIntrinsics, transform) ).Write($"{frameName}.color", outputStore);
                 }
 
                 // create the components

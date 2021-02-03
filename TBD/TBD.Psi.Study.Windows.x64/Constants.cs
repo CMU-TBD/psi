@@ -41,11 +41,11 @@ namespace TBD.Psi.Study
                             { "k2d1", "leftCam"},
                         };*/
 
-        // Lab 2021-01-13
+        // Lab 2021-01-27
         public static string OperatingDirectory = @"E:\Data\Lab-Store\2021-01-27";
         public static string CalibrationRecordingPath = @"calibration-recordings\calibration-recording.0003";
         public static string CalibrationCSVPath = @"E:\Data\Cal\result-lab-2021-01-27.csv";
-        public static string TestRecordingPath = @"recordings\record-pipeline.0004";
+        public static string TestRecordingPath = @"recordings\recording.0001";
         public static string TransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab-2021-01-27.json";
         public static Dictionary<string, string> SensorCorrespondMap = new Dictionary<string, string>()
                         {
@@ -70,16 +70,20 @@ namespace TBD.Psi.Study
                         };*/
 
         // Run Live
-        public static string LiveOperatingDirectory = @"C:\Data\Inbox-Store";
-        public static string LiveSavePath = @"run-live";
-        public static string LiveTransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-hallway.json";
+        public static string LiveOperatingDirectory = @"E:\Data\Lab-Store";
+        public static string LiveFolderName = @"live-recordings";
+        public static string LiveStoreName = @"live-recording";
+        public static string LiveTransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab-2021-01-27.json";
+        public static string RosCoreAddress = "127.0.0.1";
+        public static string RosClientAddress = "127.0.0.1";
         public static Dictionary<string, string> LiveSensorCorrespondMap = new Dictionary<string, string>()
-                {
-                    { "azure0", "mainCam"},
-                    { "azure1", "rightTopCam"},
-                    { "azure3", "leftCam"},
-                };
-        
+            {
+                { "azure1", "topCam"},
+                { "azure2", "mainCam"},
+                { "azure3", "midCam"},
+                { "k2d1", "leftCam"},
+            };
+
 
     }
 }

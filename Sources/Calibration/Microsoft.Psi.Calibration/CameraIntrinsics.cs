@@ -156,10 +156,18 @@ namespace Microsoft.Psi.Calibration
         {
             double k1 = this.RadialDistortion[0];
             double k2 = this.RadialDistortion[1];
-            double k3 = this.RadialDistortion[2];
-            double k4 = this.RadialDistortion[3];
-            double k5 = this.RadialDistortion[4];
-            double k6 = this.RadialDistortion[5];
+            double k3 = 0;
+            double k4 = 0;
+            double k5 = 0;
+            double k6 = 0;
+            if (this.RadialDistortion.Count > 2)
+            {
+                k3 = this.RadialDistortion[2];
+                k4 = this.RadialDistortion[3];
+                k5 = this.RadialDistortion[4];
+                k6 = this.RadialDistortion[5];
+            }
+
             double t0 = this.TangentialDistortion[0];
             double t1 = this.TangentialDistortion[1];
 

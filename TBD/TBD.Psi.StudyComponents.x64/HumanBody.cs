@@ -166,8 +166,13 @@ namespace TBD.Psi.StudyComponents
             foreach (var key in keyJoints)
             {
                 // first get the cs in both matrix
-                var b1Pose = body1.BodyTree.SolveTransformation(body1.RootId, key).TransformBy(body1.RootPose);
-                var b2Pose = body2.BodyTree.SolveTransformation(body2.RootId, key).TransformBy(body2.RootPose);
+                var b1Pose = body1.BodyTree.SolveTransformation(body1.RootId, key)?.TransformBy(body1.RootPose);
+                var b2Pose = body2.BodyTree.SolveTransformation(body2.RootId, key)?.TransformBy(body2.RootPose);
+
+                if (b1Pose == null || b2Pose == null)
+                {
+                    return false;
+                }
 
                 // calculate the difference
                 var (transDiff, rotDiff) = Utils.CalculateDifference(b1Pose, b2Pose);
@@ -200,6 +205,7 @@ namespace TBD.Psi.StudyComponents
 
         public void CombineBodies(IEnumerable<HumanBody> bodies)
         {
+
             // replace all the uncertain joints in the body with certain ones from the replacements
             // Note, the bones are setup to be in the right hierarhical order, we don't have to worry about adding stuff for later
             foreach (var bone in AzureKinectBody.Bones)

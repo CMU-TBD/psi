@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -20,22 +21,22 @@
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
                 // general settings
-                var azureKinectNum = 1;
+                var azureKinectNum = 3;
                 var kinect2Num = 1;
                 var mainNum = -1;
 
-                // Code
-
-                var outputStore = PsiStore.Create(p, Constants.LiveSavePath, Constants.LiveOperatingDirectory);
+                var storePath = Path.Combine(Constants.LiveOperatingDirectory, DateTime.Today.ToString("yyyy-MM-dd"), Constants.LiveFolderName);
+                var outputStore = PsiStore.Create(p, Constants.LiveStoreName, storePath);
 
                 // create a transformation tree that describe the environment
                 var transformationTree = new TransformationTreeTracker(p, pathToSettings: Constants.LiveTransformationSettingsPath);
                 transformationTree.WorldFrameOutput.Write("world", outputStore);
 
                 // Create the components that we use live
+                var bodyStreamValidator = new StreamValidator(p);
                 var bodyMerger = new BodyMerger(p);
                 var bodyTracker = new BodyTracker(p);
-                var rosPublisher = new ROSWorldSender(p);
+                var rosPublisher = new ROSWorldSender(p, Constants.RosCoreAddress, Constants.RosClientAddress);
 
                 // connect components
                 bodyMerger.PipeTo(bodyTracker);
@@ -64,6 +65,7 @@
                     k4a.ColorImage.EncodeJpeg(quality: Constants.JPEGEncodeQuality).Write($"{deviceName}.color", outputStore);
                     k4a.DepthDeviceCalibrationInfo.Write($"{deviceName}.depth-calibration", outputStore);
                     k4a.Bodies.Write($"{deviceName}.bodies", outputStore);
+                    bodyStreamValidator.AddStream(k4a.Bodies);
                     k4a.DepthImage.EncodePng().Write($"{deviceName}.depth", outputStore);
 
                     // Add body to merger
@@ -86,7 +88,7 @@
                     k2.DepthDeviceCalibrationInfo.Write($"{deviceName}.depth-calibration", outputStore);
                     k2.Bodies.Write($"{deviceName}.bodies", outputStore);
                     k2.DepthImage.EncodePng().Write($"{deviceName}.depth", outputStore);
-
+                    bodyStreamValidator.AddStream(k2.Bodies);
                     // Add body to merger
                     var bodyInWorld = k2.Bodies.ChangeToFrame(transformationTree.SolveTransformation("world", Constants.SensorCorrespondMap[deviceName]));
                     bodyMerger.AddHumanBodyStream(bodyInWorld.ChangeToHumanBodies());
@@ -98,6 +100,13 @@
                     Format = WaveFormat.Create16kHz1Channel16BitPcm()
                 });
                 audioSource.Write("audio", outputStore);
+
+
+                bodyStreamValidator.Select(m =>
+                {
+                    Console.WriteLine($"All body stream publishing at originating time:{m}");
+                    return m;
+                }).Write("info.start_time", outputStore);
 
                 // Start Pipeline
                 p.Diagnostics.Write("diagnostics", outputStore);

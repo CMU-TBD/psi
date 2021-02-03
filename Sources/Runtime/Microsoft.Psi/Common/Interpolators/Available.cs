@@ -143,6 +143,17 @@ namespace Microsoft.Psi
         }
 
         /// <summary>
+        /// Greedy interpolator that selects the first available value from all streams within a specified time tolerance.
+        /// </summary>
+        /// <typeparam name="T">The message type.</typeparam>
+        /// <param name="tolerance">The tolerance within which to search for the first message.</param>
+        /// <returns>The greedy interpolator.</returns>
+        public static GreedyInterpolator<T> AllFirst<T>(TimeSpan tolerance)
+        {
+            return new FirstAvailableInterpolator<T>(new RelativeTimeInterval(-tolerance, tolerance), false, waitForAll: true);
+        }
+
+        /// <summary>
         /// Greedy interpolator that selects the first available value in the stream, or default if no such
         /// value is found.
         /// </summary>
