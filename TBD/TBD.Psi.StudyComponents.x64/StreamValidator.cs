@@ -8,61 +8,33 @@ namespace TBD.Psi.StudyComponents
     using Microsoft.Psi;
     using Microsoft.Psi.Components;
 
-    public class StreamValidator : Subpipeline, IProducer<DateTime>
+    public class StreamValidator : IProducer<DateTime>
     {
-        private Pipeline parent;
-        private Connector<DateTime> outConnector;
-        private List<IProducer<DateTime>> streamSources = new List<IProducer<DateTime>>();
+        private Pipeline pipeline;
+        private int incomingStreamTotal = 0;
+        private int incomingStreamCount = 0;
         public StreamValidator(Pipeline pipeline)
-            : base(pipeline)
         {
-            this.parent = pipeline;
-            this.outConnector = this.CreateOutputConnectorTo<DateTime>(pipeline, nameof(this.outConnector));
-            pipeline.PipelineRun += this.pipelineStarted;
-            
-        }
-
-        private void pipelineStarted(object sender, PipelineRunEventArgs e)
-        {
-            if (this.streamSources.Count > 1)
-            {
-                // link up all the sources
-                var fuser = new Fuse<DateTime, DateTime, DateTime, DateTime>(
-                    this,
-                    Available.AllFirst<DateTime>(TimeSpan.MaxValue),
-                    (m1, m2) =>
-                    {
-                        var list = new List<DateTime>(m2);
-                        list.Add(m1);
-                        list.Sort();
-                        return list.LastOrDefault();
-                    },
-                    this.streamSources.Count-1);
-                this.streamSources[0].PipeTo(fuser.InPrimary);
-                for (var i = 0; i < this.streamSources.Count-1; i++)
-                {
-                    this.streamSources[i+1].PipeTo(fuser.InSecondaries[i]);
-                }
-                fuser.Out.Name = "zhi-test";
-                fuser.Out.PipeTo(this.outConnector);
-            }
-            else if (this.streamSources.Count == 1)
-            {
-                this.streamSources[0].PipeTo(this.outConnector);
-            }
+            this.pipeline = pipeline;
+            this.Out = pipeline.CreateEmitter<DateTime>(this, nameof(this.Out));
         }
 
         public void AddStream<T>(IProducer<T> incomingStream, string name = "")
         {
-            // create an input connector
-            var inputConnector = this.CreateInputConnectorFrom<T>(this.parent, $"In-{incomingStream.Out.Name}");
-            incomingStream.PipeTo(inputConnector);
-            streamSources.Add(inputConnector.First().Select((m, e) => {
-                Console.WriteLine($"Receiving Msg from {((name.Length == 0) ? incomingStream.Out.Name : name)}"); 
-                return e.OriginatingTime;
-                }));
+            this.incomingStreamTotal++;
+            var receiverName = (name.Length == 0) ? $"receiver-{this.incomingStreamTotal}" : name;
+            var receiver = this.pipeline.CreateReceiver<T>(this, (m, e) =>
+            {
+                Console.WriteLine($"Receiving Msg from {receiverName}");
+                this.incomingStreamCount++;
+                if (this.incomingStreamCount == this.incomingStreamTotal)
+                {
+                    this.Out.Post(e.OriginatingTime, e.OriginatingTime);
+                }
+            }, receiverName);
+            incomingStream.First().PipeTo(receiver);
         }
 
-        public Emitter<DateTime> Out => this.outConnector.Out;
+        public Emitter<DateTime> Out { get; private set; }
     }
 }
