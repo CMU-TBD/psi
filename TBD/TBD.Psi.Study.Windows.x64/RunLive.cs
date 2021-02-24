@@ -65,7 +65,7 @@
                     k4a.ColorImage.EncodeJpeg(quality: Constants.JPEGEncodeQuality).Write($"{deviceName}.color", outputStore);
                     k4a.DepthDeviceCalibrationInfo.Write($"{deviceName}.depth-calibration", outputStore);
                     k4a.Bodies.Write($"{deviceName}.bodies", outputStore);
-                    bodyStreamValidator.AddStream(k4a.Bodies);
+                    bodyStreamValidator.AddStream(k4a.Bodies, deviceName);
                     k4a.DepthImage.EncodePng().Write($"{deviceName}.depth", outputStore);
 
                     // Add body to merger
@@ -88,7 +88,7 @@
                     k2.DepthDeviceCalibrationInfo.Write($"{deviceName}.depth-calibration", outputStore);
                     k2.Bodies.Write($"{deviceName}.bodies", outputStore);
                     k2.DepthImage.EncodePng().Write($"{deviceName}.depth", outputStore);
-                    bodyStreamValidator.AddStream(k2.Bodies);
+                    bodyStreamValidator.AddStream(k2.Bodies, deviceName);
                     // Add body to merger
                     var bodyInWorld = k2.Bodies.ChangeToFrame(transformationTree.SolveTransformation("world", Constants.SensorCorrespondMap[deviceName]));
                     bodyMerger.AddHumanBodyStream(bodyInWorld.ChangeToHumanBodies());

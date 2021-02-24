@@ -23,7 +23,7 @@ namespace TBD.Psi.Study
             {
                 // INFORMATION
                 // board information
-                var boardMarkerSize = 0.115f;
+                var boardMarkerSize = 0.1145f;
                 var boardMarkerDist = 0.023f;
                 var boardXNum = 2;
                 var boardYNum = 3;
@@ -35,9 +35,13 @@ namespace TBD.Psi.Study
 
                 var deliveryPolicy = DeliveryPolicy.SynchronousOrThrottle;
 
+                // Generate the store path
+                var inputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, Constants.CalibrationSubDirectory);
+                var outputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, @"post-board");
+
                 // Stores
-                var inputStore = PsiStore.Open(p, "calibration-recording", Path.Combine(Constants.OperatingDirectory, Constants.CalibrationRecordingPath));
-                var outputStore = PsiStore.Create(p, "board-detection", Path.Combine(Constants.OperatingDirectory, @"post-board"));
+                var inputStore = PsiStore.Open(p, Constants.CalibrationStoreName, inputStorePath);
+                var outputStore = PsiStore.Create(p, "board-detection", outputStorePath);
 
                 // create the calibration tool
                 var calibrationMerger = new CalibrationMerger(p, outputStore, boardXNum, boardYNum, boardMarkerSize, boardMarkerDist, "DICT_4X4_100", deliveryPolicy);
@@ -114,7 +118,9 @@ namespace TBD.Psi.Study
                         }
                     }
                 }
-                System.IO.File.WriteAllLines(Constants.CalibrationCSVPath, lx);
+                // generate file path
+                var csvPath = Path.Combine(Constants.ResourceLocations, $"board-{Constants.StudyType}-{Constants.PartitionIdentifier}.csv");
+                System.IO.File.WriteAllLines(csvPath, lx);
             }
             Console.WriteLine($"total time:{(DateTime.Now - start_time).TotalSeconds}");
         }

@@ -29,24 +29,59 @@ namespace TBD.Psi.Study
                         };*/
 
         // Lab 2021-01-13
-/*        public static string OperatingDirectory = @"E:\Data\Lab-Store\2021-01-13";
-        public static string CalibrationRecordingPath = @"calibration-recordings\calibration-recording.0000";
-        public static string CalibrationCSVPath = @"E:\Data\Cal\result-lab.csv";
-        public static string TestRecordingPath = @"recordings\record-pipeline.0004";
-        public static string TransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab.json";
-        public static Dictionary<string, string> SensorCorrespondMap = new Dictionary<string, string>()
-                        {
-                            { "azure1", "topCam"},
-                            { "azure2", "mainCam"},
-                            { "k2d1", "leftCam"},
-                        };*/
+        /*        public static string OperatingDirectory = @"E:\Data\Lab-Store\2021-01-13";
+                public static string CalibrationRecordingPath = @"calibration-recordings\calibration-recording.0000";
+                public static string CalibrationCSVPath = @"E:\Data\Cal\result-lab.csv";
+                public static string TestRecordingPath = @"recordings\record-pipeline.0004";
+                public static string TransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab.json";
+                public static Dictionary<string, string> SensorCorrespondMap = new Dictionary<string, string>()
+                                {
+                                    { "azure1", "topCam"},
+                                    { "azure2", "mainCam"},
+                                    { "k2d1", "leftCam"},
+                                };*/
 
         // Lab 2021-01-27
-        public static string OperatingDirectory = @"E:\Data\Lab-Store\2021-01-27";
-        public static string CalibrationRecordingPath = @"calibration-recordings\calibration-recording.0003";
-        public static string CalibrationCSVPath = @"E:\Data\Cal\result-lab-2021-01-27.csv";
+        /*       public static string OperatingDirectory = @"E:\Data\Lab-Store\2021-01-27";
+               public static string CalibrationRecordingPath = @"calibration-recordings\calibration-recording.0003";
+               public static string CalibrationCSVPath = @"E:\Data\Cal\result-lab-2021-01-27.csv";
+               public static string TestRecordingPath = @"recordings\recording.0001";
+               public static string TransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab-2021-01-27.json";
+               public static Dictionary<string, string> SensorCorrespondMap = new Dictionary<string, string>()
+                               {
+                                   { "azure1", "topCam"},
+                                   { "azure2", "mainCam"},
+                                   { "azure3", "midCam"},
+                                   { "k2d1", "leftCam"},
+                               };*/
+
+        // Lab 2021-02-10
+        /*        public static string OperatingDirectory = @"E:\Data\Lab-Store\2021-02-10";
+                public static string CalibrationRecordingPath = @"calibration-recordings\recording.0002";
+                public static string CalibrationStoreName = "recording";
+                public static string CalibrationCSVPath = @"E:\Data\Cal\result-lab-2021-02-10.csv";
+                public static string TestRecordingPath = @"recordings\recording.0001";
+                public static string TransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab-2021-02-10.json";
+                public static Dictionary<string, string> SensorCorrespondMap = new Dictionary<string, string>()
+                                {
+                                    { "azure1", "topCam"},
+                                    { "azure2", "mainCam"},
+                                    { "azure3", "midCam"},
+                                    { "k2d1", "leftCam"},
+                                };*/
+
+        // Combine stats
+        public static string StudyType = "lab";
+        public static string OperatingDirectory = @"E:\Data\Lab-Store\";
+        public static string ResourceLocations = @"E:\Data\Resources\";
+        public static string TransformationSettingsDirectory = @"C:\Users\Zhi\Desktop\Dev\";
+        public static string CalibrationSubDirectory = "calibration-recording";
+        public static string CalibrationStoreName = "recording";
+
+        // Lab 2021-02-17
+        public static string PartitionIdentifier = "2021-02-17";
         public static string TestRecordingPath = @"recordings\recording.0001";
-        public static string TransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab-2021-01-27.json";
+        public static string TransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab-2021-02-10.json";
         public static Dictionary<string, string> SensorCorrespondMap = new Dictionary<string, string>()
                         {
                             { "azure1", "topCam"},

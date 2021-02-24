@@ -21,11 +21,15 @@ namespace TBD.Psi.Study
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
                 // create input & output stores
-                var inputStore = PsiStore.Open(p, "calibration-recording", Path.Combine(Constants.OperatingDirectory, Constants.CalibrationRecordingPath));
-                var outputStore = PsiStore.Create(p, "depth-merger", Path.Combine(Constants.OperatingDirectory, @"depth-merger"));
+                var inputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, Constants.CalibrationSubDirectory);
+                var outputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, @"depth-merger");
+
+                var inputStore = PsiStore.Open(p, Constants.CalibrationStoreName, inputStorePath);
+                var outputStore = PsiStore.Create(p, "depth-merger", outputStorePath);
 
                 //create transformation tree and build the relationships
-                var transformationTree = new TransformationTreeTracker(p, pathToSettings: Constants.TransformationSettingsPath);
+                var transformationSettingPath = Path.Combine(Constants.ResourceLocations, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
+                var transformationTree = new TransformationTreeTracker(p, pathToSettings: transformationSettingPath);
 
                 // open each depth map and add their corresponding coordinate system
                 foreach(var stream in inputStore.AvailableStreams.Where(s => s.Name.EndsWith("depth") && s.TypeName == typeof(Shared<EncodedDepthImage>).AssemblyQualifiedName))
@@ -35,6 +39,10 @@ namespace TBD.Psi.Study
                     var frameName = Constants.SensorCorrespondMap[stream.Name.Split('.')[0]];
                     // get transformation
                     var transform = transformationTree.SolveTransformation("world", frameName);
+                    if (transform is null)
+                    {
+                        throw new ArgumentException($"Cannot find transformation for {frameName}");
+                    }
                     // create basic streams
                     var calibrationStream = inputStore.OpenStream<IDepthDeviceCalibrationInfo>($"{deviceName}.depth-calibration");
                     var imgStream = inputStore.OpenStream<Shared<EncodedDepthImage>>(stream.Name);

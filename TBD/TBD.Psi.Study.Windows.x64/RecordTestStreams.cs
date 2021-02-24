@@ -54,13 +54,13 @@
                     }
 
                     var k4a = new AzureKinectSensor(p, configuration);
-
-                    k4a.ColorImage.EncodeJpeg(quality: Constants.JPEGEncodeQuality).Write($"azure{(mainNum != i ? i : 0)}.color", store);
-                    k4a.DepthDeviceCalibrationInfo.Write($"azure{(mainNum != i ? i : 0)}.depth-calibration", store);
+                    var deviceName = $"azure{(mainNum != i ? i : 0)}";
+                    k4a.ColorImage.EncodeJpeg(quality: Constants.JPEGEncodeQuality).Write($"{deviceName}.color", store);
+                    k4a.DepthDeviceCalibrationInfo.Write($"{deviceName}.depth-calibration", store);
                     if (recordBodies)
                     {
-                        bodyStreamValidator.AddStream(k4a.Bodies);
-                        k4a.Bodies.Write($"azure{(mainNum != i ? i : 0)}.bodies", store);
+                        bodyStreamValidator.AddStream(k4a.Bodies, $"{deviceName}");
+                        k4a.Bodies.Write($"{deviceName}.bodies", store);
                     }
                     k4a.DepthImage.EncodePng().Write($"azure{(mainNum != i ? i : 0)}.depth", store);
                 }
@@ -74,16 +74,16 @@
                         OutputCalibration = true,
                         OutputBodies = recordBodies
                     });
-
-                    k2.ColorImage.EncodeJpeg(quality: Constants.JPEGEncodeQuality).Write($"k2d{i}.color", store);
-                    k2.DepthDeviceCalibrationInfo.Write($"k2d{i}.depth-calibration", store);
+                    var deviceName = $"k2d{i}";
+                    k2.ColorImage.EncodeJpeg(quality: Constants.JPEGEncodeQuality).Write($"{deviceName}.color", store);
+                    k2.DepthDeviceCalibrationInfo.Write($"{deviceName}.depth-calibration", store);
                     if (recordBodies)
                     {
-                        bodyStreamValidator.AddStream(k2.Bodies);
-                        k2.Bodies.Write($"k2d{i}.bodies", store);
+                        bodyStreamValidator.AddStream(k2.Bodies, $"{deviceName}");
+                        k2.Bodies.Write($"{deviceName}.bodies", store);
                     }
                     
-                    k2.DepthImage.EncodePng().Write($"k2d{i}.depth", store);
+                    k2.DepthImage.EncodePng().Write($"{deviceName}.depth", store);
                 }
 
                 p.Diagnostics.Write("diagnostics", store);
