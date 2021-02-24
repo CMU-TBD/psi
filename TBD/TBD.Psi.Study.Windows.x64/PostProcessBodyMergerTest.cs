@@ -19,11 +19,14 @@
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
                 // input & output store
-                var inputStore = PsiStore.Open(p,Constants.TestRecordingPath.Split(Path.DirectorySeparatorChar).Last().Split('.')[0], Path.Combine(Constants.OperatingDirectory, Constants.TestRecordingPath));
-                var outputStore = PsiStore.Create(p, "body-merge-test", Path.Combine(Constants.OperatingDirectory, @"body-merge-test"));
+                var inputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, Constants.TestRecordingPath);
+                var inputStore = PsiStore.Open(p,Constants.TestRecordingPath.Split(Path.DirectorySeparatorChar).Last().Split('.')[0], inputStorePath);
+                var outputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, @"body-merge-test");
+                var outputStore = PsiStore.Create(p, "body-merge-test", Path.Combine(Constants.OperatingDirectory, outputStorePath));
 
                 //create transformation tree and build the relationships
-                var transformationTree = new TransformationTreeTracker(p, pathToSettings: Constants.TransformationSettingsPath);
+                var transformationSettingPath = Path.Combine(Constants.ResourceLocations, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
+                var transformationTree = new TransformationTreeTracker(p, pathToSettings: transformationSettingPath);
                 transformationTree.WorldFrameOutput.Write("world", outputStore);
 
 

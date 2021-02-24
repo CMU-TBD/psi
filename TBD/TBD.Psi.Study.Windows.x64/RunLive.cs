@@ -29,7 +29,8 @@
                 var outputStore = PsiStore.Create(p, Constants.LiveStoreName, storePath);
 
                 // create a transformation tree that describe the environment
-                var transformationTree = new TransformationTreeTracker(p, pathToSettings: Constants.LiveTransformationSettingsPath);
+                var transformationSettingPath = Path.Combine(Constants.ResourceLocations, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
+                var transformationTree = new TransformationTreeTracker(p, pathToSettings: transformationSettingPath);
                 transformationTree.WorldFrameOutput.Write("world", outputStore);
 
                 // Create the components that we use live
@@ -70,7 +71,9 @@
 
                     // Add body to merger
                     var bodyInWorld = k4a.Bodies.ChangeToFrame(transformationTree.SolveTransformation("world", Constants.SensorCorrespondMap[deviceName]));
-                    bodyMerger.AddHumanBodyStream(bodyInWorld.ChangeToHumanBodies(), mainNum == i);
+                    var humanBodyInWorld = bodyInWorld.ChangeToHumanBodies();
+                    humanBodyInWorld.Write($"{deviceName}.human-bodies", outputStore);
+                    bodyMerger.AddHumanBodyStream(humanBodyInWorld, mainNum == i);
                 }
 
                 for (var i = 1; i <= kinect2Num; i++)
@@ -91,7 +94,9 @@
                     bodyStreamValidator.AddStream(k2.Bodies, deviceName);
                     // Add body to merger
                     var bodyInWorld = k2.Bodies.ChangeToFrame(transformationTree.SolveTransformation("world", Constants.SensorCorrespondMap[deviceName]));
-                    bodyMerger.AddHumanBodyStream(bodyInWorld.ChangeToHumanBodies());
+                    var humanBodyInWorld = bodyInWorld.ChangeToHumanBodies();
+                    humanBodyInWorld.Write($"{deviceName}.human-bodies", outputStore);
+                    bodyMerger.AddHumanBodyStream(humanBodyInWorld);
                 }
 
                 // Audio recording from main device

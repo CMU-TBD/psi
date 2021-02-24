@@ -9,7 +9,7 @@ namespace TBD.Psi.Study
     public class Constants
     {
         // General
-        public static int JPEGEncodeQuality = 75;
+        public static int JPEGEncodeQuality = 60;
 
         // recording constants
         public static string RecordMainDirectory = @"E:\Data\Lab-Store";
@@ -77,11 +77,6 @@ namespace TBD.Psi.Study
         public static string TransformationSettingsDirectory = @"C:\Users\Zhi\Desktop\Dev\";
         public static string CalibrationSubDirectory = "calibration-recording";
         public static string CalibrationStoreName = "recording";
-
-        // Lab 2021-02-17
-        public static string PartitionIdentifier = "2021-02-17";
-        public static string TestRecordingPath = @"recordings\recording.0001";
-        public static string TransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab-2021-02-10.json";
         public static Dictionary<string, string> SensorCorrespondMap = new Dictionary<string, string>()
                         {
                             { "azure1", "topCam"},
@@ -89,6 +84,16 @@ namespace TBD.Psi.Study
                             { "azure3", "midCam"},
                             { "k2d1", "leftCam"},
                         };
+
+        // Lab 2021-02-17
+       /* public static string PartitionIdentifier = "2021-02-17";
+        public static string TestRecordingPath = @"recordings\recording.0001";
+        public static string TransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab-2021-02-10.json";*/
+
+
+        // Lab 
+        public static string PartitionIdentifier = "2021-02-24";
+        public static string TestRecordingPath = @"live-recordings\live-recording.0000";
 
 
         // Hallway 2020-11-18
@@ -108,17 +113,7 @@ namespace TBD.Psi.Study
         public static string LiveOperatingDirectory = @"E:\Data\Lab-Store";
         public static string LiveFolderName = @"live-recordings";
         public static string LiveStoreName = @"live-recording";
-        public static string LiveTransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab-2021-01-27.json";
-        public static string RosCoreAddress = "127.0.0.1";
-        public static string RosClientAddress = "127.0.0.1";
-        public static Dictionary<string, string> LiveSensorCorrespondMap = new Dictionary<string, string>()
-            {
-                { "azure1", "topCam"},
-                { "azure2", "mainCam"},
-                { "azure3", "midCam"},
-                { "k2d1", "leftCam"},
-            };
-
-
+        public static string RosCoreAddress = "192.168.0.201";
+        public static string RosClientAddress = "192.168.0.3";
     }
 }

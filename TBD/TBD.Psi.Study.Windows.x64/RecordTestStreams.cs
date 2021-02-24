@@ -27,7 +27,7 @@
                 var azureKinectNum = 3;
                 var kinect2Num = 1;
                 var mainNum = -1;
-                var recordBodies = true;
+                var recordBodies = false;
 
                 // Validation components
                 var bodyStreamValidator = new StreamValidator(p);
