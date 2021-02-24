@@ -189,6 +189,37 @@ namespace Microsoft.Psi.Visualization.ViewModels
         }
 
         /// <summary>
+        /// Gets the total size of the stream.
+        /// </summary>
+        [PropertyOrder(13)]
+        [DisplayName("Size of Stream")]
+        [Description("Total size of the stream in human readble size")]
+        public string StreamSize
+        {
+            get
+            {
+                if (this.StreamMetadata != null)
+                {
+                    double? size = this.StreamMetadata?.AverageMessageSize * this.MessageCount;
+                    if (size != null)
+                    {
+                        string[] sizePostfix = { "B", "KB", "MB", "GB" };
+                        int count = 0;
+                        while (size > 1024 && count < sizePostfix.Length)
+                        {
+                            size /= 1024;
+                            count++;
+                        }
+
+                        return $"{size:f2} {sizePostfix[count]}";
+                    }
+                }
+
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the type of messages in this stream tree node.
         /// </summary>
         [Browsable(false)]
