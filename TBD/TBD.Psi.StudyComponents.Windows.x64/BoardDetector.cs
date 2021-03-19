@@ -19,6 +19,7 @@ namespace TBD.Psi.StudyComponents
         private Pipeline pipeline;
         private bool receiveCalibration = false;
         private ArucoBoardDetector detector;
+        private IDepthDeviceCalibrationInfo calibration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BoardDetector"/> class.
@@ -65,7 +66,10 @@ namespace TBD.Psi.StudyComponents
                     var cs_mat = Matrix<double>.Build.DenseOfArray(mat);
                     // OpenCV's coordinate system is Z-forward, X-right and Y-down. Change it to the Psi Standard format
                     var kinectBasis = new CoordinateSystem(default, UnitVector3D.ZAxis, UnitVector3D.XAxis.Negate(), UnitVector3D.YAxis.Negate());
-                    this.Out.Post(new CoordinateSystem(kinectBasis.Transpose() * cs_mat), env.OriginatingTime);
+                    // We need to convert it from the color frame to the global frame that is useful for us.
+                    var initial_solution = new CoordinateSystem(kinectBasis.Transpose() * cs_mat);
+                    var transform = initial_solution.TransformBy(this.calibration.ColorPose);
+                    this.Out.Post(transform, env.OriginatingTime);
                 }
             }
 
@@ -73,6 +77,7 @@ namespace TBD.Psi.StudyComponents
 
         public void AddCalibrationInfo(IDepthDeviceCalibrationInfo info)
         {
+            this.calibration = info;
             var intrinsicArr = new double[4];
             intrinsicArr[0] = info.ColorIntrinsics.FocalLengthXY.X;
             intrinsicArr[1] = info.ColorIntrinsics.FocalLengthXY.Y;

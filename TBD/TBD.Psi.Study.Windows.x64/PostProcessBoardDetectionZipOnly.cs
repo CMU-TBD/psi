@@ -13,70 +13,53 @@ namespace TBD.Psi.Study
     using Microsoft.Psi.Calibration;
     using Microsoft.Psi.Imaging;
     using TBD.Psi.StudyComponents;
+    using Microsoft.Psi.Components;
 
-    public class PostProcessBoardDetection
+    public class PostProcessBoardDetectionZipOnly
     {
         public static void Run()
         {
             var start_time = DateTime.Now;
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
-                // INFORMATION
-                // board information
-                var boardMarkerSize = 0.1145f;
-                var boardMarkerDist = 0.023f;
-                var boardXNum = 2;
-                var boardYNum = 3;
-
-                /*                var boardMarkerSize = 0.077f;
-                                var boardMarkerDist = 0.00151f;
-                                var boardXNum = 4;
-                                var boardYNum = 6;*/
-
+                
                 var deliveryPolicy = DeliveryPolicy.SynchronousOrThrottle;
 
                 // Generate the store path
-                var inputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, Constants.CalibrationSubDirectory);
-                var outputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, @"post-board");
+                var inputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, Constants.OperatingStore);
+                var inputStore = PsiStore.Open(p, Constants.OperatingStore.Split('\\').Last().Split('.').First(), inputStorePath);
 
-                // Stores
-                var inputStore = PsiStore.Open(p, Constants.CalibrationStoreName, inputStorePath);
-                var outputStore = PsiStore.Create(p, "board-detection", outputStorePath);
+                // get all the poses
+                var poseEmitters = new List<Emitter<CoordinateSystem>>();
 
-                // create the calibration tool
-                var calibrationMerger = new CalibrationMerger(p, outputStore, boardXNum, boardYNum, boardMarkerSize, boardMarkerDist, "DICT_4X4_100", deliveryPolicy);
-
-                // list of color streams
-                var colorStreams = inputStore.AvailableStreams.Where(s => s.Name.EndsWith(".color"));
-                foreach (var colorStream in colorStreams)
+                foreach (var poseStream in inputStore.AvailableStreams.Where(s => s.Name.EndsWith(".pose")))
                 {
-                    var deviceName = colorStream.Name.Remove(colorStream.Name.Length - 6);
-                    // see if there is a corresponding calibration stream for the color stream
-                    var calibrationStreamName = deviceName + ".depth-calibration";
-                    if (inputStore.AvailableStreams.Select(s => s.Name).Contains(calibrationStreamName))
-                    {
-                        Console.WriteLine($"Adding Calibration of {deviceName}");
-                        var color = inputStore.OpenStream<Shared<EncodedImage>>(colorStream.Name);
-                        var calibration = inputStore.OpenStream<IDepthDeviceCalibrationInfo>(calibrationStreamName);
-                        if (deviceName.StartsWith("k2"))
-                        {
-                            calibrationMerger.AddSavedStreams(color.Decode(deliveryPolicy).Flip(FlipMode.AlongVerticalAxis, deliveryPolicy).Out, calibration.Out, deviceName);
+                    var emitter = inputStore.OpenStream<CoordinateSystem>(poseStream.Name).Out;
+                    poseEmitters.Add(emitter);
+                }
 
-                        }
-                        else
+                // zip all of them
+                var zipper = new Zip<(CoordinateSystem, string, CoordinateSystem, string)>(p);
+                for (var i = 0; i < poseEmitters.Count; i++)
+                {
+                    for (var j = i + 1; j < poseEmitters.Count; j++)
+                    {
+                        var name1 = poseEmitters[i].Name.Split('.').First();
+                        var name2 = poseEmitters[j].Name.Split('.').First();
+                        // join and send to merger
+                        var joiner = poseEmitters[i].Join(poseEmitters[j], TimeSpan.FromMilliseconds(5), deliveryPolicy, deliveryPolicy).Select(m =>
                         {
-                            calibrationMerger.AddSavedStreams(color.Decode(deliveryPolicy).Out, calibration.Out, deviceName);
-                        }
+                            var (pose1, pose2) = m;
+                            return (pose1, name1, pose2, name2);
+                        }, deliveryPolicy);
+                        var receiver = zipper.AddInput($"zip-{i}-{j}");
+                        joiner.PipeTo(receiver, deliveryPolicy);
                     }
                 }
 
-
-                calibrationMerger.Write("result", outputStore);
-                p.Diagnostics.Write("diagnotics", outputStore);
-
                 // collect the information for processing
                 var poseCollection = new Dictionary<string, Dictionary<string, (List<CoordinateSystem>, List<CoordinateSystem>)>>();
-                calibrationMerger.Do(m =>
+                zipper.Select(m => m.First(), deliveryPolicy).Do(m =>
                  {
                      if (!poseCollection.ContainsKey(m.Item2))
                      {

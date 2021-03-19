@@ -13,6 +13,7 @@ namespace TBD.Psi.Study
     using Microsoft.Psi.Imaging;
     using Microsoft.Psi.Calibration;
     using Microsoft.Psi.Components;
+    using MathNet.Spatial.Euclidean;
 
     public class PostProcessDepthImageStaging
     {
@@ -22,17 +23,20 @@ namespace TBD.Psi.Study
             {
                 // create input & output stores
                 var inputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, Constants.CalibrationSubDirectory);
+                var inputStore2Path = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, Constants.OperatingStore);
+
                 var outputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, @"depth-merger");
 
                 var inputStore = PsiStore.Open(p, Constants.CalibrationStoreName, inputStorePath);
+                var inputStore2 = PsiStore.Open(p, Constants.OperatingStore.Split('\\').Last().Split('.').First(), inputStore2Path);
                 var outputStore = PsiStore.Create(p, "depth-merger", outputStorePath);
-
+              
                 //create transformation tree and build the relationships
                 var transformationSettingPath = Path.Combine(Constants.ResourceLocations, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
                 var transformationTree = new TransformationTreeTracker(p, pathToSettings: transformationSettingPath);
 
                 // open each depth map and add their corresponding coordinate system
-                foreach(var stream in inputStore.AvailableStreams.Where(s => s.Name.EndsWith("depth") && s.TypeName == typeof(Shared<EncodedDepthImage>).AssemblyQualifiedName))
+                foreach (var stream in inputStore.AvailableStreams.Where(s => s.Name.EndsWith("depth") && s.TypeName == typeof(Shared<EncodedDepthImage>).AssemblyQualifiedName))
                 {
                     // get device name
                     var deviceName = stream.Name.Split('.')[0];
@@ -51,12 +55,20 @@ namespace TBD.Psi.Study
                     {
                         imgStream = imgStream.Decode().Flip(FlipMode.AlongVerticalAxis).EncodePng();
                     }
-                    // pair with calibration
+                    // pair depth with calibration
                     imgStream.Fuse(calibrationStream.First(), Available.Nearest<IDepthDeviceCalibrationInfo>()).Select(m =>
                     {
                         return (m.Item1, m.Item2.DepthIntrinsics, transform);
-                    }).Write(frameName, outputStore);
+                    }).Write($"{frameName}.depth", outputStore);
+
+                    // add pose for debugging
+                    var pose = inputStore2.OpenStream<CoordinateSystem>($"{deviceName}.pose");
+                    pose.Fuse(calibrationStream.First(), Available.Nearest<IDepthDeviceCalibrationInfo>()).Select(m =>
+                    {
+                        return m.Item1.TransformBy(transform);
+                    }).Write($"{frameName}.pose", outputStore);
                 }
+
                 p.Diagnostics.Write("diagnostics", outputStore);
                 p.Run(ReplayDescriptor.ReplayAll);
             }

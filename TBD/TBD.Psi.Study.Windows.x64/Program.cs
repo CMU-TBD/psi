@@ -9,12 +9,16 @@
             // RecordTestStreams.Run();
 
             // For Running Live
-            RunLive.Run();
+            // RunLive.Run();
 
-            // Post Processing
+            // Post Processings
             // PostProcessBoardDetection.Run();
-            // PostProcessDepthImageStaging.Run();
+            PostProcessDepthImageStaging.Run();
             // PostProcessBodyMergerTest.Run();
+            // PostProcessBoardDetectionZipOnly.Run();
+
+            // Replay of Lives Recordings
+            //ReplayLiveRecording.Run();
 
             // Sandbox.Run();
         }

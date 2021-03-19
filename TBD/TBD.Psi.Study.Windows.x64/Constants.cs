@@ -86,15 +86,24 @@ namespace TBD.Psi.Study
                         };
 
         // Lab 2021-02-17
-       /* public static string PartitionIdentifier = "2021-02-17";
-        public static string TestRecordingPath = @"recordings\recording.0001";
-        public static string TransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab-2021-02-10.json";*/
+        /* public static string PartitionIdentifier = "2021-02-17";
+         public static string TestRecordingPath = @"recordings\recording.0001";
+         public static string TransformationSettingsPath = @"C:\Users\Zhi\Desktop\Dev\transformation-lab-2021-02-10.json";*/
 
 
-        // Lab 
-        public static string PartitionIdentifier = "2021-02-24";
+        // Lab 2021-02-4 
+        // public static string PartitionIdentifier = "2021-02-24";
+        // public static string TestRecordingPath = @"live-recordings\live-recording.0000";
+
+        // Lab 2021-03-03
+        /*        public static string PartitionIdentifier = "2021-03-03";
+                public static string TestRecordingPath = @"live-recordings\live-recording.0000";*/
+
+        // Lab 2021-03-18
+        public static string PartitionIdentifier = "2021-03-18";
         public static string TestRecordingPath = @"live-recordings\live-recording.0000";
-
+        public static string ReplayRecordingPath = @"live-recordings\live-recording.0000";
+        public static string OperatingStore = @"post-board\board-detection.0002";
 
         // Hallway 2020-11-18
         /*        public static string OperatingDirectory = @"E:\Data\Hallway-Store\2020-11-18";

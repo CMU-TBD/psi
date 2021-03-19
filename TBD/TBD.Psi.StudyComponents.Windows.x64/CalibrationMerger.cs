@@ -29,7 +29,7 @@ namespace TBD.Psi.StudyComponents
         private double markerSeperation;
         private DeliveryPolicy deliveryPolicy;
         private ArucoDictionary dictName;
-        private TimeSpan timeRange = TimeSpan.FromMilliseconds(30);
+        private TimeSpan timeRange = TimeSpan.FromMilliseconds(15);
         private PsiExporter store = null;
         private bool saveInputToStore = false;
 

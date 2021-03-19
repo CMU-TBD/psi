@@ -17,7 +17,7 @@ namespace TBD.Psi.StudyComponents
     /// </summary>
     public class ROSWorldSender : IConsumer<List<HumanBody>>
     {
-        private const string TopicName = "/bodies";
+        private const string TopicName = "/humans";
         private const string NodeName = "/psi_pub";
         private string rosCoreAddress = "";
         private string rosClientAddress = "";
