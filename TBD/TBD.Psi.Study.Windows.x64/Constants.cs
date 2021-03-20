@@ -103,7 +103,8 @@ namespace TBD.Psi.Study
         public static string PartitionIdentifier = "2021-03-18";
         public static string TestRecordingPath = @"live-recordings\live-recording.0000";
         public static string ReplayRecordingPath = @"live-recordings\live-recording.0000";
-        public static string OperatingStore = @"post-board\board-detection.0002";
+        // public static string OperatingStore = @"post-board\board-detection.0002";
+        public static string OperatingStore = @"live-recordings\live-recording.0000";
 
         // Hallway 2020-11-18
         /*        public static string OperatingDirectory = @"E:\Data\Hallway-Store\2020-11-18";
@@ -117,6 +118,9 @@ namespace TBD.Psi.Study
                             { "azure1", "rightTopCam"},
                             { "azure3", "leftCam"},
                         };*/
+
+        public static string LocalRosCoreAddress = "127.0.0.1";
+        public static string LocalRosClientAddress = "127.0.0.1";
 
         // Run Live
         public static string LiveOperatingDirectory = @"E:\Data\Lab-Store";
