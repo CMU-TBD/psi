@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <Platforms>x64</Platforms>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.Kinect.BodyTracking" Version="1.1.0" />
+    <ProjectReference Include="..\..\Calibration\Microsoft.Psi.Calibration\Microsoft.Psi.Calibration.csproj" />
+    <ProjectReference Include="..\..\Devices\Microsoft.Psi.DeviceManagement\Microsoft.Psi.DeviceManagement.csproj" />
+    <ProjectReference Include="..\..\Imaging\Microsoft.Psi.Imaging\Microsoft.Psi.Imaging.csproj" />
+    <ProjectReference Include="..\..\Runtime\Microsoft.Psi\Microsoft.Psi.csproj" />
+  </ItemGroup>
+</Project>

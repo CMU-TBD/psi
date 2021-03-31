@@ -29,8 +29,7 @@
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics.Signed" Version="4.9.1" />
     <PackageReference Include="MathNet.Spatial.Signed" Version="0.6.0" />
-    <PackageReference Include="Microsoft.Azure.Kinect.BodyTracking" Version="1.0.1" />
-    <PackageReference Include="Microsoft.Azure.Kinect.Sensor" Version="1.3.0" />
+    <PackageReference Include="Microsoft.Azure.Kinect.Sensor" Version="1.4.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -39,6 +38,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Azure.Kinect.BodyTracking">
+      <HintPath>C:\Program Files\Azure Kinect Body Tracking SDK v1.1\sdk\netstandard2.0\release\Microsoft.Azure.Kinect.BodyTracking.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Calibration\Microsoft.Psi.Calibration\Microsoft.Psi.Calibration.csproj" />
