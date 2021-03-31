@@ -81,9 +81,9 @@ namespace TBD.Psi.Study
                         {
                             { "azure1", "topCam"},
                             { "azure2", "mainCam"},
-                            { "azure3", "midCam"},
-                            { "k2d1", "leftCam"},
-                        };
+                            { "azure3", "leftCam"},
+/*                            { "k2d1", "farLeftCam"},
+*/                        };
 
         // Lab 2021-02-17
         /* public static string PartitionIdentifier = "2021-02-17";
@@ -100,11 +100,11 @@ namespace TBD.Psi.Study
                 public static string TestRecordingPath = @"live-recordings\live-recording.0000";*/
 
         // Lab 2021-03-18
-        public static string PartitionIdentifier = "2021-03-18";
-        public static string TestRecordingPath = @"live-recordings\live-recording.0000";
-        public static string ReplayRecordingPath = @"live-recordings\live-recording.0000";
-        // public static string OperatingStore = @"post-board\board-detection.0002";
-        public static string OperatingStore = @"live-recordings\live-recording.0000";
+        /*        public static string PartitionIdentifier = "2021-03-18";
+                public static string TestRecordingPath = @"live-recordings\live-recording.0000";
+                public static string ReplayRecordingPath = @"live-recordings\live-recording.0000";
+                // public static string OperatingStore = @"post-board\board-detection.0002";
+                public static string OperatingStore = @"live-recordings\live-recording.0000";*/
 
         // Hallway 2020-11-18
         /*        public static string OperatingDirectory = @"E:\Data\Hallway-Store\2020-11-18";
@@ -118,6 +118,13 @@ namespace TBD.Psi.Study
                             { "azure1", "rightTopCam"},
                             { "azure3", "leftCam"},
                         };*/
+
+
+        // Lab 2021-03-23
+        public static string PartitionIdentifier = "2021-03-23";
+        public static string TestRecordingPath = @"live-recordings\live-recording.0000";
+        public static string OperatingStore = @"post-board\board-detection.0000";
+
 
         public static string LocalRosCoreAddress = "127.0.0.1";
         public static string LocalRosClientAddress = "127.0.0.1";

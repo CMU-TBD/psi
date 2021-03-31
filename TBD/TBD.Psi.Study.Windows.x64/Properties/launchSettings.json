@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TBD.Psi.Study.Windows.x64": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

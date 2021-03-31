@@ -200,7 +200,7 @@ namespace Microsoft.Psi.Visualization.ViewModels
             {
                 if (this.StreamMetadata != null)
                 {
-                    double? size = this.StreamMetadata?.AverageMessageSize * this.MessageCount;
+                    double? size = this.StreamMetadata?.AverageMessageSize * (double)this.MessageCount;
                     if (size != null)
                     {
                         string[] sizePostfix = { "B", "KB", "MB", "GB" };

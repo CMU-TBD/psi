@@ -22,7 +22,7 @@
             {
                 // general settings
                 var azureKinectNum = 3;
-                var kinect2Num = 1;
+                var kinect2Num = 0;
                 var mainNum = -1;
 
                 var storePath = Path.Combine(Constants.LiveOperatingDirectory, DateTime.Today.ToString("yyyy-MM-dd"), Constants.LiveFolderName);
