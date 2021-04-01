@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <OutputType>exe</OutputType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\Sources\Integrations\Onnx\Microsoft.Psi.Onnx.Cpu\Microsoft.Psi.Onnx.Cpu.csproj" />
+    <ProjectReference Include="..\..\Sources\Integrations\Onnx\Microsoft.Psi.Onnx.ModelRunners.Cpu\Microsoft.Psi.Onnx.ModelRunners.Cpu.csproj" />
+  </ItemGroup>
+</Project>
