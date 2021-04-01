@@ -57,7 +57,6 @@
                         WiredSyncMode = mainNum > 0 ? (mainNum == (i - 1) ? Microsoft.Azure.Kinect.Sensor.WiredSyncMode.Master : Microsoft.Azure.Kinect.Sensor.WiredSyncMode.Subordinate) : Microsoft.Azure.Kinect.Sensor.WiredSyncMode.Standalone,
                         BodyTrackerConfiguration = new AzureKinectBodyTrackerConfiguration()
                         {
-                            CpuOnlyMode = false,
                             TemporalSmoothing = 0.0f,
                         }
                     });

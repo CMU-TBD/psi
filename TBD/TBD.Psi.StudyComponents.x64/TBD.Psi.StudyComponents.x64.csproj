@@ -16,4 +16,10 @@
     <ProjectReference Include="..\TBD.Psi.ROS\TBD.Psi.ROS.fsproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Microsoft.Azure.Kinect.BodyTracking">
+      <HintPath>$(AzureKinectBodyTrackingSDKDir)\sdk\netstandard2.0\release\Microsoft.Azure.Kinect.BodyTracking.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

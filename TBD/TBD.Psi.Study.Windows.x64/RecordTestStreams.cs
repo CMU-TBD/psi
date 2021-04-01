@@ -48,7 +48,6 @@
                     {
                         configuration.BodyTrackerConfiguration = new AzureKinectBodyTrackerConfiguration()
                         {
-                            CpuOnlyMode = false,
                             TemporalSmoothing = 0.0f,
                         };
                     }
