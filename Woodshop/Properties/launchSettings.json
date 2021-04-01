@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Woodshop": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Psi;
+using Microsoft.Psi.Data;
 using Microsoft.Psi.AzureKinect;
+using Microsoft.Psi.Imaging;
 using Microsoft.Azure.Kinect.Sensor;
 
 namespace Woodshop
@@ -19,17 +21,19 @@ namespace Woodshop
 
             using (var p = Pipeline.Create())
             {
+                var store = PsiStore.Create(p, "body", @"C:\Data\body-test");
                 var k4a = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
                 {
                     OutputDepth = true,
                     OutputColor = true,
                     BodyTrackerConfiguration = new AzureKinectBodyTrackerConfiguration()
                     {
-                        CpuOnlyMode = false
+                        LiteNetwork = true,
                     }
                 });
 
-                k4a.Bodies.Do(m => { });
+                k4a.Bodies.Write("body", store);
+                k4a.ColorImage.EncodeJpeg(50).Write("color", store);
                 p.RunAsync();
                 Console.ReadLine();
             }
