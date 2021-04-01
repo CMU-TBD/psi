@@ -118,11 +118,12 @@ namespace Microsoft.Psi.AzureKinect
             // Static Lock to prevent external error when creating multiple trackers simultanously.
             lock (TrackerCreationLock)
             {
-                this.tracker = Tracker.Create(calibration, new TrackerConfiguration()
+                var t = Tracker.Create(calibration, new TrackerConfiguration()
                 {
                     SensorOrientation = this.configuration.SensorOrientation,
                     ProcessingMode = this.configuration.CpuOnlyMode ? TrackerProcessingMode.Cpu : TrackerProcessingMode.Gpu,
                 });
+                this.tracker = t;
             }
 
             this.tracker.SetTemporalSmooting(this.configuration.TemporalSmoothing);

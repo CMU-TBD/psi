@@ -29,8 +29,7 @@
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics.Signed" Version="4.9.1" />
     <PackageReference Include="MathNet.Spatial.Signed" Version="0.6.0" />
-    <PackageReference Include="Microsoft.Azure.Kinect.BodyTracking" Version="1.0.1" />
-    <PackageReference Include="Microsoft.Azure.Kinect.Sensor" Version="1.3.0" />
+    <PackageReference Include="Microsoft.Azure.Kinect.Sensor" Version="1.4.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -39,6 +38,57 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+  <Target Name="CheckVariable">
+    <Warning Text="In order to build this project you must define the environment variable AzureKinectBodyTrackingSDKDir to point to your installed Azure Kinect Body Tracking SDK" ContinueOnError="WarnAndContinue" Condition="'$(AzureKinectBodyTrackingSDKDir)'==''" />
+    <CreateProperty Value="" Condition="'$(AzureKinectBodyTrackingSDKDir)'==''">
+      <Output TaskParameter="Value" PropertyName="BuildDependsOn" />
+    </CreateProperty>
+    <CreateProperty Value="false" Condition="'$(AzureKinectBodyTrackingSDKDir)'==''">
+      <Output TaskParameter="Value" PropertyName="GeneratePackageOnBuild" />
+    </CreateProperty>
+    <CreateProperty Value="" Condition="'$(AzureKinectBodyTrackingSDKDir)'==''">
+      <Output TaskParameter="Value" PropertyName="GenerateNuspecDependsOn" />
+    </CreateProperty>
+  </Target>
+  <ItemGroup>
+    <Content Include="$(AzureKinectBodyTrackingSDKDir)\sdk\windows-desktop\amd64\release\bin\dnn_model_2_0_op11.onnx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(AzureKinectBodyTrackingSDKDir)\sdk\windows-desktop\amd64\release\bin\onnxruntime_providers_shared.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(AzureKinectBodyTrackingSDKDir)\sdk\windows-desktop\amd64\release\bin\onnxruntime_providers_tensorrt.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(AzureKinectBodyTrackingSDKDir)\sdk\windows-desktop\amd64\release\bin\onnxruntime.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(AzureKinectBodyTrackingSDKDir)\sdk\windows-desktop\amd64\release\bin\nvinfer.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(AzureKinectBodyTrackingSDKDir)\sdk\windows-desktop\amd64\release\bin\nvinfer_plugin.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(AzureKinectBodyTrackingSDKDir)\sdk\windows-desktop\amd64\release\bin\k4abt.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(AzureKinectBodyTrackingSDKDir)\sdk\windows-desktop\amd64\release\bin\myelin64_1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(AzureKinectBodyTrackingSDKDir)\tools\cudnn64_8.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Azure.Kinect.BodyTracking">
+      <HintPath>$(AzureKinectBodyTrackingSDKDir)\sdk\netstandard2.0\release\Microsoft.Azure.Kinect.BodyTracking.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Content Include="$(AzureKinectBodyTrackingSDKDir)\sdk\netstandard2.0\release\Microsoft.Azure.Kinect.BodyTracking.pdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Calibration\Microsoft.Psi.Calibration\Microsoft.Psi.Calibration.csproj" />
