@@ -83,7 +83,14 @@ namespace Microsoft.Psi.AzureKinect
                 infraredMemory.CopyTo(this.capture.IR.Memory);
 
                 // Call the body tracker.
-                this.tracker.EnqueueCapture(this.capture);
+                try
+                {
+                    this.tracker.EnqueueCapture(this.capture);
+                }
+                catch (FieldAccessException )
+                {
+                }
+
                 using (var bodyFrame = this.tracker.PopResult(false))
                 {
                     // Parse the output into a list of KinectBody's to post
@@ -118,12 +125,12 @@ namespace Microsoft.Psi.AzureKinect
             // Static Lock to prevent external error when creating multiple trackers simultanously.
             lock (TrackerCreationLock)
             {
-                var t = Tracker.Create(calibration, new TrackerConfiguration()
+                this.tracker = Tracker.Create(calibration, new TrackerConfiguration()
                 {
+                    ModelPath = this.configuration.LiteNetwork ? "dnn_model_2_0_lite_op11.onnx" : "dnn_model_2_0_op11.onnx",
                     SensorOrientation = this.configuration.SensorOrientation,
-                    ProcessingMode = this.configuration.CpuOnlyMode ? TrackerProcessingMode.Cpu : TrackerProcessingMode.Gpu,
+                    ProcessingMode = this.configuration.ProcessingMode,
                 });
-                this.tracker = t;
             }
 
             this.tracker.SetTemporalSmooting(this.configuration.TemporalSmoothing);

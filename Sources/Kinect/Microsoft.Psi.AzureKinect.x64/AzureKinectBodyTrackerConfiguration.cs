@@ -21,11 +21,20 @@ namespace Microsoft.Psi.AzureKinect
         public float TemporalSmoothing { get; set; } = 0f;
 
         /// <summary>
-        /// Gets or sets a value indicating whether to perform body tracking computation only
-        /// on the CPU.
+        /// Gets or sets a value indicating whether to use the lite network.
         /// </summary>
-        /// <remarks>If false, the tracker requires CUDA hardware and drivers.</remarks>
-        public bool CpuOnlyMode { get; set; } = false;
+        /// <remarks>
+        /// The lite network is faster but comes at a 5% decrease in performance.
+        /// </remarks>
+        public bool LiteNetwork { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a the body tracker's processing mode.
+        /// </summary>
+        /// <remarks>
+        /// Defaults to Cuda. Alternatives are CPU, TensorRT, and DirectML.
+        /// </remarks>
+        public TrackerProcessingMode ProcessingMode { get; set; } = TrackerProcessingMode.Cuda;
 
         /// <summary>
         /// Gets or sets the sensor orientation used by body tracking.
