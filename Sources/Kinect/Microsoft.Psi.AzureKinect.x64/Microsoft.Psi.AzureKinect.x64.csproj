@@ -55,6 +55,9 @@
     <Content Include="$(AzureKinectBodyTrackingSDKDir)\sdk\windows-desktop\amd64\release\bin\dnn_model_2_0_op11.onnx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="$(AzureKinectBodyTrackingSDKDir)\sdk\windows-desktop\amd64\release\bin\dnn_model_2_0_lite_op11.onnx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="$(AzureKinectBodyTrackingSDKDir)\sdk\windows-desktop\amd64\release\bin\onnxruntime_providers_shared.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -77,6 +80,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="$(AzureKinectBodyTrackingSDKDir)\tools\cudnn64_8.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(AzureKinectBodyTrackingSDKDir)\tools\cudnn_ops_infer64_8.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(AzureKinectBodyTrackingSDKDir)\tools\cudnn_cnn_infer64_8.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
