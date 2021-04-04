@@ -134,6 +134,6 @@ namespace TBD.Psi.Study
         public static string LiveFolderName = @"live-recordings";
         public static string LiveStoreName = @"live-recording";
         public static string RosCoreAddress = "192.168.0.201";
-        public static string RosClientAddress = "192.168.0.3";
+        public static string RosClientAddress = "192.168.0.157";
     }
 }

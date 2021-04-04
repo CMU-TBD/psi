@@ -24,7 +24,7 @@
                 var azureKinectNum = 3;
                 var kinect2Num = 0;
                 var mainNum = -1;
-                var liteModel = true;
+                var liteModel = false; 
 
                 var storePath = Path.Combine(Constants.LiveOperatingDirectory, DateTime.Today.ToString("yyyy-MM-dd"), Constants.LiveFolderName);
                 var outputStore = PsiStore.Create(p, Constants.LiveStoreName, storePath);
