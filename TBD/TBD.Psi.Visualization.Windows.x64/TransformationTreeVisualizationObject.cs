@@ -15,17 +15,17 @@ namespace TBD.Psi.Visualization.Windows
     using Microsoft.Psi.Visualization.VisualizationObjects;
     using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
     using Win3D = System.Windows.Media.Media3D;
-    using TBD.Psi.StudyComponents;
+    using TBD.Psi.TransformationTree;
     using System.Collections.Generic;
     using MathNet.Spatial.Euclidean;
 
-    [VisualizationObject("Transformation Tree")]
+    [VisualizationObject("Visualize TransformationTree")]
     public class TransformationTreeVisualizationObject : ModelVisual3DVisualizationObjectCollectionBase<CoordinateSystemVisualizationObject, TransformationTree<string>>
     {
         private string baseFrame = "";
         // The collection of child visualization objects.
         private readonly List<CoordinateSystemVisualizationObject> children = new List<CoordinateSystemVisualizationObject>();
-        private List<(string name, CoordinateSystem cs)> currentCoordinateSystems;
+        private List<(string name, CoordinateSystem cs)> currentCoordinateSystems = new List<(string name, CoordinateSystem cs)>();
 
         public TransformationTreeVisualizationObject()
         {
@@ -69,7 +69,7 @@ namespace TBD.Psi.Visualization.Windows
 
         private void UpdateCoordinateSystemValues()
         {
-            if (this.CurrentData.Contains(this.baseFrame))
+            if (this.CurrentData != null && this.CurrentData.Contains(this.baseFrame))
             {
                 this.currentCoordinateSystems = this.CurrentData.TraverseTree(this.baseFrame, new CoordinateSystem());
             }
@@ -82,14 +82,9 @@ namespace TBD.Psi.Visualization.Windows
 
         private void UpdateCoordinateSystemVisuals()
         {
-            // get the latest coordinate System
-
-            // convert the data into a list of coordinate system
-            var coordinateSystems = this.CurrentData.TraverseTree("base", new CoordinateSystem());
-
             // now we use the same code as the list
             int index = 0;
-            foreach ((string name, CoordinateSystem cs) in coordinateSystems)
+            foreach ((string name, CoordinateSystem cs) in this.currentCoordinateSystems)
             {
                 // If we don't have enough visualization objects, create a new one
                 while (index >= this.ModelView.Children.Count)
