@@ -38,12 +38,13 @@
                 var bodyStreamValidator = new StreamValidator(p);
                 var bodyMerger = new BodyMerger(p);
                 var bodyTracker = new BodyTracker(p);
-                var rosPublisher = new ROSWorldSender(p, Constants.RosCoreAddress, Constants.RosClientAddress);
+                var rosBodyPublisher = new ROSWorldSender(p, Constants.RosCoreAddress, Constants.RosClientAddress);
+                var rosAudioPublisher = new ROSAudioSender(p, Constants.RosCoreAddress, Constants.RosClientAddress);
 
                 // connect components
                 bodyMerger.PipeTo(bodyTracker);
                 bodyTracker.Write("tracked", outputStore);
-                bodyTracker.PipeTo(rosPublisher);
+                bodyTracker.PipeTo(rosBodyPublisher);
 
                 // setup the cameras and add their data
                 for (var i = 1; i <= azureKinectNum; i++)
@@ -106,6 +107,8 @@
                     Format = WaveFormat.Create16kHz1Channel16BitPcm()
                 });
                 audioSource.Write("audio", outputStore);
+                // send to ROS too.
+                audioSource.PipeTo(rosAudioPublisher);
 
 
                 bodyStreamValidator.Select(m =>
