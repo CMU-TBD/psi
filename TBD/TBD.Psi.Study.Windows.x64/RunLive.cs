@@ -21,7 +21,7 @@
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
                 // general settings
-                var azureKinectNum = 3;
+                var azureKinectNum = 0;
                 var kinect2Num = 0;
                 var mainNum = -1;
                 var liteModel = false; 
@@ -104,6 +104,7 @@
                 // Audio recording from main device
                 var audioSource = new AudioCapture(p, new AudioCaptureConfiguration()
                 {
+                    OptimizeForSpeech = true,
                     Format = WaveFormat.Create16kHz1Channel16BitPcm()
                 });
                 audioSource.Write("audio", outputStore);
@@ -118,7 +119,7 @@
                 }).Write("info.start_time", outputStore);
 
                 // Start Pipeline
-                p.Diagnostics.Write("diagnostics", outputStore);
+                p.Diagnostics.Write("diagnostics", outputStore); 
                 p.RunAsync();
 
                 Console.WriteLine("Press Enter to stop...");

@@ -85,63 +85,65 @@ namespace TBD.Psi.StudyComponents
 
         private void PipelineStartEvent(object sender, PipelineRunEventArgs e)
         {
-
-            var joiner = new Join<List<HumanBody>, List<HumanBody>, List<HumanBody>, List<HumanBody>>(
-              this.mainProducer.Out.Pipeline,
-              Reproducible.Nearest<List<HumanBody>>(TimeSpan.FromMilliseconds(200)),
-              (m, secondaryArray) => m.Concat(secondaryArray.SelectMany(m => m)).ToList(),
-              this.producerList.Count,
-              null);
-
-            this.mainProducer.PipeTo(joiner.InPrimary, this.deliveryPolicy);
-            for (var i = 0; i < this.producerList.Count; i++)
+            if (this.mainProducer != null)
             {
-                this.producerList[i].PipeTo(joiner.InSecondaries[i], this.deliveryPolicy);
-            }
+                var joiner = new Join<List<HumanBody>, List<HumanBody>, List<HumanBody>, List<HumanBody>>(
+                  this.mainProducer.Out.Pipeline,
+                  Reproducible.Nearest<List<HumanBody>>(TimeSpan.FromMilliseconds(200)),
+                  (m, secondaryArray) => m.Concat(secondaryArray.SelectMany(m => m)).ToList(),
+                  this.producerList.Count,
+                  null);
 
-            joiner.Out.Select((listOfBodies, e) =>
-            {
+                this.mainProducer.PipeTo(joiner.InPrimary, this.deliveryPolicy);
+                for (var i = 0; i < this.producerList.Count; i++)
+                {
+                    this.producerList[i].PipeTo(joiner.InSecondaries[i], this.deliveryPolicy);
+                }
+
+                joiner.Out.Select((listOfBodies, e) =>
+                {
 
                 // For now, we going to use a first-come first server algorithm.
                 // TODO: In the future, some kind of Hungarian Algorithm or matchin
                 // algorithm should be used.
                 var mergedList = new List<List<HumanBody>>();
-                var usedBodiesList = new List<int>();
-                for (int i = 0; i < listOfBodies.Count; i++)
-                {
+                    var usedBodiesList = new List<int>();
+                    for (int i = 0; i < listOfBodies.Count; i++)
+                    {
                     // If this body is already being used, continue
                     if (usedBodiesList.IndexOf(i) >= 0)
-                    {
-                        continue;
-                    }
-
-                    // create a collection with this body inside 
-                    var currentCollection = new List<HumanBody>()
-                    {
-                        listOfBodies[i],
-                    };
-
-                    // compare with all remaining bodies
-                    for (int j = i + 1; j < listOfBodies.Count; j++)
-                    {
-                        // ignore if used
-                        if (usedBodiesList.IndexOf(i) >= 0)
                         {
                             continue;
                         }
 
+                    // create a collection with this body inside 
+                    var currentCollection = new List<HumanBody>()
+                        {
+                        listOfBodies[i],
+                        };
+
+                    // compare with all remaining bodies
+                    for (int j = i + 1; j < listOfBodies.Count; j++)
+                        {
+                        // ignore if used
+                        if (usedBodiesList.IndexOf(i) >= 0)
+                            {
+                                continue;
+                            }
+
                         // check if the values are meaningful
                         if (HumanBody.CompareHumanBodies(listOfBodies[i], listOfBodies[j]))
-                        {
-                            usedBodiesList.Add(j);
-                            currentCollection.Add(listOfBodies[j]);
+                            {
+                                usedBodiesList.Add(j);
+                                currentCollection.Add(listOfBodies[j]);
+                            }
                         }
-                    }
 
-                    mergedList.Add(currentCollection);
-                }
-                return mergedList;
-            }, this.deliveryPolicy).Out.PipeTo(this.outConnector, this.deliveryPolicy);
+                        mergedList.Add(currentCollection);
+                    }
+                    return mergedList;
+                }, this.deliveryPolicy).Out.PipeTo(this.outConnector, this.deliveryPolicy);
+            }
         }
     }
 }
