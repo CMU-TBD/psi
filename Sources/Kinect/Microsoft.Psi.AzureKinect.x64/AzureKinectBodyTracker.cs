@@ -82,38 +82,39 @@ namespace Microsoft.Psi.AzureKinect
                 var infraredMemory = new Memory<byte>(this.infraredBytes);
                 infraredMemory.CopyTo(this.capture.IR.Memory);
 
-                // Call the body tracker.
+                // Call the body tracker and pop results
+                Frame bodyFrame = null;
                 try
                 {
                     this.tracker.EnqueueCapture(this.capture);
+                    bodyFrame = this.tracker.PopResult(false);
                 }
                 catch (FieldAccessException )
                 {
+                    // Known issue where the tracker sometimes throw a FieldAcessException.
+                    // As far as we can tell, it doesn't affect actual results.
                 }
 
-                using (var bodyFrame = this.tracker.PopResult(false))
+                // Parse the output into a list of KinectBody's to post
+                if (bodyFrame != null)
                 {
-                    // Parse the output into a list of KinectBody's to post
-                    if (bodyFrame != null)
+                    uint bodyIndex = 0;
+                    while (bodyIndex < bodyFrame.NumberOfBodies)
                     {
-                        uint bodyIndex = 0;
-                        while (bodyIndex < bodyFrame.NumberOfBodies)
+                        if (bodyIndex >= this.currentBodies.Count)
                         {
-                            if (bodyIndex >= this.currentBodies.Count)
-                            {
-                                this.currentBodies.Add(new AzureKinectBody());
-                            }
-
-                            this.currentBodies[(int)bodyIndex].CopyFrom(bodyFrame.GetBody(bodyIndex));
-                            bodyIndex++;
+                            this.currentBodies.Add(new AzureKinectBody());
                         }
 
-                        this.currentBodies.RemoveRange((int)bodyIndex, this.currentBodies.Count - (int)bodyIndex);
+                        this.currentBodies[(int)bodyIndex].CopyFrom(bodyFrame.GetBody(bodyIndex));
+                        bodyIndex++;
                     }
-                    else
-                    {
-                        this.currentBodies.Clear();
-                    }
+
+                    this.currentBodies.RemoveRange((int)bodyIndex, this.currentBodies.Count - (int)bodyIndex);
+                }
+                else
+                {
+                    this.currentBodies.Clear();
                 }
 
                 this.Out.Post(this.currentBodies, envelope.OriginatingTime);
