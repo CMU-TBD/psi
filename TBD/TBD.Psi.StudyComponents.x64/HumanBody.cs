@@ -252,6 +252,25 @@ namespace TBD.Psi.StudyComponents
                         this.jointConfidenceLevels[bone.ChildJoint] = alternative.getJointConfidenceLevel(bone.ChildJoint);
                     }
                 }
+                else
+                {
+                    // if we are confident of our joint. Let's see if we can improve the joint by taking the average.
+                    var equalTransformations = bodies.Where(m => (int)m.getJointConfidenceLevel(bone.ChildJoint) >= (int)this.getJointConfidenceLevel(bone.ChildJoint))
+                        .Select(b => b.BodyTree.SolveTransformation(bone.ParentJoint, bone.ChildJoint)).ToList();
+
+                    // take the average of the all transformations
+                    // TODO add the rotations
+                    var currentTransform = this.BodyTree.SolveTransformation(bone.ParentJoint, bone.ChildJoint);
+                    var averageOrigin = currentTransform.Origin.ToVector3D();
+                    var averageTransform = new CoordinateSystem();
+                    for (var i = 0; i < equalTransformations.Count; i++)
+                    {
+                        averageOrigin += equalTransformations[i].Origin.ToVector3D();
+                    }
+                    averageOrigin /= (equalTransformations.Count + 1);
+                    var newTransform = new CoordinateSystem(averageOrigin.ToPoint3D(), currentTransform.XAxis, currentTransform.YAxis, currentTransform.ZAxis);
+                    this.BodyTree.UpdateTransformation(bone.ParentJoint, bone.ChildJoint, newTransform);
+                }
             }
 
             // Change the position of the person to be the average of the current set
@@ -262,7 +281,7 @@ namespace TBD.Psi.StudyComponents
                 currPoint = currPoint + point.ToVector3D();
             }
             currPoint = currPoint.ScaleBy(1.0 / (pointArr.Count() + 1));
-            this.RootPose = new CoordinateSystem(new Point3D(currPoint.X, currPoint.Y, currPoint.Z), this.RootPose.XAxis, this.RootPose.YAxis, this.RootPose.ZAxis);
+            this.RootPose = new CoordinateSystem(currPoint.ToPoint3D(), this.RootPose.XAxis, this.RootPose.YAxis, this.RootPose.ZAxis);
         }
 
     }
