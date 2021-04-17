@@ -20,8 +20,8 @@
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
                 // input & output store
-                var inputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, Constants.OperatingStore);
-                var inputStore = PsiStore.Open(p,Constants.OperatingStore.Split(Path.DirectorySeparatorChar).Last().Split('.')[0], inputStorePath);
+                var inputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, Constants.OperatingStoreSubPath);
+                var inputStore = PsiStore.Open(p, Constants.OperatingStoreName, inputStorePath);
                 var outputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, @"body-merge-test");
                 var outputStore = PsiStore.Create(p, "body-merge-test", Path.Combine(Constants.OperatingDirectory, outputStorePath));
 
@@ -39,17 +39,17 @@
                     var calibrationStream = inputStore.OpenStream<IDepthDeviceCalibrationInfo>($"{deviceName}.depth-calibration");
                     // get transformation to global frame
                     var transform = transformationTree.SolveTransformation("world", frameName);
-                    inputStore.OpenStream<Shared<EncodedImage>>(colorStreamName).Join(calibrationStream.First(), Reproducible.Nearest<IDepthDeviceCalibrationInfo>()).Select(m => (m.Item1, m.Item2.ColorIntrinsics, transform) ).Write($"{frameName}.color", outputStore);
+                    inputStore.OpenStream<Shared<EncodedImage>>(colorStreamName).Join(calibrationStream.First(), Reproducible.Nearest<IDepthDeviceCalibrationInfo>()).Select(m => (m.Item1, m.Item2.ColorIntrinsics, transform)).Write($"{frameName}.color", outputStore);
                 }
 
                 // create the components
                 var merger = new BodyMerger(p);
                 var tracker = new BodyTracker(p);
-                var rosPublisher = new ROSWorldSender(p, Constants.LocalRosCoreAddress, Constants.LocalRosClientAddress);
+                // var rosPublisher = new ROSWorldSender(p, Constants.LocalRosCoreAddress, Constants.LocalRosClientAddress);
                 // link the major components
                 merger.PipeTo(tracker);
                 tracker.Write("trackedBodies", outputStore);
-                tracker.PipeTo(rosPublisher);
+                // tracker.PipeTo(rosPublisher);
 
                 // add azure bodies into the body mergers
                 // Note: We don't use the type name because kinect body's name include versions and it breaks comparison 
@@ -64,20 +64,23 @@
                     var bodies = bodiesOrigin.ChangeToFrame(transform);
                     bodies.Write($"{frameName}.bodies", outputStore);
                     // add to merger
-                    merger.AddHumanBodyStream(bodies.ChangeToHumanBodies());
+                    var humanBodies = bodies.ChangeToHumanBodies().HumanBodiesSituatedfilter();
+                    humanBodies.Write($"{frameName}.humans", outputStore);
+
+                    merger.AddHumanBodyStream(humanBodies);
                 }
-/*                foreach (var k2BodyStreamName in inputStore.AvailableStreams.Where(s => s.Name.StartsWith("k2d") && s.Name.Split('.').Last() == "bodies").Select(s => s.Name))
-                {
-                    var frameName = Constants.SensorCorrespondMap[k2BodyStreamName.Split('.')[0]];
-                    // get transformation to global frame
-                    var transform = transformationTree.SolveTransformation("world", frameName);
-                    // open stream
-                    var bodiesOrigin = inputStore.OpenStream<List<KinectBody>>(k2BodyStreamName);
-                    var bodies = bodiesOrigin.ChangeToFrame(transform);
-                    bodies.Write($"{frameName}.bodies", outputStore);
-                    // add to merger
-                    merger.AddHumanBodyStream(bodies.ChangeToHumanBodies());
-                }*/
+                /*                foreach (var k2BodyStreamName in inputStore.AvailableStreams.Where(s => s.Name.StartsWith("k2d") && s.Name.Split('.').Last() == "bodies").Select(s => s.Name))
+                                {
+                                    var frameName = Constants.SensorCorrespondMap[k2BodyStreamName.Split('.')[0]];
+                                    // get transformation to global frame
+                                    var transform = transformationTree.SolveTransformation("world", frameName);
+                                    // open stream
+                                    var bodiesOrigin = inputStore.OpenStream<List<KinectBody>>(k2BodyStreamName);
+                                    var bodies = bodiesOrigin.ChangeToFrame(transform);
+                                    bodies.Write($"{frameName}.bodies", outputStore);
+                                    // add to merger
+                                    merger.AddHumanBodyStream(bodies.ChangeToHumanBodies());
+                                }*/
 
 
                 p.Diagnostics.Write("diagnostics", outputStore);
@@ -86,7 +89,7 @@
                 //var replayDescriptor = new ReplayDescriptor(inputStore.MessageOriginatingTimeInterval.Left + TimeSpan.FromSeconds(23.5), TimeSpan.FromSeconds(2));
                 var replayDescriptor = ReplayDescriptor.ReplayAllRealTime;
 
-                p.Run(replayDescriptor); 
+                p.Run(replayDescriptor);
             }
         }
     }

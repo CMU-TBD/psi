@@ -90,6 +90,9 @@ namespace TBD.Psi.StudyComponents
                 this.currTrackingPeople[this.peopleIndex++] = (combinedBody, env.OriginatingTime);
                 currentBodies.Add(combinedBody);
             }
+            // append the last position of people who we are tracking but isn't in the scene for some reason
+            var missedPeople = this.currTrackingPeople.Where(pair => !matchedIndex.Contains(pair.Key)).Select(pair => pair.Value.body);
+            currentBodies = currentBodies.Concat(missedPeople).ToList();
 
             this.Out.Post(currentBodies, env.OriginatingTime);
         }

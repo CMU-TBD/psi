@@ -30,9 +30,11 @@ namespace TBD.Psi.Study
                             { "azure3", "leftCam"},
                         };
 
-        public static string PartitionIdentifier = "2021-04-13";
+        public static string PartitionIdentifier = "2021-04-14";
         public static string TestRecordingPath = @"live-recordings\live-recording.0000";
         public static string OperatingStore = @"post-board\board-detection.0000";
+        public static string OperatingStoreSubPath = @"phantom-body-test\videodata";
+        public static string OperatingStoreName = @"Cropped";
 
 
         public static string LocalRosCoreAddress = "127.0.0.1";

@@ -40,6 +40,11 @@ namespace TBD.Psi.StudyComponents
             }, deliveryPolicy);
         }
 
+        public static IProducer<List<HumanBody>> HumanBodiesSituatedfilter(this IProducer<List<HumanBody>> producer)
+        {
+            return producer.PipeTo(new HumanSituatedFilter(producer.Out.Pipeline));
+        }
+
         public static IProducer<List<HumanBody>> ChangeToFrame(this IProducer<List<HumanBody>> producer, CoordinateSystem wantedToAzure, DeliveryPolicy deliveryPolicy = null)
         {
             return producer.Select(m =>

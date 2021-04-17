@@ -102,6 +102,20 @@ namespace TBD.Psi.StudyComponents
         public CoordinateSystem RootPose { get; set; }
         public uint Id { get; set; }
 
+        public double? EstimatedHeight
+        {
+            get
+            {
+                //TODO: In the future, we can do a combining the person's body parts
+                var headJoint = this.GetJoint(JointId.Head, JointConfidenceLevel.Medium);
+                if (headJoint != null)
+                {
+                    return headJoint.Origin.Z;
+                }
+                return null;
+            }
+        }
+
         public Ray3D? GazeDirection
         {
             get
