@@ -9,11 +9,11 @@ namespace TBD.Psi.Study
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Psi;
-    using TBD.Psi.StudyComponents;
     using Microsoft.Psi.Imaging;
     using Microsoft.Psi.Calibration;
     using Microsoft.Psi.Components;
     using MathNet.Spatial.Euclidean;
+    using TBD.Psi.TransformationTree;
 
     public class PostProcessDepthImageStaging
     {
@@ -30,10 +30,10 @@ namespace TBD.Psi.Study
                 var inputStore = PsiStore.Open(p, Constants.CalibrationStoreName, inputStorePath);
                 var inputStore2 = PsiStore.Open(p, Constants.OperatingStore.Split('\\').Last().Split('.').First(), inputStore2Path);
                 var outputStore = PsiStore.Create(p, "depth-merger", outputStorePath);
-              
+
                 //create transformation tree and build the relationships
                 var transformationSettingPath = Path.Combine(Constants.ResourceLocations, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
-                var transformationTree = new TransformationTreeTracker(p, pathToSettings: transformationSettingPath);
+                var transformationTree = new TransformationTreeComponent(p, 1000, transformationSettingPath);
 
                 // open each depth map and add their corresponding coordinate system
                 foreach (var stream in inputStore.AvailableStreams.Where(s => s.Name.EndsWith("depth") && s.TypeName == typeof(Shared<EncodedDepthImage>).AssemblyQualifiedName))
@@ -42,7 +42,7 @@ namespace TBD.Psi.Study
                     var deviceName = stream.Name.Split('.')[0];
                     var frameName = Constants.SensorCorrespondMap[stream.Name.Split('.')[0]];
                     // get transformation
-                    var transform = transformationTree.SolveTransformation("world", frameName);
+                    var transform = transformationTree.QueryTransformation("world", frameName);
                     if (transform is null)
                     {
                         throw new ArgumentException($"Cannot find transformation for {frameName}");

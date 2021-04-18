@@ -12,6 +12,7 @@
     using Microsoft.Psi.AzureKinect;
     using Microsoft.Psi.Kinect;
     using Microsoft.Psi.Calibration;
+    using TBD.Psi.TransformationTree;
 
     public class PostProcessBodyMergerTest
     {
@@ -27,8 +28,8 @@
 
                 //create transformation tree and build the relationships
                 var transformationSettingPath = Path.Combine(Constants.ResourceLocations, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
-                var transformationTree = new TransformationTreeTracker(p, pathToSettings: transformationSettingPath);
-                transformationTree.WorldFrameOutput.Write("world", outputStore);
+                var transformationTree = new TransformationTreeComponent(p, 1000, transformationSettingPath);
+                transformationTree.Write("world", outputStore);
 
 
                 // redirect all color streams
@@ -38,7 +39,7 @@
                     var frameName = Constants.SensorCorrespondMap[deviceName];
                     var calibrationStream = inputStore.OpenStream<IDepthDeviceCalibrationInfo>($"{deviceName}.depth-calibration");
                     // get transformation to global frame
-                    var transform = transformationTree.SolveTransformation("world", frameName);
+                    var transform = transformationTree.QueryTransformation("world", frameName);
                     inputStore.OpenStream<Shared<EncodedImage>>(colorStreamName).Join(calibrationStream.First(), Reproducible.Nearest<IDepthDeviceCalibrationInfo>()).Select(m => (m.Item1, m.Item2.ColorIntrinsics, transform)).Write($"{frameName}.color", outputStore);
                 }
 
@@ -58,7 +59,7 @@
                 {
                     var frameName = Constants.SensorCorrespondMap[azureBodyStreamName.Split('.')[0]];
                     // get transformation to global frame
-                    var transform = transformationTree.SolveTransformation("world", frameName);
+                    var transform = transformationTree.QueryTransformation("world", frameName);
                     // open stream
                     var bodiesOrigin = inputStore.OpenStream<List<AzureKinectBody>>(azureBodyStreamName);
                     var bodies = bodiesOrigin.ChangeToFrame(transform);
@@ -73,7 +74,7 @@
                                 {
                                     var frameName = Constants.SensorCorrespondMap[k2BodyStreamName.Split('.')[0]];
                                     // get transformation to global frame
-                                    var transform = transformationTree.SolveTransformation("world", frameName);
+                                    var transform = transformationTree.QueryTransformation("world", frameName);
                                     // open stream
                                     var bodiesOrigin = inputStore.OpenStream<List<KinectBody>>(k2BodyStreamName);
                                     var bodies = bodiesOrigin.ChangeToFrame(transform);

@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\TBD.Psi.Components\TBD.Psi.TransformationTree\TBD.Psi.TransformationTree.csproj" />
     <ProjectReference Include="..\..\Sources\Audio\Microsoft.Psi.Audio.Windows\Microsoft.Psi.Audio.Windows.csproj" />
     <ProjectReference Include="..\..\Sources\Imaging\Microsoft.Psi.Imaging.Windows\Microsoft.Psi.Imaging.Windows.csproj" />
     <ProjectReference Include="..\..\Sources\Kinect\Microsoft.Psi.Kinect.Windows\Microsoft.Psi.Kinect.Windows.csproj" />

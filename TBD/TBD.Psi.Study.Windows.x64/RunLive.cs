@@ -13,6 +13,7 @@
     using Microsoft.Psi.Imaging;
     using Microsoft.Psi.Kinect;
     using TBD.Psi.StudyComponents;
+    using TBD.Psi.TransformationTree;
 
     public class RunLive
     {
@@ -31,8 +32,8 @@
 
                 // create a transformation tree that describe the environment
                 var transformationSettingPath = Path.Combine(Constants.ResourceLocations, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
-                var transformationTree = new TransformationTreeTracker(p, pathToSettings: transformationSettingPath);
-                transformationTree.WorldFrameOutput.Write("world", outputStore);
+                var transformationTree = new TransformationTreeComponent(p, 1000, transformationSettingPath);
+                transformationTree.Write("world", outputStore);
 
                 // Create the components that we use live
                 var bodyStreamValidator = new StreamValidator(p);
@@ -72,7 +73,7 @@
                     k4a.DepthImage.EncodePng().Write($"{deviceName}.depth", outputStore);
 
                     // Add body to merger
-                    var bodyInWorld = k4a.Bodies.ChangeToFrame(transformationTree.SolveTransformation("world", Constants.SensorCorrespondMap[deviceName]));
+                    var bodyInWorld = k4a.Bodies.ChangeToFrame(transformationTree.QueryTransformation("world", Constants.SensorCorrespondMap[deviceName]));
                     var humanBodyInWorld = bodyInWorld.ChangeToHumanBodies();
                     humanBodyInWorld.Write($"{deviceName}.human-bodies", outputStore);
                     bodyMerger.AddHumanBodyStream(humanBodyInWorld, mainNum == i);
@@ -95,7 +96,7 @@
                     k2.DepthImage.EncodePng().Write($"{deviceName}.depth", outputStore);
                     bodyStreamValidator.AddStream(k2.Bodies, deviceName);
                     // Add body to merger
-                    var bodyInWorld = k2.Bodies.ChangeToFrame(transformationTree.SolveTransformation("world", Constants.SensorCorrespondMap[deviceName]));
+                    var bodyInWorld = k2.Bodies.ChangeToFrame(transformationTree.QueryTransformation("world", Constants.SensorCorrespondMap[deviceName]));
                     var humanBodyInWorld = bodyInWorld.ChangeToHumanBodies();
                     humanBodyInWorld.Write($"{deviceName}.human-bodies", outputStore);
                     bodyMerger.AddHumanBodyStream(humanBodyInWorld);

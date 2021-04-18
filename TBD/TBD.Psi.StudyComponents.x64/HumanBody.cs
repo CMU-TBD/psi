@@ -9,6 +9,7 @@ namespace TBD.Psi.StudyComponents
 {
     using Microsoft.Psi;
     using System.Linq;
+    using TBD.Psi.TransformationTree;
 
     public class HumanBody
     {
@@ -159,7 +160,7 @@ namespace TBD.Psi.StudyComponents
             {
                 return null;
             }
-            return this.BodyTree.SolveTransformation(this.RootId, jointId)?.TransformBy(InRealWorld ? this.RootPose : new CoordinateSystem());
+            return this.BodyTree.QueryTransformation(this.RootId, jointId)?.TransformBy(InRealWorld ? this.RootPose : new CoordinateSystem());
         }
 
         public static bool CompareHumanBodies(HumanBody body1, HumanBody body2, double distTol = 0.4, double rotTol = 0.7, List<JointId> keyJoints = null)
@@ -180,8 +181,8 @@ namespace TBD.Psi.StudyComponents
             foreach (var key in keyJoints)
             {
                 // first get the cs in both matrix
-                var b1Pose = body1.BodyTree.SolveTransformation(body1.RootId, key)?.TransformBy(body1.RootPose);
-                var b2Pose = body2.BodyTree.SolveTransformation(body2.RootId, key)?.TransformBy(body2.RootPose);
+                var b1Pose = body1.BodyTree.QueryTransformation(body1.RootId, key)?.TransformBy(body1.RootPose);
+                var b2Pose = body2.BodyTree.QueryTransformation(body2.RootId, key)?.TransformBy(body2.RootPose);
 
                 if (b1Pose == null || b2Pose == null)
                 {
@@ -232,7 +233,7 @@ namespace TBD.Psi.StudyComponents
                 for(var i = 0; i < candidates.Count; i++)
                 {
                     candidateConfidenceList.Add(candidates[i].getJointConfidenceLevel(bone.ChildJoint));
-                    candidateTransformList.Add(candidates[i].BodyTree.SolveTransformation(bone.ParentJoint, bone.ChildJoint));
+                    candidateTransformList.Add(candidates[i].BodyTree.QueryTransformation(bone.ParentJoint, bone.ChildJoint));
                 }
                 int replacementId = -1;
 
@@ -292,7 +293,7 @@ namespace TBD.Psi.StudyComponents
                     // Unfortuantely, at this point, we cannot take the average of the quaternion.
                     // The detected bodies with missing joint has a weird output where the angles are incorrect 
                     // or widely off.
-                    var currentTransform = this.BodyTree.SolveTransformation(bone.ParentJoint, bone.ChildJoint);
+                    var currentTransform = this.BodyTree.QueryTransformation(bone.ParentJoint, bone.ChildJoint);
                     var currentQuaternion = Utils.GetQuaternionFromCoordinateSystem(currentTransform);
                     var averageOrigin = currentTransform.Origin.ToVector3D();
                     for (var i = 0; i < equalCandidates.Count; i++)
