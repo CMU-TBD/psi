@@ -87,7 +87,7 @@
 
                 // setting time for debug purposes
                 //var replayDescriptor = new ReplayDescriptor(inputStore.MessageOriginatingTimeInterval.Left + TimeSpan.FromSeconds(23.5), TimeSpan.FromSeconds(2));
-                var replayDescriptor = ReplayDescriptor.ReplayAllRealTime;
+                var replayDescriptor = ReplayDescriptor.ReplayAll;
 
                 p.Run(replayDescriptor);
             }

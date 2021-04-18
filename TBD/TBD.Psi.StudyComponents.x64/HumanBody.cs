@@ -53,23 +53,23 @@ namespace TBD.Psi.StudyComponents
                 }
                 else if ((int)childConfidence >= minimumConfidenceLevel)
                 {
-/*                    // only the child joint is found, but the parent didn't.
-                    // recursively see if the parent's parent is available.
-                    var parentJointId = pair.ParentJoint;
-                    var ancestorJointId = pair.ParentJoint;
-                    while (ancestorJointId != this.RootId)
-                    {
-                        ancestorJointId = bonesHierarchy.Where(m => m.ChildJoint == parentJointId).First().ParentJoint;
-                        // see if ancestorjoint is available
-                        var (ancestorPose, ancestorConfidence) = body.Joints[ancestorJointId];
-                        if (ancestorConfidence >= Microsoft.Azure.Kinect.BodyTracking.JointConfidenceLevel.Low)
-                        {
-                            // find the transformation between them & save it 
-                            var transform = childPose.TransformBy(ancestorPose.Invert());
-                            this.BodyTree.UpdateTransformation(ancestorJointId, pair.ChildJoint, transform);
-                            break;
-                        }
-                    }       */             
+                    /*                    // only the child joint is found, but the parent didn't.
+                                        // recursively see if the parent's parent is available.
+                                        var parentJointId = pair.ParentJoint;
+                                        var ancestorJointId = pair.ParentJoint;
+                                        while (ancestorJointId != this.RootId)
+                                        {
+                                            ancestorJointId = bonesHierarchy.Where(m => m.ChildJoint == parentJointId).First().ParentJoint;
+                                            // see if ancestorjoint is available
+                                            var (ancestorPose, ancestorConfidence) = body.Joints[ancestorJointId];
+                                            if (ancestorConfidence >= Microsoft.Azure.Kinect.BodyTracking.JointConfidenceLevel.Low)
+                                            {
+                                                // find the transformation between them & save it 
+                                                var transform = childPose.TransformBy(ancestorPose.Invert());
+                                                this.BodyTree.UpdateTransformation(ancestorJointId, pair.ChildJoint, transform);
+                                                break;
+                                            }
+                                        }       */
                 }
             }
 
@@ -155,7 +155,7 @@ namespace TBD.Psi.StudyComponents
 
         public CoordinateSystem GetJoint(JointId jointId, JointConfidenceLevel minimumConfidenceLevel = JointConfidenceLevel.Low, bool InRealWorld = true)
         {
-            if ( !this.jointConfidenceLevels.ContainsKey(jointId) || (int)this.jointConfidenceLevels[jointId] < (int)minimumConfidenceLevel)
+            if (!this.jointConfidenceLevels.ContainsKey(jointId) || (int)this.jointConfidenceLevels[jointId] < (int)minimumConfidenceLevel)
             {
                 return null;
             }
@@ -171,7 +171,7 @@ namespace TBD.Psi.StudyComponents
             }
 
             // make sure the bodies has the key joints
-            if(!body1.BodyTree.Contains(keyJoints) || !body2.BodyTree.Contains(keyJoints))
+            if (!body1.BodyTree.Contains(keyJoints) || !body2.BodyTree.Contains(keyJoints))
             {
                 return false;
             }
@@ -209,6 +209,8 @@ namespace TBD.Psi.StudyComponents
         /// <returns>New combined human body.</returns>
         public static HumanBody CombineBodies(List<HumanBody> bodies)
         {
+            // we pick the body with the most complete skeleton in the scene
+            bodies = bodies.OrderByDescending(m => m.jointConfidenceLevels.Values.Where(s => s >= JointConfidenceLevel.Medium).Count()).ToList();
             var newBody = bodies[0].DeepClone();
             if (bodies.Count > 1)
             {
@@ -219,56 +221,88 @@ namespace TBD.Psi.StudyComponents
 
         public void CombineBodies(IEnumerable<HumanBody> bodies)
         {
-
             // replace all the uncertain joints in the body with certain ones from the replacements
             // Note, the bones are setup to be in the right hierarhical order, we don't have to worry about adding stuff for later
             foreach (var bone in AzureKinectBody.Bones)
             {
-                // ignore if we already know the position
+                // This might be suboptimal, but it helps with calculating
+                var candidates = bodies.Where(b => b.BodyTree.Contains(bone.ChildJoint) && b.BodyTree.Contains(bone.ParentJoint)).ToList();
+                var candidateConfidenceList = new List<JointConfidenceLevel>();
+                var candidateTransformList = new List<CoordinateSystem>();
+                for(var i = 0; i < candidates.Count; i++)
+                {
+                    candidateConfidenceList.Add(candidates[i].getJointConfidenceLevel(bone.ChildJoint));
+                    candidateTransformList.Add(candidates[i].BodyTree.SolveTransformation(bone.ParentJoint, bone.ChildJoint));
+                }
+                int replacementId = -1;
+
+                // if we have alternatives with higher confidence
                 if (this.BodyTree.Contains(bone.ChildJoint) && this.BodyTree.Contains(bone.ParentJoint))
                 {
-                    // use the other bodies if they are more certain then us about the child
-                    // TODO: Right now we just pick the first
-                    var betterCandidate = bodies.Where(m => (int)m.getJointConfidenceLevel(bone.ChildJoint) > (int)this.getJointConfidenceLevel(bone.ChildJoint)).FirstOrDefault();
-
-                    if (betterCandidate != null)
+                    for(var i = 0; i < candidateConfidenceList.Count; i++)
                     {
-                        var transform = betterCandidate.BodyTree.SolveTransformation(bone.ParentJoint, bone.ChildJoint);
-                        this.BodyTree.UpdateTransformation(bone.ParentJoint, bone.ChildJoint, transform);
-                        this.jointConfidenceLevels[bone.ChildJoint] = betterCandidate.getJointConfidenceLevel(bone.ChildJoint);
+                        // take the first one for now
+                        if ((int)candidateConfidenceList[i] > (int)this.getJointConfidenceLevel(bone.ChildJoint))
+                        {
+                            this.BodyTree.UpdateTransformation(bone.ParentJoint, bone.ChildJoint, candidateTransformList[i]);
+                            this.jointConfidenceLevels[bone.ChildJoint] = candidateConfidenceList[i];
+                            replacementId = i;
+                        }
                     }
-                    continue;
-                }
-                else if (this.BodyTree.Contains(bone.ParentJoint))
-                {
-                    // we have the parent joint but not the child joint
-                    // look for the child joint in the bodies
-                    // TODO alternatives to just pick the first one
-                    var alternative = bodies.Where(b => b.BodyTree.Contains(bone.ChildJoint) && b.BodyTree.Contains(bone.ParentJoint)).FirstOrDefault();
-                    if (alternative != null)
-                    {
-                        var transform = alternative.BodyTree.SolveTransformation(bone.ParentJoint, bone.ChildJoint);
-                        this.BodyTree.UpdateTransformation(bone.ParentJoint, bone.ChildJoint, transform);
-                        this.jointConfidenceLevels[bone.ChildJoint] = alternative.getJointConfidenceLevel(bone.ChildJoint);
-                    }
-                }
-                else
-                {
-                    // if we are confident of our joint. Let's see if we can improve the joint by taking the average.
-                    var equalTransformations = bodies.Where(m => (int)m.getJointConfidenceLevel(bone.ChildJoint) >= (int)this.getJointConfidenceLevel(bone.ChildJoint))
-                        .Select(b => b.BodyTree.SolveTransformation(bone.ParentJoint, bone.ChildJoint)).ToList();
 
-                    // take the average of the all transformations
-                    // TODO add the rotations
+                }
+                // if we only know the parent but not the child, lets search for a child to be added.
+                else if (this.BodyTree.Contains(bone.ParentJoint) && !this.BodyTree.Contains(bone.ChildJoint))
+                {
+                    // For now, we pick the first one with the highest confidence
+                    var transform22 = new CoordinateSystem();
+                    for (var i = 0; i < candidateConfidenceList.Count; i++)
+                    {
+                        // take the first one for now
+                        if (!this.BodyTree.Contains(bone.ChildJoint) || (int)candidateConfidenceList[i] > (int)this.getJointConfidenceLevel(bone.ChildJoint))
+                        {
+                            transform22 = candidateTransformList[i];
+                            this.BodyTree.UpdateTransformation(bone.ParentJoint, bone.ChildJoint, candidateTransformList[i]);
+                            this.jointConfidenceLevels[bone.ChildJoint] = candidateConfidenceList[i];
+                            replacementId = i;
+                        }
+                    }
+                }
+                // now we see if we can combine different bodies reading to get better results.
+                if (this.BodyTree.Contains(bone.ChildJoint) && this.BodyTree.Contains(bone.ParentJoint))
+                {
+                    var equalCandidates = new List<CoordinateSystem>();
+                    for(var i = 0; i < candidateConfidenceList.Count; i++)
+                    {
+                        // ignore replacement
+                        if (i == replacementId)
+                        {
+                            continue;
+                        }
+                        if ((int)candidateConfidenceList[i] >= (int)this.getJointConfidenceLevel(bone.ChildJoint))
+                        {
+                            equalCandidates.Add(candidateTransformList[i]);
+                        }
+                    }
+                    if (equalCandidates.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    // Unfortuantely, at this point, we cannot take the average of the quaternion.
+                    // The detected bodies with missing joint has a weird output where the angles are incorrect 
+                    // or widely off.
                     var currentTransform = this.BodyTree.SolveTransformation(bone.ParentJoint, bone.ChildJoint);
+                    var currentQuaternion = Utils.GetQuaternionFromCoordinateSystem(currentTransform);
                     var averageOrigin = currentTransform.Origin.ToVector3D();
-                    var averageTransform = new CoordinateSystem();
-                    for (var i = 0; i < equalTransformations.Count; i++)
+                    for (var i = 0; i < equalCandidates.Count; i++)
                     {
-                        averageOrigin += equalTransformations[i].Origin.ToVector3D();
+                        averageOrigin += equalCandidates[i].Origin.ToVector3D();
+                        // currentQuaternion += Utils.GetQuaternionFromCoordinateSystem(equalCandidates[i]);
                     }
-                    averageOrigin /= (equalTransformations.Count + 1);
-                    var newTransform = new CoordinateSystem(averageOrigin.ToPoint3D(), currentTransform.XAxis, currentTransform.YAxis, currentTransform.ZAxis);
+                    averageOrigin /= (equalCandidates.Count + 1);
+                    currentQuaternion = Utils.Normalize(currentQuaternion);
+                    var newTransform = Utils.ConstructCoordinateSystem(averageOrigin, currentQuaternion);
                     this.BodyTree.UpdateTransformation(bone.ParentJoint, bone.ChildJoint, newTransform);
                 }
             }
@@ -280,7 +314,7 @@ namespace TBD.Psi.StudyComponents
             {
                 currPoint = currPoint + point.ToVector3D();
             }
-            currPoint = currPoint.ScaleBy(1.0 / (pointArr.Count() + 1));
+            currPoint /= (pointArr.Count() + 1);
             this.RootPose = new CoordinateSystem(currPoint.ToPoint3D(), this.RootPose.XAxis, this.RootPose.YAxis, this.RootPose.ZAxis);
         }
 

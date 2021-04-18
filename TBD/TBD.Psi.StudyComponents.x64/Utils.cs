@@ -8,6 +8,7 @@ namespace TBD.Psi.StudyComponents
     using System.Numerics;
     using MathNet.Numerics.LinearAlgebra.Double;
     using MathNet.Spatial.Euclidean;
+    using MathNet.Spatial.Units;
     using Microsoft.Azure.Kinect.BodyTracking;
     using Microsoft.Psi.AzureKinect;
     using Quaternion = System.Numerics.Quaternion;
@@ -19,9 +20,15 @@ namespace TBD.Psi.StudyComponents
         /// https://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/index.htm
         /// </summary>
         /// <param name="quaternion">Quaternion</param>
-        /// <returns>Axis and Angle.</returns>
+        /// <returns>Axis and Angle (degrees).</returns>
         internal static (Vector3, double) GetAxisAngleFromQuaterion(Quaternion quaternion)
         {
+            // check for the singularity conditions
+            if (quaternion.IsIdentity)
+            {
+                return (new Vector3(1, 0, 0), 0);
+            }
+
             var angle = 2 * Math.Acos(quaternion.W);
             var axis = new Vector3(0);
             var denominator = Math.Sqrt(1 - (quaternion.W * quaternion.W));
@@ -68,14 +75,86 @@ namespace TBD.Psi.StudyComponents
         {
 
             var rotMat = cs.GetRotationSubMatrix();
-            double w = Math.Sqrt(1 + rotMat.At(0, 0) + rotMat.At(1, 1) + rotMat.At(2, 2)) / 2.0;
-            double w4 = 4 * w;
-            double x = (rotMat.At(2, 1) - rotMat.At(1, 2)) / w4;
-            double y = (rotMat.At(0, 2) - rotMat.At(2, 0)) / w4;
-            double z = (rotMat.At(1, 0) - rotMat.At(0, 1)) / w4;
+            double trace = rotMat.At(0, 0) + rotMat.At(1, 1) + rotMat.At(2, 2);
+            double w, x, y, z;
+            if (trace > 0)
+            {
+                double s = 0.5 / Math.Sqrt(trace + 1);
+                w = 0.25 / s;
+                x = (rotMat.At(2, 1) - rotMat.At(1, 2)) * s;
+                y = (rotMat.At(0, 2) - rotMat.At(2, 0)) * s;
+                z = (rotMat.At(1, 0) - rotMat.At(0, 1)) * s;
+            }
+            else if (rotMat.At(0, 0) > rotMat.At(1, 1) && rotMat.At(0, 0) > rotMat.At(2, 2))
+            {
+                double s = Math.Sqrt(1 + rotMat.At(0, 0) - rotMat.At(1, 1) - rotMat.At(2, 2)) * 2;
+                w = (rotMat.At(2, 1) - rotMat.At(1, 2)) / s;
+                x = 0.25 * s;
+                y = (rotMat.At(0, 1) + rotMat.At(1, 0)) / s;
+                z = (rotMat.At(0, 2) + rotMat.At(2, 0)) / s;
+            }
+            else if (rotMat.At(1, 1) > rotMat.At(2, 2))
+            {
+                double s = Math.Sqrt(1 + rotMat.At(1, 1) - rotMat.At(0, 0) - rotMat.At(2, 2)) * 2;
+                w = (rotMat.At(0, 2) - rotMat.At(2, 0)) / s;
+                x = (rotMat.At(0, 1) + rotMat.At(1, 0)) / s;
+                y = 0.25 * s;
+                z = (rotMat.At(1, 2) + rotMat.At(2, 1)) / s;
+            }
+            else
+            {
+                double s = Math.Sqrt(1 + rotMat.At(2, 2) - rotMat.At(0, 0) - rotMat.At(1, 1)) * 2;
+                w = (rotMat.At(1, 0) - rotMat.At(0, 1)) / s;
+                x = (rotMat.At(0, 2) + rotMat.At(2, 0)) / s;
+                y = (rotMat.At(1, 2) + rotMat.At(2, 1)) / s;
+                z = 0.25 * s;
+            }
 
             return new System.Numerics.Quaternion(Convert.ToSingle(x), Convert.ToSingle(y), Convert.ToSingle(z), Convert.ToSingle(w));
+        }
 
+        internal static Quaternion Normalize(Quaternion q)
+        {
+            var norm = q.Length();
+            return new Quaternion(q.X / norm, q.Y / norm, q.Z / norm, q.W / norm);
+        }
+
+        internal static CoordinateSystem ConstructCoordinateSystem(Vector3D origin, Quaternion q)
+        {
+            var transMat = Matrix.Build.DenseIdentity(4, 4);
+            double sqw = q.W * q.W;
+            double sqx = q.X * q.X;
+            double sqy = q.Y * q.Y;
+            double sqz = q.Z * q.Z;
+
+            transMat.At(0, 0, sqx - sqy - sqz + sqw);
+            transMat.At(1, 1, -sqx + sqy - sqz + sqw);
+            transMat.At(2, 2, -sqx - sqy + sqz + sqw);
+
+            double tmp1 = q.X * q.Y;
+            double tmp2 = q.Z * q.W;
+
+            transMat.At(1, 0, (tmp1 + tmp2) * 2);
+            transMat.At(0, 1, (tmp1 - tmp2) * 2);
+
+            tmp1 = q.X * q.Z;
+            tmp2 = q.Y * q.W;
+            transMat.At(2, 0, 2* (tmp1 - tmp2));
+            transMat.At(0, 2, 2* (tmp1 + tmp2));
+            tmp1 = q.Y * q.Z;
+            tmp2 = q.X * q.W;
+            transMat.At(2, 1, 2 * (tmp1 + tmp2));
+            transMat.At(1, 2, 2 * (tmp1 - tmp2));
+
+            transMat.At(0, 3, origin.X);
+            transMat.At(1, 3, origin.Y);
+            transMat.At(2, 3, origin.Z);
+
+            //(var rotVec, var rotVal) = GetAxisAngleFromQuaterion(q);
+            //var rotMat = Matrix3D.RotationAroundArbitraryVector(UnitVector3D.Create(rotVec.X, rotVec.Y, rotVec.Z), Angle.FromDegrees(rotVal));
+
+            //var cs = new CoordinateSystem()
+            return new CoordinateSystem(transMat);
         }
     }
 }
