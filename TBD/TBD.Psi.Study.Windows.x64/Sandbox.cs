@@ -10,6 +10,7 @@ namespace TBD.Psi.Study
     using Microsoft.Psi;
     using Microsoft.Psi.AzureKinect;
     using Microsoft.Psi.Imaging;
+    using TBD.Psi.StudyComponents;
 
     public class Sandbox
     {
@@ -17,29 +18,21 @@ namespace TBD.Psi.Study
         {
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
-                /*                // create input & output stores
-                                var inputStore = PsiStore.Open(p, Constants.CalibrationStoreName, Path.Combine(Constants.OperatingDirectory, Constants.CalibrationSubDirectory));
-
-                                // open an image stream
-                                var color = inputStore.OpenStream<Shared<EncodedImage>>("azure1.color");
-                                var index = 0;
-                                color.Decode().ToGray().EncodeJpeg().Do(m =>
-                                   {
-                                        EncodedImage obj =  m.Resource;
-                                        var stream = obj.ToStream();
-                                        using (var sw = File.OpenWrite(@$"E:\Temp\img-{index++}.jpeg"))
-                                        {
-                                           stream.CopyTo(sw);
-                                        }
-                                   });
-
-                                p.Run(ReplayDescriptor.ReplayAll);*/
-
+                var tagDetector = new TagDetector(p, 0.045f, OpenCV.ArucoDictionary.DICT_APRILTAG_16h5);
                 var k4a1 = new AzureKinectSensor(p, new AzureKinectSensorConfiguration()
                 {
-                    BodyTrackerConfiguration = new AzureKinectBodyTrackerConfiguration(),
+                    DeviceIndex = 2,
+                    OutputColor = true
                 });
-                k4a1.Bodies.Do(m => Console.WriteLine("hello"));
+                k4a1.ColorImage.ToGray().PipeTo(tagDetector.ImageIn);
+                k4a1.DepthDeviceCalibrationInfo.PipeTo(tagDetector.CalibrationIn);
+                tagDetector.Do(m =>
+                {
+                    foreach (var n in m)
+                    {
+                        Console.WriteLine(n.Item2);
+                    }
+                });
                 p.RunAsync();
                 Console.ReadLine();
             }

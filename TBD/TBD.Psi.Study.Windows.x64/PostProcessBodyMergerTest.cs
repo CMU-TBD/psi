@@ -41,6 +41,7 @@
                     // get transformation to global frame
                     var transform = transformationTree.QueryTransformation("world", frameName);
                     inputStore.OpenStream<Shared<EncodedImage>>(colorStreamName).Join(calibrationStream.First(), Reproducible.Nearest<IDepthDeviceCalibrationInfo>()).Select(m => (m.Item1, m.Item2.ColorIntrinsics, transform)).Write($"{frameName}.color", outputStore);
+                    //inputStore.OpenStream<Shared<EncodedImage>>(colorStreamName).Pair(calibrationStream.First()).Select(m => (m.Item1, m.Item2.ColorIntrinsics, transform)).Write($"{frameName}.color", outputStore);
                 }
 
                 // create the components

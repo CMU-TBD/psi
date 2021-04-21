@@ -21,10 +21,13 @@
     <ClCompile Include="ImageBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ArucoBoardDetector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="ArucoBoardDetector.h">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="ArucoBoardDetector.cpp">
+    <ClCompile Include="ArucoDetector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -33,6 +36,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ArucoBoard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ArucoDetector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

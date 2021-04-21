@@ -14,13 +14,13 @@
             // Post Processings
             // PostProcessBoardDetection.Run();
             // PostProcessDepthImageStaging.Run();
-            PostProcessBodyMergerTest.Run();
+            // PostProcessBodyMergerTest.Run();
             // PostProcessBoardDetectionZipOnly.Run();
 
             // Replay of Lives Recordings 
             //ReplayLiveRecording.Run();
 
-            // Sandbox.Run();
+            Sandbox.Run();
             // Sandbox.Run();
         }
     }

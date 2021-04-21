@@ -91,12 +91,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ArucoDetector.cpp" />
     <ClCompile Include="ArucoBoardDetector.cpp" />
     <ClCompile Include="ImageBuffer.cpp" />
     <ClCompile Include="ArucoBoardDetector.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArucoBoard.h" />
+    <ClInclude Include="ArucoDetector.h" />
     <ClInclude Include="ImageBuffer.h" />
   </ItemGroup>
   <ItemGroup>
