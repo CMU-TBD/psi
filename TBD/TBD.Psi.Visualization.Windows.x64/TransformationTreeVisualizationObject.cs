@@ -19,7 +19,7 @@ namespace TBD.Psi.Visualization.Windows
     using System.Collections.Generic;
     using MathNet.Spatial.Euclidean;
 
-    [VisualizationObject("Visualize TransformationTree")]
+    [VisualizationObject("TransformationTree")]
     public class TransformationTreeVisualizationObject : ModelVisual3DVisualizationObjectCollectionBase<CoordinateSystemVisualizationObject, TransformationTree<string>>
     {
         private string baseFrame = "";
@@ -48,6 +48,11 @@ namespace TBD.Psi.Visualization.Windows
         {
             if (this.CurrentData != null)
             {
+                // if we don't have a base frame, pick one for the data
+                if (this.baseFrame == "")
+                {
+                    this.BaseFrame = this.CurrentData.ProposeRoot();
+                }
                 this.UpdateCoordinateSystemValues();
                 this.UpdateCoordinateSystemVisuals();
             }

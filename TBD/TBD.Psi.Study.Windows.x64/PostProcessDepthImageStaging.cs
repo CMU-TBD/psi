@@ -69,6 +69,7 @@ namespace TBD.Psi.Study
                     }).Write($"{frameName}.pose", outputStore);
                 }
 
+                transformationTree.Write("world", outputStore);
                 p.Diagnostics.Write("diagnostics", outputStore);
                 p.Run(ReplayDescriptor.ReplayAll);
             }
