@@ -47,11 +47,12 @@ namespace PsiStoreTool
                         (Verbs.Messages opts) => Utility.DisplayStreamMessages(opts.Stream, opts.Store, opts.Path, opts.Number),
                         (Verbs.Save opts) => Utility.SaveStreamMessages(opts.Stream, opts.Store, opts.Path, opts.File, opts.Format),
                         (Verbs.Send opts) => Utility.SendStreamMessages(opts.Stream, opts.Store, opts.Path, opts.Topic, opts.Address, opts.Format),
-                        (Verbs.Concat opts) => Utility.ConcatenateStores(opts.Store, opts.Path, opts.Output),
-                        (Verbs.Crop opts) => Utility.CropStore(opts.Store, opts.Path, opts.Output, opts.Start, opts.Length),
-                        (Verbs.Encode opts) => Utility.EncodeStore(opts.Store, opts.Path, opts.Output, opts.Quality),
+                        (Verbs.Concat opts) => Utility.ConcatenateStores(opts.Store, opts.Path, opts.Output, opts.OutputPath),
+                        (Verbs.Crop opts) => Utility.CropStore(opts.Store, opts.Path, opts.Output, opts.OutputPath, opts.Start, opts.Length),
+                        (Verbs.Encode opts) => Utility.EncodeStore(opts.Store, opts.Path, opts.Output, opts.OutputPath, opts.Quality),
                         (Verbs.ListTasks opts) => Utility.ListTasks(opts.Assemblies),
                         (Verbs.Exec opts) => Utility.ExecuteTask(opts.Stream, opts.Store, opts.Path, opts.Name, opts.Assemblies, opts.Arguments),
+                        (Verbs.AnalyzeStreams opts) => Utility.AnalyzeStreams(opts.Store, opts.Path, opts.Order),
                         DisplayParseErrors);
             }
             catch (Exception ex)
