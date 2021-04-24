@@ -51,7 +51,7 @@ namespace TBD.Psi.Visualization.Windows
                 // if we don't have a base frame, pick one for the data
                 if (this.baseFrame == "")
                 {
-                    this.BaseFrame = this.CurrentData.ProposeRoot();
+                    this.BaseFrame = this.CurrentData.FindRoot();
                 }
                 this.UpdateCoordinateSystemValues();
                 this.UpdateCoordinateSystemVisuals();
