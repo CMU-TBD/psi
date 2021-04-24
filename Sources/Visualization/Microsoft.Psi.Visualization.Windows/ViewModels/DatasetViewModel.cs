@@ -529,7 +529,7 @@ namespace Microsoft.Psi.Visualization.ViewModels
             if (this.CurrentSessionViewModel != null)
             {
                 // Get the session extents
-                TimeInterval sessionExtents = this.CurrentSessionViewModel.ModelTimeInterval;
+                TimeInterval sessionExtents = this.CurrentSessionViewModel.OriginatingTimeInterval;
 
                 // Update the navigator with the session extents
                 visualizationContainer.Navigator.DataRange.SetRange(sessionExtents);
