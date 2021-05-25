@@ -30,7 +30,7 @@ namespace TBD.Psi.Study
                             { "azure3", "leftCam"},
                         };
 
-        public static string PartitionIdentifier = "2021-04-20";
+        public static string PartitionIdentifier = "2021-05-21";
         public static string TestRecordingPath = @"live-recordings\live-recording.0000";
         public static string OperatingStore = @"post-board\board-detection.0000";
         public static string OperatingStoreSubPath = @"phantom-body-test\videodata3";
@@ -47,5 +47,8 @@ namespace TBD.Psi.Study
         public static string LiveStoreName = @"live-recording";
         public static string RosCoreAddress = "192.168.0.201";
         public static string RosClientAddress = "192.168.0.157";
+
+        // Replay Live
+        public static string ReplayLiveStore = @"live-recording.0000";
     }
 }

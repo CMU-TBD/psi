@@ -14,7 +14,7 @@ namespace TBD.Psi.StudyComponents
     /// <summary>
     /// Psi Component to Detect AruCo Board Using OpenCV.
     /// </summary>
-    internal class BoardDetector : IProducer<CoordinateSystem>
+    public class BoardDetector : IProducer<CoordinateSystem>
     {
         private Pipeline pipeline;
         private bool receiveCalibration = false;
@@ -35,6 +35,7 @@ namespace TBD.Psi.StudyComponents
         {
             this.pipeline = p;
             this.Out = p.CreateEmitter<CoordinateSystem>(this, nameof(this.Out));
+            this.DebugImageOut = p.CreateEmitter<Shared<Image>>(this, nameof(this.DebugImageOut));
             this.CalibrationIn = p.CreateReceiver<IDepthDeviceCalibrationInfo>(this, this.CalibrationCB, nameof(this.CalibrationIn));
             this.ImageIn = p.CreateReceiver<Shared<Image>>(this, this.ImageCB, nameof(this.ImageIn));
             this.detector = new ArucoBoardDetector(new ArucoBoard(markersX, markersY, markerLength, markerSeperation, dictName, firstMarker));
@@ -55,12 +56,17 @@ namespace TBD.Psi.StudyComponents
         /// </summary>
         public Emitter<CoordinateSystem> Out { get; private set; }
 
+        /// <summary>
+        /// Gets the debug image emitter.
+        /// </summary>
+        public Emitter<Shared<Image>> DebugImageOut { get; private set; }
+
         private void ImageCB(Shared<Image> img, Envelope env)
         {
             if (this.receiveCalibration)
             {
                 var buffer = new ImageBuffer(img.Resource.Width, img.Resource.Height, img.Resource.ImageData, img.Resource.Stride);
-                var mat = this.detector.DetectArucoBoard(buffer);
+                var mat = this.detector.DetectArucoBoard(buffer, this.DebugImageOut.HasSubscribers);
                 if (mat != null)
                 {
                     var cs_mat = Matrix<double>.Build.DenseOfArray(mat);
@@ -70,6 +76,12 @@ namespace TBD.Psi.StudyComponents
                     var initial_solution = new CoordinateSystem(kinectBasis.Transpose() * cs_mat);
                     var transform = initial_solution.TransformBy(this.calibration.ColorPose);
                     this.Out.Post(transform, env.OriginatingTime);
+                }
+                // also post the debug image
+                if (this.DebugImageOut.HasSubscribers)
+                {
+                    // we assume the lower level already update the image
+                    this.DebugImageOut.Post(img, env.OriginatingTime);
                 }
             }
 

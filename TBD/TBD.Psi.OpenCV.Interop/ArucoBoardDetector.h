@@ -48,7 +48,7 @@ namespace TBD
 					return receiveCalibration_;
 				}
 
-				array<double, 2>^ DetectArucoBoard(ImageBuffer^ grayImage);
+				array<double, 2>^ DetectArucoBoard(ImageBuffer^ grayImage, bool drawAxis);
 			};
 		}
 	}

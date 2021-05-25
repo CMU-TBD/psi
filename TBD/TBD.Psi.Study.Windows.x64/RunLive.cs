@@ -22,7 +22,7 @@
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
                 // general settings
-                var azureKinectNum = 0;
+                var azureKinectNum = 3;
                 var kinect2Num = 0;
                 var mainNum = -1;
                 var liteModel = false; 
@@ -41,6 +41,13 @@
                 var bodyTracker = new BodyTracker(p);
                 var rosBodyPublisher = new ROSWorldSender(p, Constants.RosCoreAddress, Constants.RosClientAddress);
                 var rosAudioPublisher = new ROSAudioSender(p, Constants.RosCoreAddress, Constants.RosClientAddress);
+               
+
+                // study ROS Subscriber to link up topics
+                var rosListner = new ROSStudyListener(p, outputStore,"ws://192.168.0.152:9090");
+                rosListner.AddUtteranceListener("/robocept/action_feedback/voice", "robocept.utterance");
+                rosListner.AddUtteranceListener("/podi/action_feedback/voice", "podi.utterance");
+                rosListner.AddUtteranceListener("/robocept/utterance", "utterances");
 
                 // connect components
                 bodyMerger.PipeTo(bodyTracker);
@@ -67,7 +74,7 @@
 
                     var deviceName = $"azure{(mainNum != i ? i : 0)}";
                     k4a.ColorImage.EncodeJpeg(quality: Constants.JPEGEncodeQuality).Write($"{deviceName}.color", outputStore);
-                    k4a.DepthDeviceCalibrationInfo.Write($"{deviceName}.depth-calibration", outputStore);
+                    k4a.DepthDeviceCalibrationInfo.Write($"{deviceName}.depth-calibgithubration", outputStore);
                     k4a.Bodies.Write($"{deviceName}.bodies", outputStore);
                     bodyStreamValidator.AddStream(k4a.Bodies, deviceName);
                     k4a.DepthImage.EncodePng().Write($"{deviceName}.depth", outputStore);

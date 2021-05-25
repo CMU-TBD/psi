@@ -14,6 +14,11 @@ namespace TBD
 				return ret;
 			}
 
+			static ImageBuffer^ MatUnWrap(cv::Mat mat)
+			{
+				return gcnew ImageBuffer(mat.rows, mat.cols, System::IntPtr((void*)mat.data), mat.step);
+			}
+
 			void ArucoBoardDetector::SetCameraIntrinsics(array<double>^ intrinsics, array<double>^ radial, array<double>^ tangent)
 			{
 				if (radial->Length > 2) 
@@ -35,7 +40,17 @@ namespace TBD
 				receiveCalibration_ = true;
 			}
 
-			array<double, 2>^ ArucoBoardDetector::DetectArucoBoard(ImageBuffer^ grayImage)
+			bool compreIdArrays(std::vector<int> ids, std::vector<int> boardIds)
+			{
+				bool missing = false;
+				for (auto bid : boardIds) {
+					missing = (std::find(ids.begin(), ids.end(), bid) == ids.end());
+				}
+				return !missing;
+			}
+
+
+			array<double, 2>^ ArucoBoardDetector::DetectArucoBoard(ImageBuffer^ grayImage, bool drawAxis)
 			{
 				// create temporary variables
 				std::vector<int> ids;
@@ -50,7 +65,12 @@ namespace TBD
 				cv::aruco::detectMarkers(img, cvBoard->dictionary, corners, ids, cv::aruco::DetectorParameters::create(), rejectedCorners);
 				// cv::aruco::refineDetectedMarkers(img, cvBoard, corners, ids, rejectedCorners);
 				// if we can see the whole board & all the points
-				if (ids.size() == cvBoard->ids.size() && std::find(ids.begin(), ids.end(), 0) != ids.end()) {
+				if (drawAxis)
+				{
+					cv::aruco::drawDetectedMarkers(img, corners, ids);
+				}
+
+				if (ids.size() >= cvBoard->ids.size() && compreIdArrays(ids, cvBoard->ids)) {
 					cv::Mat obj_points, img_points;
 					// estimate the board
 					cv::aruco::estimatePoseBoard(corners, ids, cvBoard, *cameraMat_, *distCoeffs_, *rvecPtr, *tvecPtr, false);
@@ -60,6 +80,12 @@ namespace TBD
 					double p3 = tvecPtr->at<double>(2);
 					cv::Mat rot;
 					cv::Rodrigues(*rvecPtr, rot);
+
+					if (drawAxis)
+					{
+						cv::aruco::drawAxis(img, *cameraMat_, *distCoeffs_, *rvecPtr, *tvecPtr, 0.1);
+					}
+
 					return gcnew array<double, 2>(4, 4)
 					{
 						{ rot.at<double>(0), rot.at<double>(1), rot.at<double>(2), tvecPtr->at<double>(0)},

@@ -18,7 +18,7 @@ namespace TBD.Psi.Study
     using TBD.Psi.RosSharpBridge;
     using MathNet.Numerics.LinearAlgebra;
 
-    public class Sandbox
+    public class Sandbox2
     {
         public static void Run()
         {
@@ -30,10 +30,6 @@ namespace TBD.Psi.Study
             {
                 var transformationSettingPath = Path.Combine(Constants.ResourceLocations, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
                 var transformationTree = new TransformationTreeComponent(p, 1000, transformationSettingPath);
-                Console.WriteLine(transformationTree.QueryTransformation("world", "baxterBase"));
-                Console.WriteLine(Utils.GetQuaternionFromCoordinateSystem(transformationTree.QueryTransformation("world", "baxterBase")));
-                return;
-                
                 var outputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, "sandbox");
                 var outputStore = PsiStore.Create(p, "sandbox", Path.Combine(Constants.OperatingDirectory, outputStorePath));
 

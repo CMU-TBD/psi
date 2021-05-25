@@ -39,6 +39,7 @@
                         OutputColor = true,
                         OutputDepth = true,
                         OutputCalibration = true,
+                        OutputImu = true,
                         DeviceIndex = i - 1,
                         Exposure = TimeSpan.FromMilliseconds(10),
                         WiredSyncMode = mainNum > 0 ? (mainNum == (i - 1) ? Microsoft.Azure.Kinect.Sensor.WiredSyncMode.Master : Microsoft.Azure.Kinect.Sensor.WiredSyncMode.Subordinate) : Microsoft.Azure.Kinect.Sensor.WiredSyncMode.Standalone,

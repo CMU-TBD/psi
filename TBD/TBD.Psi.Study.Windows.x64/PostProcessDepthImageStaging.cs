@@ -23,12 +23,9 @@ namespace TBD.Psi.Study
             {
                 // create input & output stores
                 var inputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, Constants.CalibrationSubDirectory);
-                var inputStore2Path = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, Constants.OperatingStore);
-
                 var outputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, @"depth-merger");
 
                 var inputStore = PsiStore.Open(p, Constants.CalibrationStoreName, inputStorePath);
-                var inputStore2 = PsiStore.Open(p, Constants.OperatingStore.Split('\\').Last().Split('.').First(), inputStore2Path);
                 var outputStore = PsiStore.Create(p, "depth-merger", outputStorePath);
 
                 //create transformation tree and build the relationships
@@ -60,13 +57,6 @@ namespace TBD.Psi.Study
                     {
                         return (m.Item1, m.Item2.DepthIntrinsics, transform);
                     }).Write($"{frameName}.depth", outputStore);
-
-                    // add pose for debugging
-                    var pose = inputStore2.OpenStream<CoordinateSystem>($"{deviceName}.pose");
-                    pose.Fuse(calibrationStream.First(), Available.Nearest<IDepthDeviceCalibrationInfo>()).Select(m =>
-                    {
-                        return m.Item1.TransformBy(transform);
-                    }).Write($"{frameName}.pose", outputStore);
                 }
 
                 transformationTree.Write("world", outputStore);

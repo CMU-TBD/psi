@@ -46,3 +46,34 @@ module RosMessageTypes =
             type Kind = { Bodies : HumanBody.Kind seq}
 
             let ToMessage { Bodies = bodies} = ["bodies", VariableArrayVal (Seq.map (HumanBody.ToMessage >> Seq.toList >> StructVal)  bodies |> Seq.toList)] |> Seq.ofList
+
+    module tbd_audio_msgs = 
+
+        module Utterance = 
+            let Def = { Type   = "tbd_audio_msgs/Utterance"
+                        MD5    = "6bfd764a5958bbe48136d8ac1b641f78"
+                        Fields = ["header", StructDef Standard.Header.Def.Fields
+                                  "text", StringDef
+                                  "confidence", Float32Def
+                                  "end_time", TimeDef
+                                  "word_list", VariableArrayDef StringDef
+                                  "timing_list", VariableArrayDef UInt16Def]}
+
+            type Kind = { Header: Standard.Header.Kind
+                          Text: string
+                          Confidence: single
+                          EndTime: DateTime
+                          WordList: string seq
+                          TimingList: uint16 seq}
+
+            let FromMessage m = m |> Seq.toList |> function ["header",          StructVal header
+                                                             "text",            StringVal text
+                                                             "confidence",      Float32Val confidence
+                                                             "end_time",        TimeVal (sec, nsec)
+                                                             "word_list",       VariableArrayVal word_list
+                                                             "timing_list",     VariableArrayVal timing_list] -> { Header        = Standard.Header.FromMessage header
+                                                                                                                   Text          = text
+                                                                                                                   Confidence    = confidence
+                                                                                                                   EndTime       = toDateTime sec nsec
+                                                                                                                   WordList      = List.map (function StringVal str -> str | _ -> malformed ()) word_list
+                                                                                                                   TimingList      = List.map (function UInt16Val timing -> timing | _ -> malformed ()) timing_list } | _ -> malformed ()

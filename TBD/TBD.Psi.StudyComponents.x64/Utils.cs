@@ -13,7 +13,7 @@ namespace TBD.Psi.StudyComponents
     using Microsoft.Psi.AzureKinect;
     using Quaternion = System.Numerics.Quaternion;
 
-    internal class Utils
+    public class Utils
     {
         /// <summary>
         /// Convert quaternion to Axis Angle. Implement algorithm from
@@ -71,7 +71,7 @@ namespace TBD.Psi.StudyComponents
             return (dist, rotDiff);
         }
 
-        internal static System.Numerics.Quaternion GetQuaternionFromCoordinateSystem(CoordinateSystem cs)
+        public static System.Numerics.Quaternion GetQuaternionFromCoordinateSystem(CoordinateSystem cs)
         {
 
             var rotMat = cs.GetRotationSubMatrix();

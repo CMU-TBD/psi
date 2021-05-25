@@ -18,26 +18,35 @@ namespace TBD.Psi.Study
     {
         public static void Run()
         {
+            var baxterPositionLines = new List<string>();
+            var floorPositionLines = new List<string>();
             var start_time = DateTime.Now;
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
                 // INFORMATION
-                // board information
-                var boardMarkerSize = 0.1145f;
-                var boardMarkerDist = 0.023f;
+                // main board information
+                var boardMarkerSize = 0.11f;
+                var boardMarkerDist = 0.022f;
                 var boardXNum = 2;
                 var boardYNum = 3;
+                var boardDict = "DICT_5X5_50";
 
-                /*                var boardMarkerSize = 0.077f;
-                                var boardMarkerDist = 0.00151f;
-                                var boardXNum = 4;
-                                var boardYNum = 6;*/
-
+                // baxter face board information
+                var faceMarkerSize = 0.063f;
+                var facedMarkerDist = 0.0095f;
+                var faceXNum = 2;
+                var faceYNum = 2;
+                var faceDict = TBD.Psi.OpenCV.ArucoDictionary.DICT_4X4_50;
+                var faceFirstMaker = 30;
                 // baxter tag information
-                var baxterInViewDeviceName = "azure3";
-                var baxterTagId = 0;
-                var baxterMarkerSize = 0.045f;
-                IProducer<CoordinateSystem> baxterTagSource = null;
+                var baxterInViewDeviceName = "azure2";
+                //floor board
+                var floorBoardSize = 0.1145f;
+                var floorBoardMarkerDist = 0.023f;
+                var floorBoarddXNum = 2;
+                var floorBoardYNum = 3;
+                var floorBoardDict = TBD.Psi.OpenCV.ArucoDictionary.DICT_4X4_50;
+                var floorBoardInViewDeviceName = "azure2";
 
 
                 var deliveryPolicy = DeliveryPolicy.SynchronousOrThrottle;
@@ -51,7 +60,7 @@ namespace TBD.Psi.Study
                 var outputStore = PsiStore.Create(p, "board-detection", outputStorePath);
 
                 // create the calibration tool
-                var calibrationMerger = new CalibrationMerger(p, outputStore, boardXNum, boardYNum, boardMarkerSize, boardMarkerDist, "DICT_4X4_100", deliveryPolicy);
+                var calibrationMerger = new CalibrationMerger(p, outputStore, boardXNum, boardYNum, boardMarkerSize, boardMarkerDist, boardDict, deliveryPolicy);
 
                 // list of color streams
                 var colorStreams = inputStore.AvailableStreams.Where(s => s.Name.EndsWith(".color"));
@@ -63,29 +72,44 @@ namespace TBD.Psi.Study
                     if (inputStore.AvailableStreams.Select(s => s.Name).Contains(calibrationStreamName))
                     {
                         Console.WriteLine($"Adding Calibration of {deviceName}");
-                        var color = inputStore.OpenStream<Shared<EncodedImage>>(colorStream.Name);
+                        var color = inputStore.OpenStream<Shared<EncodedImage>>(colorStream.Name).Decode(deliveryPolicy);
                         var calibration = inputStore.OpenStream<IDepthDeviceCalibrationInfo>(calibrationStreamName);
                         if (deviceName.StartsWith("k2"))
                         {
-                            calibrationMerger.AddSavedStreams(color.Decode(deliveryPolicy).Flip(FlipMode.AlongVerticalAxis, deliveryPolicy).Out, calibration.Out, deviceName);
+                            calibrationMerger.AddSavedStreams(color.Flip(FlipMode.AlongVerticalAxis, deliveryPolicy).Out, calibration.Out, deviceName);
 
                         }
                         else
                         {
-                            calibrationMerger.AddSavedStreams(color.Decode(deliveryPolicy).Out, calibration.Out, deviceName);
+                            calibrationMerger.AddSavedStreams(color.Out, calibration.Out, deviceName);
                         }
 
-
-                        // handle baxter tag
+                        // handle baxter's face information
                         if (deviceName == baxterInViewDeviceName)
                         {
-                            var detector = new TagDetector(p, baxterMarkerSize, OpenCV.ArucoDictionary.DICT_APRILTAG_16h5);
-                            color.Decode().ToGray().PipeTo(detector.ImageIn);
-                            calibration.PipeTo(detector.CalibrationIn);
-                            // handle output 
-                            baxterTagSource = detector.Where(m => m.Where(x => x.Item1 == baxterTagId).Any()).Select(m => m.First().Item2);
-                            baxterTagSource.Write("baxter-tag0", outputStore);
+                            var baxterBoardDetector = new BoardDetector(p, faceXNum, faceYNum, faceMarkerSize, facedMarkerDist, faceDict, faceFirstMaker);
+                            calibration.PipeTo(baxterBoardDetector.CalibrationIn);
+                            color.ToGray().PipeTo(baxterBoardDetector.ImageIn);
+                            baxterBoardDetector.Out.Write("baxterFace", outputStore);
+                            baxterBoardDetector.DebugImageOut.EncodeJpeg().Write("debug_tag_image", outputStore);
+                            baxterBoardDetector.Out.Do(m =>
+                            {
+                                baxterPositionLines.Add(String.Join(",", m.Storage.ToRowMajorArray()));
+                            });
                         }
+                        // handle floor board
+                        if (deviceName == floorBoardInViewDeviceName)
+                        {
+                            var floorBoardDetector = new BoardDetector(p, floorBoarddXNum, floorBoardYNum, floorBoardSize, floorBoardMarkerDist, floorBoardDict);
+                            calibration.PipeTo(floorBoardDetector.CalibrationIn);
+                            color.ToGray().PipeTo(floorBoardDetector.ImageIn);
+                            floorBoardDetector.Out.Write("floorBoard", outputStore);
+                            floorBoardDetector.Out.Do(m =>
+                            {
+                                floorPositionLines.Add(String.Join(",", m.Storage.ToRowMajorArray()));
+                            });
+                        }
+
                     }
 
                 }
@@ -111,19 +135,7 @@ namespace TBD.Psi.Study
                      poseCollection[m.Item2][m.Item4].Item1.Add(new CoordinateSystem(m.Item1));
                      poseCollection[m.Item2][m.Item4].Item2.Add(new CoordinateSystem(m.Item3));
                  }, deliveryPolicy);
-
-
-                var tagCSVLines = new List<string>();
-                if (baxterTagSource != null)
-                {
-                    baxterTagSource.Do(m =>
-                    {
-                        tagCSVLines.Add($"baxter,{baxterInViewDeviceName},{String.Join(",", m.Storage.ToRowMajorArray())}");
-
-                    });
-                }
-                
-                
+            
                 p.ProposeReplayTime(TimeInterval.LeftBounded(DateTime.UtcNow));
                 Generators.Repeat(p, true, 2, TimeSpan.FromSeconds(180));
 
@@ -152,15 +164,12 @@ namespace TBD.Psi.Study
                 }
                 // generate file path
                 var csvPath = Path.Combine(Constants.ResourceLocations, $"board-{Constants.StudyType}-{Constants.PartitionIdentifier}.csv");
-                var tagCSVPath = Path.Combine(Constants.ResourceLocations, $"tags-{Constants.StudyType}-{Constants.PartitionIdentifier}.csv");
-                int index = 0;
-                while (File.Exists(csvPath))
-                {
-                    csvPath = Path.Combine(Constants.ResourceLocations, $"board-{Constants.StudyType}-{Constants.PartitionIdentifier}-{++index}.csv");
-                    tagCSVPath = Path.Combine(Constants.ResourceLocations, $"tags-{Constants.StudyType}-{Constants.PartitionIdentifier}-{++index}.csv");
-                }
+                var tagCSVPath = Path.Combine(Constants.ResourceLocations, $"baxter-screen-{Constants.StudyType}-{Constants.PartitionIdentifier}.csv");
+                var floorCSVPath = Path.Combine(Constants.ResourceLocations, $"floor-{Constants.StudyType}-{Constants.PartitionIdentifier}.csv");
+
                 System.IO.File.WriteAllLines(csvPath, lx);
-                System.IO.File.WriteAllLines(tagCSVPath, tagCSVLines);
+                System.IO.File.WriteAllLines(tagCSVPath, baxterPositionLines);
+                System.IO.File.WriteAllLines(floorCSVPath, floorPositionLines);
             }
             Console.WriteLine($"total time:{(DateTime.Now - start_time).TotalSeconds}");
         }

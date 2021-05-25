@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
@@ -9,10 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MathNet.Spatial.Signed" Version="0.6.0" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\..\..\TBD.Psi.Components\TBD.Psi.RosSharpBridge.Windows\TBD.Psi.RosSharpBridge.Windows.csproj" />
     <ProjectReference Include="..\..\Sources\Imaging\Microsoft.Psi.Imaging.Windows\Microsoft.Psi.Imaging.Windows.csproj" />
     <ProjectReference Include="..\..\Sources\Kinect\Microsoft.Psi.AzureKinect.x64\Microsoft.Psi.AzureKinect.x64.csproj" />
     <ProjectReference Include="..\..\Sources\Kinect\Microsoft.Psi.Kinect.Windows\Microsoft.Psi.Kinect.Windows.csproj" />
@@ -24,6 +21,10 @@
     <Reference Include="Microsoft.Azure.Kinect.BodyTracking">
       <HintPath>$(AzureKinectBodyTrackingSDKDir)\sdk\netstandard2.0\release\Microsoft.Azure.Kinect.BodyTracking.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MathNet.Spatial.Signed" Version="0.6.0" />
   </ItemGroup>
 
 </Project>
