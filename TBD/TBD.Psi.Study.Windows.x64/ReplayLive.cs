@@ -28,7 +28,7 @@
 
                     // Send
                     var trackedBodies = inputStore.OpenStream<List<HumanBody>>("tracked");
-                    var rosBodyPublisher = new ROSWorldSender(p, Constants.RosCoreAddress, Constants.RosClientAddress);
+                    var rosBodyPublisher = new ROSWorldSender(p, Constants.RosCoreAddress, Constants.RosClientAddress, useRealTime:true);
 
 
                     trackedBodies.PipeTo(rosBodyPublisher);

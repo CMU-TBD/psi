@@ -17,6 +17,7 @@ namespace TBD.Psi.StudyComponents
     /// </summary>
     public class ROSWorldSender : IConsumer<List<HumanBody>>
     {
+        private Pipeline pipeline;
         private const string TopicName = "/humans";
         private const string NodeName = "/psi_pub";
         private string rosCoreAddress = "";
@@ -25,18 +26,20 @@ namespace TBD.Psi.StudyComponents
         private RosNode.Node node;
         private uint msgSeq = 0;
         private bool running = false;
+        private bool useRealTime = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ROSWorldSender"/> class.
         /// </summary>
         /// <param name="pipeline">Current pipeline.</param>
-        public ROSWorldSender(Pipeline pipeline, string rosCoreAddress, string rosClientAddress)
+        public ROSWorldSender(Pipeline pipeline, string rosCoreAddress, string rosClientAddress, bool useRealTime = false)
         {
+            this.pipeline = pipeline;
             this.rosCoreAddress = rosCoreAddress;
             this.rosClientAddress = rosClientAddress;
             this.In = pipeline.CreateReceiver<List<HumanBody>>(this, this.ReceiveBodies, nameof(this.In));
             pipeline.PipelineRun += this.PipelineStartCallback;
-            
+            this.useRealTime = useRealTime;
         }
 
         private void InitializeRosNode()
@@ -102,7 +105,7 @@ namespace TBD.Psi.StudyComponents
                     var bodyKind = new RosMessageTypes.tbd_ros_msgs.HumanBody.Kind(
                         new Microsoft.Ros.RosMessageTypes.Standard.Header.Kind(
                             this.msgSeq++,
-                            env.OriginatingTime,
+                            this.useRealTime ? DateTime.UtcNow  : env.OriginatingTime,
                             "PsiWorld"
                         ),
                         body.Id,

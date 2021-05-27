@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace TBD.Psi.Study
 {
+    using Microsoft.Azure.Kinect.Sensor;
+
     public class Constants
     {
         // General
@@ -29,8 +31,14 @@ namespace TBD.Psi.Study
                             { "azure2", "mainCam"},
                             { "azure3", "leftCam"},
                         };
+        public static Dictionary<int, WiredSyncMode> SensorSyncMode = new Dictionary<int, WiredSyncMode>()
+                        {
+                            { 1, WiredSyncMode.Subordinate},
+                            { 2, WiredSyncMode.Master},
+                            { 3, WiredSyncMode.Standalone},
+                        };
 
-        public static string PartitionIdentifier = "2021-05-21";
+        public static string PartitionIdentifier = "2021-05-25";
         public static string TestRecordingPath = @"live-recordings\live-recording.0000";
         public static string OperatingStore = @"post-board\board-detection.0000";
         public static string OperatingStoreSubPath = @"phantom-body-test\videodata3";

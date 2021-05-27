@@ -91,6 +91,7 @@ namespace TBD.Psi.StudyComponents
             {
                 greyImg.EncodeJpeg(quality: 80, deliveryPolicy).Write($"{name}.img", this.store);
                 boardDetector.Out.Write($"{name}.pose", this.store);
+                boardDetector.DebugImageOut.EncodeJpeg().Write($"{name}.debug", this.store);
             }
 
             // save the outgoing emitter

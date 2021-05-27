@@ -90,8 +90,8 @@ namespace TBD.Psi.Study
                             var baxterBoardDetector = new BoardDetector(p, faceXNum, faceYNum, faceMarkerSize, facedMarkerDist, faceDict, faceFirstMaker);
                             calibration.PipeTo(baxterBoardDetector.CalibrationIn);
                             color.ToGray().PipeTo(baxterBoardDetector.ImageIn);
-                            baxterBoardDetector.Out.Write("baxterFace", outputStore);
-                            baxterBoardDetector.DebugImageOut.EncodeJpeg().Write("debug_tag_image", outputStore);
+                            baxterBoardDetector.Out.Write("baxterHeadPose", outputStore);
+                            baxterBoardDetector.DebugImageOut.EncodeJpeg().Write("DebugTagInformation", outputStore);
                             baxterBoardDetector.Out.Do(m =>
                             {
                                 baxterPositionLines.Add(String.Join(",", m.Storage.ToRowMajorArray()));
@@ -113,7 +113,6 @@ namespace TBD.Psi.Study
                     }
 
                 }
-
 
                 calibrationMerger.Write("result", outputStore);
                 p.Diagnostics.Write("diagnotics", outputStore);
@@ -164,7 +163,7 @@ namespace TBD.Psi.Study
                 }
                 // generate file path
                 var csvPath = Path.Combine(Constants.ResourceLocations, $"board-{Constants.StudyType}-{Constants.PartitionIdentifier}.csv");
-                var tagCSVPath = Path.Combine(Constants.ResourceLocations, $"baxter-screen-{Constants.StudyType}-{Constants.PartitionIdentifier}.csv");
+                var tagCSVPath = Path.Combine(Constants.ResourceLocations, $"baxter-head-{Constants.StudyType}-{Constants.PartitionIdentifier}.csv");
                 var floorCSVPath = Path.Combine(Constants.ResourceLocations, $"floor-{Constants.StudyType}-{Constants.PartitionIdentifier}.csv");
 
                 System.IO.File.WriteAllLines(csvPath, lx);

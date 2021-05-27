@@ -48,6 +48,8 @@
                 rosListner.AddUtteranceListener("/robocept/action_feedback/voice", "robocept.utterance");
                 rosListner.AddUtteranceListener("/podi/action_feedback/voice", "podi.utterance");
                 rosListner.AddUtteranceListener("/robocept/utterance", "utterances");
+                rosListner.AddAudio("/robocept/audio", "audio");
+                rosListner.AddCSListener("/psi/podi_base", "podi");
 
                 // connect components
                 bodyMerger.PipeTo(bodyTracker);
@@ -115,7 +117,7 @@
                     OptimizeForSpeech = true,
                     Format = WaveFormat.Create16kHz1Channel16BitPcm()
                 });
-                audioSource.Write("audio", outputStore);
+                audioSource.Write("psi_audio", outputStore);
                 // send to ROS too.
                 audioSource.PipeTo(rosAudioPublisher);
 

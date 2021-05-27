@@ -7,11 +7,13 @@
         {
             // For recording in post-processing
             // RecordTestStreams.Run();
+            // RecordCalibrationStream.Run();
 
             // For Running Live
-            RunLive.Run();
+            // RunLive.Run();
+            RunRosMapCalibration.Run();
 
-            //  Post Processings
+            // Post Processings
             // PostProcessCalibration.Run();
             // PostProcessDepthImageStaging.Run();
             // PostProcessBodyMergerTest.Run();
