@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
@@ -9,11 +9,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="RosSharpUrdf" Version="1.7.0" />
+  </ItemGroup>
+
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\TBD.Psi.Components\TBD.Psi.TransformationTree\TBD.Psi.TransformationTree.csproj" />
     <ProjectReference Include="..\..\Sources\Audio\Microsoft.Psi.Audio.Windows\Microsoft.Psi.Audio.Windows.csproj" />
     <ProjectReference Include="..\..\Sources\Imaging\Microsoft.Psi.Imaging.Windows\Microsoft.Psi.Imaging.Windows.csproj" />
     <ProjectReference Include="..\..\Sources\Kinect\Microsoft.Psi.Kinect.Windows\Microsoft.Psi.Kinect.Windows.csproj" />
     <ProjectReference Include="..\TBD.Psi.StudyComponents.Windows.x64\TBD.Psi.StudyComponents.Windows.x64.csproj" />
     <ProjectReference Include="..\TBD.Psi.StudyComponents.x64\TBD.Psi.StudyComponents.x64.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
   </ItemGroup>
 </Project>

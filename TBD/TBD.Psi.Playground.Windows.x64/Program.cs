@@ -10,7 +10,10 @@ namespace TBD.Psi.Playground.Windows.x64
     {
         static void Main(string[] args)
         {
-            ONNXYoloExample.Run();
+            // ONNXYoloExample.Run();
+            // URDFSave.Run();
+            // RosBagMerger.Run();
+            RosReceiverTest.Run();
         }
     }
 }

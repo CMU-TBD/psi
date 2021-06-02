@@ -44,12 +44,13 @@
                
 
                 // study ROS Subscriber to link up topics
-                var rosListner = new ROSStudyListener(p, outputStore,"ws://192.168.0.152:9090");
-                rosListner.AddUtteranceListener("/robocept/action_feedback/voice", "robocept.utterance");
-                rosListner.AddUtteranceListener("/podi/action_feedback/voice", "podi.utterance");
-                rosListner.AddUtteranceListener("/robocept/utterance", "utterances");
-                rosListner.AddAudio("/robocept/audio", "audio");
-                rosListner.AddCSListener("/psi/podi_base", "podi");
+                var rosListner = new ROSStudyListener(p,"ws://192.168.0.152:9090");
+                rosListner.AddUtteranceListener("/robocept/action_feedback/voice").Write("robocept.utterances", outputStore);
+                rosListner.AddUtteranceListener("/podi/action_feedback/voice").Write("podi.utterances", outputStore);
+                rosListner.AddUtteranceListener("/robocept/utterance").Write("utterances", outputStore);
+                rosListner.AddAudio("/robocept/audio").Write("audio", outputStore);
+                rosListner.AddCSListener("/psi/podi_base").Write("podi.pose", outputStore);
+                rosListner.AddBaxterState("/robot/joint_states").Write("baxter.joint_states", outputStore);
 
                 // connect components
                 bodyMerger.PipeTo(bodyTracker);

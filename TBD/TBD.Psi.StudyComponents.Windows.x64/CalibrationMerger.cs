@@ -30,10 +30,10 @@ namespace TBD.Psi.StudyComponents
         private DeliveryPolicy deliveryPolicy;
         private ArucoDictionary dictName;
         private TimeSpan timeRange = TimeSpan.FromMilliseconds(15);
-        private PsiExporter store = null;
+        private Exporter store = null;
         private bool saveInputToStore = false;
 
-        public CalibrationMerger(Pipeline p, PsiExporter store, int numX, int numY, double markerLength, double markerSeperation, string dictName, DeliveryPolicy deliveryPolicy = null)
+        public CalibrationMerger(Pipeline p, Exporter store, int numX, int numY, double markerLength, double markerSeperation, string dictName, DeliveryPolicy deliveryPolicy = null)
             : this(p, numX, numY, markerLength, markerSeperation, dictName)
         {
             this.store = store;

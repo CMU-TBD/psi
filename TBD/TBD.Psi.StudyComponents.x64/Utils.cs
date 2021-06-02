@@ -12,6 +12,7 @@ namespace TBD.Psi.StudyComponents
     using Microsoft.Azure.Kinect.BodyTracking;
     using Microsoft.Psi.AzureKinect;
     using Quaternion = System.Numerics.Quaternion;
+ 
 
     public class Utils
     {
@@ -121,7 +122,7 @@ namespace TBD.Psi.StudyComponents
 
         internal static CoordinateSystem ConstructCoordinateSystem(Vector3D origin, Quaternion q)
         {
-            var transMat = Matrix.Build.DenseIdentity(4, 4);
+            var transMat = MathNet.Numerics.LinearAlgebra.Double.DenseMatrix.CreateIdentity(4);
             double sqw = q.W * q.W;
             double sqx = q.X * q.X;
             double sqy = q.Y * q.Y;

@@ -1,4 +1,4 @@
-﻿namespace TBD.Psi.Study
+﻿namespace TBD.Psi.Study.Calibration
 {
     using System;
     using System.IO;
@@ -8,6 +8,7 @@
     using System.Threading.Tasks;
     using Microsoft.Azure.Kinect.Sensor;
     using Microsoft.Psi;
+    using Microsoft.Psi.Data;
     using Microsoft.Psi.AzureKinect;
     using Microsoft.Psi.Kinect;
     using Microsoft.Psi.Imaging;
@@ -17,11 +18,16 @@
     {
         public static void Run()
         {
+            // Create a calibration stream
+            var datasetIdentifier = Constants.CalibrationDatasetIdentifier;
+            var datasetRootPath = Path.Combine(Constants.RootPath, "calibration", datasetIdentifier);
+            var dataset = new Dataset(datasetIdentifier);
+
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
-                //create path
-                var storePath = Path.Combine(Constants.RecordMainDirectory, DateTime.Today.ToString("yyyy-MM-dd"), Constants.RecordFolderName);
-                var store = PsiStore.Create(p, Constants.RecordStoreName, storePath);
+                //create the recording store
+                var store = PsiStore.Create(p,"calibration-recording", datasetRootPath);
+                dataset.AddSessionFromPsiStore("calibration-recording", store.Path, datasetIdentifier, "recording");
 
                 // general settings
                 var azureKinectNum = 3;
@@ -71,6 +77,7 @@
                 Console.ReadLine();
                 Console.WriteLine("Ending ...");
             }
+            dataset.Save(Path.Combine(datasetRootPath, "dataset.pds"));
         }
     }
 }

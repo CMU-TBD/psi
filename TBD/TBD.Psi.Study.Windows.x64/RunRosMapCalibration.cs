@@ -62,7 +62,7 @@ namespace TBD.Psi.Study
                 });
 
                 var podiBoardDetector = new BoardDetector(p, podiXNum, podiYNum, podiMarkerSize, podiMarkerDist, podiDict, podiFirstMaker);
-                var rosListner = new ROSStudyListener(p, outputStore, "ws://192.168.0.152:9090");
+                var rosListner = new ROSStudyListener(p, "ws://192.168.0.152:9090");
                 var podiPose = rosListner.AddCSListener("/psi/marker_in_map");
                 azure.DepthDeviceCalibrationInfo.PipeTo(podiBoardDetector.CalibrationIn);
                 azure.ColorImage.ToGray().PipeTo(podiBoardDetector.ImageIn);

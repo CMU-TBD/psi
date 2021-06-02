@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Microsoft.Psi.PsiStudio": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}
