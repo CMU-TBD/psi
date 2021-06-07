@@ -17,8 +17,8 @@ namespace TBD.Psi.Study
         // Derived
         public static string CalibrationDatasetIdentifier = $"{PartitionIdentifier}-calibration";
 
-
-        public static string DatasetPath = @"E:\Data\Dataset\multi_robot_study.pds";
+        // post study dataset path 
+        public static string DatasetPath = @"E:\Study-Data\X002\X002.pds";
 
         // General
         public static int JPEGEncodeQuality = 60;

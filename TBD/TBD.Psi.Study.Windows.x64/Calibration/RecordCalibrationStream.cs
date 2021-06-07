@@ -22,13 +22,12 @@
             var datasetIdentifier = Constants.CalibrationDatasetIdentifier;
             var datasetRootPath = Path.Combine(Constants.RootPath, "calibration", datasetIdentifier);
             var dataset = new Dataset(datasetIdentifier);
-
+            var storePath = "";
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
                 //create the recording store
                 var store = PsiStore.Create(p,"calibration-recording", datasetRootPath);
-                dataset.AddSessionFromPsiStore("calibration-recording", store.Path, datasetIdentifier, "recording");
-
+                storePath = store.Path;
                 // general settings
                 var azureKinectNum = 3;
                 var kinect2Num = 0;
@@ -72,11 +71,13 @@
                 }
 
                 p.Diagnostics.Write("diagnostics", store);
+                // Run for 10 seconds
                 p.RunAsync();
-                Console.WriteLine("Press to End");
-                Console.ReadLine();
+                p.WaitAll(15000); 
                 Console.WriteLine("Ending ...");
             }
+            // add it to 
+            dataset.AddSessionFromPsiStore("calibration-recording", storePath, datasetIdentifier, "recording");
             dataset.Save(Path.Combine(datasetRootPath, "dataset.pds"));
         }
     }

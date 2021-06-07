@@ -16,11 +16,11 @@ namespace TBD.Psi.Playground.Windows.x64
         {
             using (var p = Pipeline.Create())
             {
-                var rosListner = new ROSStudyListener(p, "ws://172.17.86.92:9090");
-                rosListner.AddCSListener("pose").Do(m =>
-                {
-                    Console.WriteLine("Receive");
-                });
+                var store = PsiStore.Create(p, "state", @"E:\Data\playground");
+                var rosListner = new ROSStudyListener(p, "ws://172.17.86.94:9090");
+                var stateTracker = new StateTracker(p);
+                rosListner.AddStringListener("/study/state").PipeTo(stateTracker);
+                stateTracker.Write("state", store);
                 p.RunAsync();
                 Console.ReadLine();
             }

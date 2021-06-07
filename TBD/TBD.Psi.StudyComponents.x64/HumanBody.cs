@@ -13,6 +13,7 @@ namespace TBD.Psi.StudyComponents
 
     public class HumanBody
     {
+        private string gazeTarget = "";
         List<JointId> jointList = new List<JointId>();
         Dictionary<JointId, JointConfidenceLevel> jointConfidenceLevels = new Dictionary<JointId, JointConfidenceLevel>();
 
@@ -132,6 +133,18 @@ namespace TBD.Psi.StudyComponents
                     return new Ray3D(origin.ToPoint3D(), direction);
                 }
                 return null;
+            }
+        }
+
+        public string GazeTarget
+        {
+            set
+            {
+                this.gazeTarget = value;
+            }
+            get
+            {
+                return this.gazeTarget;
             }
         }
 

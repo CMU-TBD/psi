@@ -13,7 +13,8 @@ namespace TBD.Psi.Playground.Windows.x64
             // ONNXYoloExample.Run();
             // URDFSave.Run();
             // RosBagMerger.Run();
-            RosReceiverTest.Run();
+            //RosReceiverTest.Run();
+            TestBox.Run();
         }
     }
 }

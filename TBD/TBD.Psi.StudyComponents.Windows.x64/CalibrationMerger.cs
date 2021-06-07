@@ -33,7 +33,7 @@ namespace TBD.Psi.StudyComponents
         private Exporter store = null;
         private bool saveInputToStore = false;
 
-        public CalibrationMerger(Pipeline p, Exporter store, int numX, int numY, double markerLength, double markerSeperation, string dictName, DeliveryPolicy deliveryPolicy = null)
+        public CalibrationMerger(Pipeline p, Exporter store, int numX, int numY, double markerLength, double markerSeperation, ArucoDictionary dictName, DeliveryPolicy deliveryPolicy = null)
             : this(p, numX, numY, markerLength, markerSeperation, dictName)
         {
             this.store = store;
@@ -41,14 +41,14 @@ namespace TBD.Psi.StudyComponents
             this.deliveryPolicy = deliveryPolicy ?? DeliveryPolicy.Unlimited;
         }
 
-        public CalibrationMerger(Pipeline p, int numX, int numY, double markerLength, double markerSeperation, string dictName)
+        public CalibrationMerger(Pipeline p, int numX, int numY, double markerLength, double markerSeperation, ArucoDictionary dictName)
             : base(p)
         {
             this.numX = numX;
             this.numY = numY;
             this.markerLength = markerLength;
             this.markerSeperation = markerSeperation;
-            this.dictName = (ArucoDictionary) Enum.Parse(typeof(ArucoDictionary), dictName);
+            this.dictName = dictName;
             this.pipeline = p;
             this.pipeline.PipelineRun += this.PipelineStartEvent;
             this.zipper = new Zip<(CoordinateSystem, string, CoordinateSystem, string)>(this);

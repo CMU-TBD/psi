@@ -26,7 +26,11 @@ namespace TBD.Psi.Study.Calibration
 
         public static async Task _Run()
         {
-     
+            // var data
+            var baxterInViewDeviceName = "azure2";
+            var floorBoardInViewDeviceName = "azure2";
+
+
             // Open Dataset
             var dataset = Dataset.Load(Path.Combine(Constants.RootPath, "calibration", Constants.CalibrationDatasetIdentifier, "dataset.pds"));
             await dataset.CreateDerivedPartitionAsync(
@@ -72,14 +76,25 @@ namespace TBD.Psi.Study.Calibration
                             poseStream.Select(m => m.TransformBy(transform)).Write($"pose.board-{deviceName}", exporter);
                         }
 
-                        transformationTree.Write("pose.world", exporter);
-                        p.Diagnostics.Write("diagnostics", exporter);
+                        if (deviceName == baxterInViewDeviceName && importer.HasStream("board.baxter_head"))
+                        {
+                            var poseStream = importer.OpenStream<CoordinateSystem>("board.baxter_head");
+                            poseStream.Select(m => m.TransformBy(transform)).Write($"pose.board-baxter_head", exporter);
+                        }
+                        if (deviceName == floorBoardInViewDeviceName && importer.HasStream("board.floor"))
+                        {
+                            var poseStream = importer.OpenStream<CoordinateSystem>("board.floor");
+                            poseStream.Select(m => m.TransformBy(transform)).Write($"pose.board-floor", exporter);
+                        }
+
                     }
+                    transformationTree.Write("pose.world", exporter);
+                    p.Diagnostics.Write("diagnostics", exporter);
                 },
             "DepthCheck",
             true,
             "DepthCheck",
-            _ => Path.Combine(Constants.RootPath, "calibration", Constants.CalibrationDatasetIdentifier),
+            _ => Path.Combine(Constants.RootPath, "calibration", Constants.CalibrationDatasetIdentifier, "DepthCheck"),
             enableDiagnostics:true
             );
             dataset.Save(Path.Combine(Constants.RootPath, "calibration", Constants.CalibrationDatasetIdentifier, "dataset.pds"));

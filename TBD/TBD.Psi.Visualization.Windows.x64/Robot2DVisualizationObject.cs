@@ -45,14 +45,15 @@ namespace TBD.Psi.Visualization.Windows
                 this.rectangle.BeginEdit();
                 this.rectangle.Origin = new Win3D.Point3D(this.CurrentData.Item2[0], this.CurrentData.Item2[1], 0);
                 var theta = this.CurrentData.Item2[2];
-                this.rectangle.LengthDirection = new Win3D.Vector3D(Math.Cos(theta), Math.Sin(theta), 0);
+                var yLength = Math.Sin(theta);
+                this.rectangle.LengthDirection = new Win3D.Vector3D(Math.Cos(theta), -1*Math.Sin(theta), 0);
                 this.rectangle.Length = this.CurrentData.Item2[3];
                 this.rectangle.Width = this.CurrentData.Item2[4];
                 this.rectangle.EndEdit();
                 // add direction
                 this.direction.BeginEdit();
                 this.direction.Point1 = new Win3D.Point3D(this.CurrentData.Item2[0], this.CurrentData.Item2[1], 0);
-                this.direction.Point2 = new Win3D.Point3D(this.CurrentData.Item2[0] + Math.Cos(theta) * (this.rectangle.Length/2), this.CurrentData.Item2[1] + Math.Sin(theta) * (this.rectangle.Length / 2), 0);
+                this.direction.Point2 = new Win3D.Point3D(this.CurrentData.Item2[0] + Math.Cos(theta) * (this.rectangle.Length/2), this.CurrentData.Item2[1] - Math.Sin(theta) * (this.rectangle.Length / 2), 0);
                 this.direction.EndEdit();
 
             }

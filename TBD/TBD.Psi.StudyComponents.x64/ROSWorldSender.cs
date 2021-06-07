@@ -102,10 +102,12 @@ namespace TBD.Psi.StudyComponents
                         jointList.Add(jointKind);
                     }
 
+                    // Note that the ROS module automaticallys converts UTC time to EPOCH time
+                    // used in ROS.
                     var bodyKind = new RosMessageTypes.tbd_ros_msgs.HumanBody.Kind(
                         new Microsoft.Ros.RosMessageTypes.Standard.Header.Kind(
                             this.msgSeq++,
-                            this.useRealTime ? DateTime.UtcNow  : env.OriginatingTime,
+                            this.useRealTime ? DateTime.UtcNow : env.OriginatingTime,
                             "PsiWorld"
                         ),
                         body.Id,

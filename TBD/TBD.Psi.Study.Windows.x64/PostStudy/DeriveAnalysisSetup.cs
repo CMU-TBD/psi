@@ -14,8 +14,10 @@ namespace TBD.Psi.Study.PostStudy
     using MathNet.Spatial.Euclidean;
     using TBD.Psi.TransformationTree;
     using RosSharp.Urdf;
+    using Win3D = System.Windows.Media.Media3D;
+    using g3;
 
-    public class DeriveVisualize
+    public class DeriveAnalysisSetup
     {
         public static void Run()
         {
@@ -30,34 +32,39 @@ namespace TBD.Psi.Study.PostStudy
             await dataset.CreateDerivedPartitionAsync(
             (pipeline, importer, exporter) =>
             {
-                if (importer.HasStream("podi.pose"))
-                {                   
+                if (importer.HasStream("podi"))
+                {
+                 
                     // all the other manual conversions
                     var podiURDF = new Robot(@"D:\ROS\tbd_podi_description\urdf\podi.urdf");
-                    var podiPose = importer.OpenStream<CoordinateSystem>("podi.pose");
+                    var podiPose = importer.OpenStream<CoordinateSystem>("podi");
                     podiPose.Select(cs =>
                     {
-                        return (cs, podiURDF, new Dictionary<string, double>());
-                    }).Write("viz.podi", exporter);
+                        var x = new Line3f();
+                         var b = new Box3d();
+                        var podiHeight = 0.6;
+                        var originalFrame = cs.ToFrame3f();
+                        originalFrame.Translate(new Vector3f(0, 0, podiHeight / 2));
+                        return new Box3d(originalFrame, new Vector3f(0.3, 0.15, podiHeight/2));
+                    }).Write("pose.box", exporter);
                 }
                 // get position of baxter
-                if (importer.HasStream("world") && importer.HasStream("baxter.joint_states"))
+/*                if (importer.HasStream("world") && importer.HasStream("baxter.joint_states"))
                 {
                     var baxterURDF = new Robot(@"D:\ROS\baxter_description\urdf\baxter.urdf");
                     var treeStream = importer.OpenStream<TransformationTree<string>>("world");
-                    var jointStream = importer.OpenStream<Dictionary<string, double>>("baxter.joint_states");
                     jointStream.Join(treeStream, TimeSpan.FromMilliseconds(300)).Select( m =>
                     {
                         (var joints, var tree) = m;
                         var transform = tree.QueryTransformation("world", "baxterBase");
                         return (transform, baxterURDF, joints);
-                    }).Write("viz.baxter", exporter);
-                }
+                    }).Write("pose.baxter", exporter);
+                }*/
             },
-            "viz",
+            "analysisSetup",
             true,
-            "viz",
-            (session) => $"E:\\Study-Data\\{session.Name.Split('.').First()}\\viz\\{String.Join(".",session.Name.Split('.').Skip(1).ToArray())}\\"
+            "analysisSetup",
+            (session) => $"E:\\Study-Data\\{session.Name.Split('.').First()}\\analysisSetup\\{session.Name.Split('.')[1]}\\"
             );
             dataset.Save(Constants.DatasetPath);
         }

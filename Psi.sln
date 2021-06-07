@@ -224,7 +224,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.Visualization.Windo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.Utility", "..\TBD.Psi.Components\TBD.Psi.Utility\TBD.Psi.Utility.csproj", "{4C83F525-1AC4-4BA5-BA40-D51975025194}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TBD.Psi.RosBagStreamTool", "..\TBD.Psi.Components\TBD.Psi.RosBagStreamTool\TBD.Psi.RosBagStreamTool.csproj", "{96DE4B9D-1B4D-4E01-8382-228190559939}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.RosBagStreamTool", "..\TBD.Psi.Components\TBD.Psi.RosBagStreamTool\TBD.Psi.RosBagStreamTool.csproj", "{96DE4B9D-1B4D-4E01-8382-228190559939}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TBD.Psi.Geometry3Sharp.Windows", "TBD\TBD.Psi.Geometry3Sharp.Windows\TBD.Psi.Geometry3Sharp.Windows.csproj", "{1448925B-2556-4B44-917B-0AA14C782836}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1076,6 +1078,18 @@ Global
 		{96DE4B9D-1B4D-4E01-8382-228190559939}.Release|x64.Build.0 = Release|Any CPU
 		{96DE4B9D-1B4D-4E01-8382-228190559939}.Release|x86.ActiveCfg = Release|Any CPU
 		{96DE4B9D-1B4D-4E01-8382-228190559939}.Release|x86.Build.0 = Release|Any CPU
+		{1448925B-2556-4B44-917B-0AA14C782836}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1448925B-2556-4B44-917B-0AA14C782836}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1448925B-2556-4B44-917B-0AA14C782836}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1448925B-2556-4B44-917B-0AA14C782836}.Debug|x64.Build.0 = Debug|Any CPU
+		{1448925B-2556-4B44-917B-0AA14C782836}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1448925B-2556-4B44-917B-0AA14C782836}.Debug|x86.Build.0 = Debug|Any CPU
+		{1448925B-2556-4B44-917B-0AA14C782836}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1448925B-2556-4B44-917B-0AA14C782836}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1448925B-2556-4B44-917B-0AA14C782836}.Release|x64.ActiveCfg = Release|Any CPU
+		{1448925B-2556-4B44-917B-0AA14C782836}.Release|x64.Build.0 = Release|Any CPU
+		{1448925B-2556-4B44-917B-0AA14C782836}.Release|x86.ActiveCfg = Release|Any CPU
+		{1448925B-2556-4B44-917B-0AA14C782836}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1174,6 +1188,7 @@ Global
 		{BB1A7C11-BFCA-4B5E-9558-F83B010D383D} = {45A2AE97-3F0B-4C92-943F-C8B296E7DB6F}
 		{4C83F525-1AC4-4BA5-BA40-D51975025194} = {45A2AE97-3F0B-4C92-943F-C8B296E7DB6F}
 		{96DE4B9D-1B4D-4E01-8382-228190559939} = {45A2AE97-3F0B-4C92-943F-C8B296E7DB6F}
+		{1448925B-2556-4B44-917B-0AA14C782836} = {E228820A-569C-4B5E-8481-262043A0F786}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EAF15EE9-DCC5-411B-A9E5-7C2F3D132331}

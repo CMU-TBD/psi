@@ -23,21 +23,64 @@ namespace TBD.Psi.Visualization.Windows
     [VisualizationObject("Human Body 2D")]
     public class Human2DVisualizationObject : ModelVisual3DVisualizationObject<(uint, double[])>
     {
-        private EllipsoidVisual3D circle = new EllipsoidVisual3D() { Fill = new SolidColorBrush(Colors.White), RadiusZ = 0, RadiusX = 0.25, RadiusY = 0.25 };
-        private ArrowVisual3D pointer = new ArrowVisual3D() { Fill = new SolidColorBrush(Colors.HotPink), Diameter = 0.05 };
+        private EllipsoidVisual3D circle = new EllipsoidVisual3D() {RadiusZ = 0, RadiusX = 0.25, RadiusY = 0.25 };
+        private ArrowVisual3D pointer = new ArrowVisual3D() { Diameter = 0.05 };
+
+        private Color baseColor = Colors.White;
+        private Color arrowColor = Colors.Yellow;
+        private int radius = 250;
 
         public Human2DVisualizationObject()
         {
-
         }
 
         public override void NotifyPropertyChanged(string propertyName)
-        {
-            if (propertyName == nameof(this.Visible))
+       {
+            if (propertyName == nameof(this.ArrowColor) ||
+                propertyName == nameof(this.BaseColor) ||
+                propertyName == nameof(this.Radius))
+            {
+                this.updateVisuals();
+            }
+            else if (propertyName == nameof(this.Visible))
             {
                 this.UpdateVisibility();
             }
         }
+
+        /// <summary>
+        /// Gets or sets the base color.
+        /// </summary>
+        [DataMember]
+        [Description("Color of the human base.")]
+        public Color BaseColor
+        {
+            get { return this.baseColor; }
+            set { this.Set(nameof(this.BaseColor), ref this.baseColor, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the arrow color.
+        /// </summary>
+        [DataMember]
+        [Description("Color of the human arrow.")]
+        public Color ArrowColor
+        {
+            get { return this.arrowColor; }
+            set { this.Set(nameof(this.ArrowColor), ref this.arrowColor, value); }
+        }
+
+        /// <summary>
+        /// Gets or sets the radius.
+        /// </summary>
+        [DataMember]
+        [Description("Radius of the human. (mm)")]
+        public int Radius
+        {
+            get { return this.radius; }
+            set { this.Set(nameof(this.Radius), ref this.radius, value); }
+        }
+
 
         private Win3D.Matrix3D ToMatrix3D(CoordinateSystem cs)
         {
@@ -51,12 +94,18 @@ namespace TBD.Psi.Visualization.Windows
 
         public override void UpdateData()
         {
+            this.updateVisuals();
+        }
+
+        public void updateVisuals()
+        {
             if (this.CurrentData != default)
             {
                 this.pointer.BeginEdit();
                 this.pointer.Point1 = new Win3D.Point3D(this.CurrentData.Item2[0], this.CurrentData.Item2[1], 0);
                 var theta = this.CurrentData.Item2[2];
-                this.pointer.Point2 = new Win3D.Point3D(this.CurrentData.Item2[0] + Math.Cos(theta) * 0.25, this.CurrentData.Item2[1] + Math.Sin(theta) * 0.25, 0);
+                this.pointer.Point2 = new Win3D.Point3D(this.CurrentData.Item2[0] + Math.Cos(theta) * (this.radius/1000.0), this.CurrentData.Item2[1] + Math.Sin(theta) * (this.radius / 1000.0), 0);
+                this.pointer.Fill = new SolidColorBrush(this.arrowColor);
                 this.pointer.EndEdit();
 
                 var cs = new CoordinateSystem();
@@ -64,8 +113,10 @@ namespace TBD.Psi.Visualization.Windows
                 cs = cs.OffsetBy(new Vector3D(this.CurrentData.Item2[0], this.CurrentData.Item2[1], 0));
                 this.circle.BeginEdit();
                 this.circle.Transform = new Win3D.MatrixTransform3D(ToMatrix3D(cs));
+                this.circle.RadiusX = (this.radius / 1000.0);
+                this.circle.RadiusY = (this.radius / 1000.0);
+                this.circle.Fill = new SolidColorBrush(this.baseColor);
                 this.circle.EndEdit();
-
             }
             this.UpdateVisibility();
         }

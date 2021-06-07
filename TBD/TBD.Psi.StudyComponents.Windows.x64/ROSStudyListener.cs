@@ -19,6 +19,7 @@ namespace TBD.Psi.StudyComponents
         private Pipeline p;
         private PsiExporter store;
         private RosSharpBridge bridge;
+        private Dictionary<string, DateTime> lastMsgTime = new Dictionary<string, DateTime>();
 
 
         public ROSStudyListener(Pipeline p, string ws_uri)
@@ -27,15 +28,25 @@ namespace TBD.Psi.StudyComponents
             this.bridge = new RosSharpBridge(p, ws_uri);
         }
 
-        public IProducer<Tuple<string, TimeSpan>> AddUtteranceListener(string topicName, string storeName = "")
+        public IProducer<Tuple<string, TimeSpan>> AddUtteranceListener(string topicName)
         {
             var emitter = this.bridge.Subscribe<TBD.Psi.RosSharpBridge.Messages.Utterance>(topicName);
             return emitter.Process<TBD.Psi.RosSharpBridge.Messages.Utterance, Tuple<string, TimeSpan>>((m, e, o) =>
             {
-                var startTime = DateTimeOffset.FromUnixTimeSeconds(m.header.stamp.secs).DateTime + TimeSpan.FromTicks(m.header.stamp.nsecs / 100);
-                var endTime = DateTimeOffset.FromUnixTimeSeconds(m.end_time.secs).DateTime + TimeSpan.FromTicks(m.end_time.nsecs / 100);
-                o.Post(new Tuple<string, TimeSpan>(m.text, endTime - startTime), startTime);
+                var startTime = RosSharpBridge.ConvertStampToUTCDateTime(m.header.stamp);
+                var endTime = RosSharpBridge.ConvertStampToUTCDateTime(m.end_time);
+                o.Post(new Tuple<string, TimeSpan>(m.text, endTime - startTime), endTime);
             });
+        }
+
+        public IProducer<string> AddStringListener(string topicName)
+        {
+            return this.bridge.Subscribe<RosSharp.RosBridgeClient.MessageTypes.Std.String>(topicName)
+                .Process<RosSharp.RosBridgeClient.MessageTypes.Std.String, string>(
+                (m, e, o) =>
+                {
+                    o.Post(m.data, e.OriginatingTime);
+                });
         }
 
         public IProducer<CoordinateSystem> AddCSListener(string topicName)
@@ -60,7 +71,20 @@ namespace TBD.Psi.StudyComponents
                 mat[2, 2] = 1 - 2 * m.pose.orientation.x * m.pose.orientation.x - 2 * m.pose.orientation.y * m.pose.orientation.y;
 
                 var cs = new CoordinateSystem(mat);
-                o.Post(cs, e.OriginatingTime);
+                var rostime = RosSharpBridge.ConvertStampToUTCDateTime(m.header.stamp);
+
+                if (this.lastMsgTime.ContainsKey(topicName) && this.lastMsgTime[topicName] == rostime)
+                {
+                    return;
+                }
+                // also make sure the time is later than the pipeline start time.
+                if (rostime < this.p.StartTime)
+                {
+                    return;
+                }
+
+                o.Post(cs, rostime);
+                this.lastMsgTime[topicName] = rostime;
             });
         }
 
@@ -83,6 +107,5 @@ namespace TBD.Psi.StudyComponents
                 o.Post(buffer, e.OriginatingTime);
             });
         }
-
     }
 }
