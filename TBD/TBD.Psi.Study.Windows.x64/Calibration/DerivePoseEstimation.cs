@@ -12,6 +12,8 @@ namespace TBD.Psi.Study.Calibration
     using TBD.Psi.StudyComponents;
     using Microsoft.Psi.Calibration;
     using Microsoft.Psi.Imaging;
+    using Microsoft.Psi.Components;
+    using MathNet.Spatial.Euclidean;
 
     public class DeriveBoardEstimations
     {
@@ -35,13 +37,19 @@ namespace TBD.Psi.Study.Calibration
         public static async Task _Run(List<string> baxterPositionLines, List<string> floorPositionLines, List<string> sensorCalibrationLines)
         {
             var deliveryPolicy = DeliveryPolicy.SynchronousOrThrottle;
+
             // INFORMATION
-            // main board information
-            var boardMarkerSize = 0.11f;
-            var boardMarkerDist = 0.022f;
-            var boardXNum = 2;
-            var boardYNum = 3;
-            var boardDict = OpenCV.ArucoDictionary.DICT_5X5_50;
+            // all the calibration boards
+            var boardMarkerSize = 0.1145f;
+            var boardMarkerDist = 0.017f;
+            var boardXNum = 3;
+            var boardYNum = 2;
+            var boardDict = OpenCV.ArucoDictionary.DICT_4X4_50;
+            List<int> firstMarkerList = new List<int>() { 0, 6, 40 };
+
+            // which marker list is the floorboard
+            int[] floorBoardMarkers = { 0, 40};
+            var floorInViewDeviceName = "azure2";
 
             // baxter face board information
             var faceMarkerSize = 0.063f;
@@ -50,34 +58,38 @@ namespace TBD.Psi.Study.Calibration
             var faceYNum = 2;
             var faceDict = OpenCV.ArucoDictionary.DICT_4X4_50;
             var faceFirstMaker = 30;
-
-            // baxter tag information
             var baxterInViewDeviceName = "azure2";
-            //floor board
-            var floorBoardSize = 0.1145f;
-            var floorBoardMarkerDist = 0.023f;
-            var floorBoardXNum = 2;
-            var floorBoardYNum = 3;
-            var floorBoardDict = OpenCV.ArucoDictionary.DICT_4X4_50;
-            var floorBoardInViewDeviceName = "azure2";
-
-
+           
+          
             // Open Dataset
             var dataset = Dataset.Load(Path.Combine(Constants.RootPath, "calibration", Constants.CalibrationDatasetIdentifier, "dataset.pds"));
             await dataset.CreateDerivedPartitionAsync(
                 (p, importer, exporter) =>
                 {
-                    // create the calibration merger for the tags on the door
-                    var calibrationMerger = new CalibrationMerger(p, exporter, boardXNum, boardYNum, boardMarkerSize, boardMarkerDist, boardDict, deliveryPolicy);
-                    var calibrationMergerFloor = new CalibrationMerger(p, 
-                        exporter, 
-                        floorBoardXNum,
-                        floorBoardYNum,
-                        floorBoardSize,
-                        floorBoardMarkerDist,
-                        floorBoardDict, 
-                        deliveryPolicy
-                    );
+                    // create zipper to merger all the calibration input
+                    var zipper = new Zip<(CoordinateSystem, string, CoordinateSystem, string)>(p);
+                    // create a list of calibrators
+                    List<CalibrationMerger> calibrationMergerList = new List<CalibrationMerger>();
+                    foreach(var id in firstMarkerList)
+                    {
+                        var merger = new CalibrationMerger(p, exporter, boardXNum, boardYNum, boardMarkerSize, boardMarkerDist, boardDict, deliveryPolicy, id);
+                        merger.PipeTo(zipper.AddInput($"board-{id}"));
+                        calibrationMergerList.Add(merger);
+                        if (floorBoardMarkers.Contains(id))
+                        {
+                            merger.Do(m =>
+                            {
+                                if (m.Item2 == $"board.{floorInViewDeviceName}-{id}")
+                                {
+                                    floorPositionLines.Add($"{String.Join(",", m.Item1.Storage.ToRowMajorArray())},{id}");
+                                }
+                                else if (m.Item4 == $"board.{floorInViewDeviceName}-{id}")
+                                {
+                                    floorPositionLines.Add($"{String.Join(",", m.Item3.Storage.ToRowMajorArray())},{id}");
+                                }
+                            });
+                        }
+                    }
 
                     // list of color streams
                     for (var i = 1; i <= 3; i++)
@@ -90,9 +102,11 @@ namespace TBD.Psi.Study.Calibration
                             Console.WriteLine($"Adding Calibration of {deviceName}");
                             var color = importer.OpenStream<Shared<EncodedImage>>(colorStreamName).Decode(deliveryPolicy);
                             var calibration = importer.OpenStream<IDepthDeviceCalibrationInfo>(calibrationStreamName);
-                            // add to calibration tool
-                            calibrationMerger.AddSavedStreams(color.Out, calibration.Out, $"{deviceName}.door");
-                            calibrationMergerFloor.AddSavedStreams(color.Out, calibration.Out, $"{deviceName}.floor");
+                            // add them to each calibrator
+                            foreach(var merger in calibrationMergerList)
+                            {
+                                merger.AddSavedStreams(color.Out, calibration.Out, $"board.{deviceName}");
+                            }
 
                             // if detector for tag above baxter
                             if (deviceName == baxterInViewDeviceName)
@@ -108,23 +122,16 @@ namespace TBD.Psi.Study.Calibration
                                 });
                             }
 
-                            // if detector for the floor 
-                            if (deviceName == floorBoardInViewDeviceName)
+                            // if the detectors are the same
+                            if (deviceName == floorInViewDeviceName)
                             {
-                                var floorBoardDetector = new BoardDetector(p, floorBoardXNum, floorBoardYNum, floorBoardSize, floorBoardMarkerDist, floorBoardDict);
-                                calibration.PipeTo(floorBoardDetector.CalibrationIn);
-                                color.ToGray().PipeTo(floorBoardDetector.ImageIn);
-                                floorBoardDetector.Out.Write("board.floor", exporter);
-                                floorBoardDetector.Out.Do(m =>
-                                {
-                                    floorPositionLines.Add(String.Join(",", m.Storage.ToRowMajorArray()));
-                                });
+
                             }
+
                         }
                     }
 
-                    // add calibration information to the CSV.
-                    calibrationMergerFloor.Zip(calibrationMerger).Do(m =>
+                    zipper.Do(m =>
                     {
                         foreach (var entry in m)
                         {
@@ -133,9 +140,6 @@ namespace TBD.Psi.Study.Calibration
                             sensorCalibrationLines.Add(String.Join(",", cs2.Storage.ToRowMajorArray()) + $",{n2}");
                         }
                     });
-
-                    calibrationMerger.Write("sensor-calibration-poses", exporter);
-                    p.Diagnostics.Write("diagnotics", exporter);
                 },
             "BoardEstimation",
             true,

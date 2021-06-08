@@ -69,12 +69,18 @@ namespace TBD.Psi.Study.Calibration
                         }
 
                         // if we can find the pose of the board, add them
-                        var boardPoseName = $"{deviceName}.pose";
-                        if (importer.HasStream(boardPoseName))
+                        
+                        int[] markerLists = { 0, 6, 40 };
+                        foreach(var marker in markerLists)
                         {
-                            var poseStream = importer.OpenStream<CoordinateSystem>(boardPoseName);
-                            poseStream.Select(m => m.TransformBy(transform)).Write($"pose.board-{deviceName}", exporter);
+                            var boardPoseName = $"board.{deviceName}-{marker}.pose";
+                            if (importer.HasStream(boardPoseName))
+                            {
+                                var poseStream = importer.OpenStream<CoordinateSystem>(boardPoseName);
+                                poseStream.Select(m => m.TransformBy(transform)).Write($"pose.board-{deviceName}{marker}", exporter);
+                            }
                         }
+
 
                         if (deviceName == baxterInViewDeviceName && importer.HasStream("board.baxter_head"))
                         {

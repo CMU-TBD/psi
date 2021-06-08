@@ -25,6 +25,7 @@ namespace TBD.Psi.StudyComponents
         private Connector<(CoordinateSystem, string, CoordinateSystem, string)> outConnector;
         private int numX;
         private int numY;
+        private int firstMarker;
         private double markerLength;
         private double markerSeperation;
         private DeliveryPolicy deliveryPolicy;
@@ -33,21 +34,22 @@ namespace TBD.Psi.StudyComponents
         private Exporter store = null;
         private bool saveInputToStore = false;
 
-        public CalibrationMerger(Pipeline p, Exporter store, int numX, int numY, double markerLength, double markerSeperation, ArucoDictionary dictName, DeliveryPolicy deliveryPolicy = null)
-            : this(p, numX, numY, markerLength, markerSeperation, dictName)
+        public CalibrationMerger(Pipeline p, Exporter store, int numX, int numY, double markerLength, double markerSeperation, ArucoDictionary dictName, DeliveryPolicy deliveryPolicy = null, int firstMarker = 0)
+            : this(p, numX, numY, markerLength, markerSeperation, dictName, firstMarker)
         {
             this.store = store;
             this.saveInputToStore = true;
             this.deliveryPolicy = deliveryPolicy ?? DeliveryPolicy.Unlimited;
         }
 
-        public CalibrationMerger(Pipeline p, int numX, int numY, double markerLength, double markerSeperation, ArucoDictionary dictName)
+        public CalibrationMerger(Pipeline p, int numX, int numY, double markerLength, double markerSeperation, ArucoDictionary dictName, int firstMarker = 0)
             : base(p)
         {
             this.numX = numX;
             this.numY = numY;
             this.markerLength = markerLength;
             this.markerSeperation = markerSeperation;
+            this.firstMarker = firstMarker;
             this.dictName = dictName;
             this.pipeline = p;
             this.pipeline.PipelineRun += this.PipelineStartEvent;
@@ -67,7 +69,7 @@ namespace TBD.Psi.StudyComponents
 
         public void AddSavedStreams(Emitter<Shared<Image>> imgInput, Emitter<IDepthDeviceCalibrationInfo> calInput, string name)
         {
-            this.AddStreams(imgInput, calInput, name);
+            this.AddStreams(imgInput, calInput, $"{name}-{this.firstMarker}");
         }
 
         public void AddSensor(KinectSensor sensor, string name)
@@ -83,7 +85,7 @@ namespace TBD.Psi.StudyComponents
             calInput.PipeTo(calReceiver);
 
             // create board detector
-            var boardDetector = new BoardDetector(this, this.numX, this.numY, (float)this.markerLength, (float)this.markerSeperation, this.dictName);
+            var boardDetector = new BoardDetector(this, this.numX, this.numY, (float)this.markerLength, (float)this.markerSeperation, this.dictName, this.firstMarker);
             var greyImg = imgReceiver.ToGray(deliveryPolicy);
             greyImg.PipeTo(boardDetector.ImageIn, deliveryPolicy);
             calReceiver.PipeTo(boardDetector.CalibrationIn);

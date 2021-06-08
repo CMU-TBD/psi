@@ -27,8 +27,8 @@ namespace TBD.Psi.Study
             {
 
                 // baxter face board information
-                var podiMarkerSize = 0.063f;
-                var podiMarkerDist = 0.0095f;
+                var podiMarkerSize = 0.0585f;
+                var podiMarkerDist = 0.009f;
                 var podiXNum = 2;
                 var podiYNum = 2;
                 var podiDict = TBD.Psi.OpenCV.ArucoDictionary.DICT_4X4_50;

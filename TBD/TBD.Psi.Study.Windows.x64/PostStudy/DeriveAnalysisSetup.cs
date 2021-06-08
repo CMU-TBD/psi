@@ -40,8 +40,6 @@ namespace TBD.Psi.Study.PostStudy
                     var podiPose = importer.OpenStream<CoordinateSystem>("podi");
                     podiPose.Select(cs =>
                     {
-                        var x = new Line3f();
-                         var b = new Box3d();
                         var podiHeight = 0.6;
                         var originalFrame = cs.ToFrame3f();
                         originalFrame.Translate(new Vector3f(0, 0, podiHeight / 2));

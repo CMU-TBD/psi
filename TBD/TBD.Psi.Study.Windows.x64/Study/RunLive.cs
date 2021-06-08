@@ -50,8 +50,8 @@
 
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
-                var storePath = Path.Combine(basePath, "recording");
-                var outputStore = PsiStore.Create(p, $"{studyType}-recording", storePath);
+                var storePath = Path.Combine(basePath, "recording", $"{studyType}");
+                var outputStore = PsiStore.Create(p, "recording", storePath);
                 // session name must be unique. We going to create new names if the previous name exist, just in case there is some issue with recording
                 var sessionIndex = 0;
                 var sessionName = $"{participantID}.{studyType}.{sessionIndex}";
