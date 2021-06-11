@@ -15,7 +15,7 @@
             // RunRosMapCalibration.Run();
 
             // Replay of Lives Recordings 
-            // ReplayLive.Run();
+            // Replay.ReplayLive.Run();
 
             // Post Study
             // PostStudy.DatasetOrganization.Run();
@@ -24,7 +24,7 @@
             // PostStudy.Derive2DRecenter.Run();
             // PostStudy.DeriveAnalysisSetup.Run();
 
-            // Calibration Stack
+            // Calibration Stackz
             // Calibration.RecordCalibrationStream.Run();
             // Calibration.DeriveBoardEstimations.Run();
             // Calibration.DeriveDepthCheck.Run();

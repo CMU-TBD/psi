@@ -26,6 +26,12 @@ namespace TBD.Psi.StudyComponents
         {
             this.p = p;
             this.bridge = new RosSharpBridge(p, ws_uri);
+        } 
+
+        public void AddEmptySender(string topicName, IProducer<int> sender)
+        {
+            var receiver =  this.bridge.Publisher<RosSharp.RosBridgeClient.MessageTypes.Std.Empty>(topicName);
+            sender.Select(_ => new RosSharp.RosBridgeClient.MessageTypes.Std.Empty()).PipeTo(receiver);
         }
 
         public IProducer<Tuple<string, TimeSpan>> AddUtteranceListener(string topicName)

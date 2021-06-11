@@ -24,7 +24,7 @@
             Console.WriteLine("Enter Participant ID:");
             var participantID = Console.ReadLine();
             Console.WriteLine("Enter type:");
-            var studyType = Console.ReadLine();
+            var studyType = Console.ReadLine().ToLower();
 
 
             // general settings
@@ -74,6 +74,7 @@
                 var bodyMerger = new BodyMerger(p);
                 var bodyTracker = new BodyTracker(p);
                 var stateTracker = new StateTracker(p);
+                var azureHeartbeat = Generators.Repeat(p, 0, TimeSpan.FromSeconds(0.25));
                 var rosBodyPublisher = new ROSWorldSender(p, Constants.RosCoreAddress, Constants.RosClientAddress);
                 var rosAudioPublisher = new ROSAudioSender(p, Constants.RosCoreAddress, Constants.RosClientAddress);
                
@@ -92,6 +93,7 @@
                 bodyTracker.PipeTo(rosBodyPublisher);
                 rosListner.AddStringListener("/study/state").PipeTo(stateTracker);
                 stateTracker.Write("state", outputStore);
+                
 
                 // setup the cameras and add their data
                 for (var i = 1; i <= azureKinectNum; i++)
@@ -141,6 +143,11 @@
                     Console.WriteLine($"All body stream publishing at originating time:{m}");
                     return m;
                 }).Write("info.start_time", outputStore);
+                var heartbeatSignal = azureHeartbeat.Fuse(bodyStreamValidator.First(), Available.Nearest<DateTime>()).Select(m =>
+                {
+                    return m.Item1;
+                });
+                rosListner.AddEmptySender("/psi/azure_signal", heartbeatSignal);
 
                 // Start Pipeline
                 p.Diagnostics.Write("diagnostics", outputStore); 

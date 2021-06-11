@@ -1,4 +1,4 @@
-﻿namespace TBD.Psi.Study
+﻿namespace TBD.Psi.Study.Replay
 {
     using System;
     using System.Collections.Generic;
@@ -12,6 +12,7 @@
     using Microsoft.Psi.AzureKinect;
     using Microsoft.Psi.Imaging;
     using Microsoft.Psi.Kinect;
+    using Microsoft.Psi.Data;
     using TBD.Psi.StudyComponents;
     using TBD.Psi.TransformationTree;
 
@@ -21,19 +22,27 @@
         {
             while (true)
             {
+                var participantId = "T001";
+                var sessionName = $"{participantId}.delivery.4";
+                var startTimeSec = 40.0;
+                var durationSec = 10.0;
                 using (var p = Pipeline.Create(enableDiagnostics: true))
                 {
-                    var inputPath = Path.Combine(Constants.LiveOperatingDirectory, Constants.PartitionIdentifier, Constants.LiveFolderName, Constants.ReplayLiveStore);
-                    var inputStore = PsiStore.Open(p, Constants.LiveStoreName, inputPath);
+
+                    var dataset = Dataset.Load($@"E:\Study-Data\{participantId}\{participantId}.pds");
+                    var pickedSession = dataset.Sessions.Where(s => s.Name == sessionName).FirstOrDefault();
+                    var pickedPartition = pickedSession.Partitions.Where(m => m.Name == "recording").FirstOrDefault();
+
+                    
+                    var inputStore = PsiStore.Open(p, pickedPartition.StoreName, pickedPartition.StorePath);
 
                     // Send
                     var trackedBodies = inputStore.OpenStream<List<HumanBody>>("tracked");
                     var rosBodyPublisher = new ROSWorldSender(p, Constants.RosCoreAddress, Constants.RosClientAddress, useRealTime:true);
 
-
                     trackedBodies.PipeTo(rosBodyPublisher);
 
-                    var replayDescriptor = new ReplayDescriptor(inputStore.MessageOriginatingTimeInterval.Left + TimeSpan.FromSeconds(45), TimeSpan.FromSeconds(1));
+                    var replayDescriptor = new ReplayDescriptor(inputStore.MessageOriginatingTimeInterval.Left + TimeSpan.FromSeconds(startTimeSec), TimeSpan.FromSeconds(durationSec));
 
                     p.Run(replayDescriptor);
                 }
