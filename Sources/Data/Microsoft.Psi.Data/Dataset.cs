@@ -26,30 +26,67 @@ namespace Microsoft.Psi.Data
         /// </summary>
         public const string DefaultName = "Untitled Dataset";
 
+        private string name;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Dataset"/> class.
         /// </summary>
         /// <param name="name">The name of the new dataset. Default is <see cref="DefaultName"/>.</param>
-        /// <param name="savePath">The path to save the dataset for autosave and unparameterd save.<see cref="DefaultName"/>.</param>
-        /// <param name="autoSaveOnChange">Whether the dataset automatically autosave changes if a path is given. Default is false.</param>
+        /// <param name="filename">An optional filename that indicates the location to save the dataset.<see cref="DefaultName"/>.</param>
+        /// <param name="autoSave">Whether the dataset automatically autosave changes if a path is given (optional, default is false).</param>
+        /// <param name="useRelativePaths">Indicates whether to use full or relative store paths (optional, default is true).</param>
         [JsonConstructor]
-        public Dataset(string name = Dataset.DefaultName, string savePath = "", bool autoSaveOnChange = false)
+        public Dataset(string name = Dataset.DefaultName, string filename = "", bool autoSave = false, bool useRelativePaths = true)
         {
             this.Name = name;
-            this.CurrentSavePath = savePath;
-            this.AutoSaveChanges = autoSaveOnChange;
+            this.Filename = filename;
+            this.AutoSave = autoSave;
+            this.UseRelativePaths = useRelativePaths;
             this.InternalSessions = new List<Session>();
-            if (this.AutoSaveChanges && savePath == string.Empty)
+            if (this.AutoSave && filename == string.Empty)
             {
-                throw new ArgumentException("savepath needed to be provided for autosave dataset.");
+                throw new ArgumentException("filename needed to be provided for autosave dataset.");
             }
         }
+
+        /// <summary>
+        /// Event raise when the dataset's structure changed.
+        /// </summary>
+        public event EventHandler DatasetChanged;
 
         /// <summary>
         /// Gets or sets the name of this dataset.
         /// </summary>
         [DataMember]
-        public string Name { get; set; }
+        public string Name
+        {
+            get => this.name;
+            set
+            {
+                this.name = value;
+                this.OnDatasetChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the current save path of this dataset.
+        /// </summary>
+        public string Filename { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether autosave is enabled.
+        /// </summary>
+        public bool AutoSave { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to use full or relative store paths.
+        /// </summary>
+        public bool UseRelativePaths { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether changes to this dataset have been saved.
+        /// </summary>
+        public bool HasUnsavedChanges { get; private set; } = false;
 
         /// <summary>
         /// Gets or sets the current save path of this dataset.
@@ -99,8 +136,9 @@ namespace Microsoft.Psi.Data
         /// Loads a dataset from the specified file.
         /// </summary>
         /// <param name="filename">The name of the file that contains the dataset to be loaded.</param>
+        /// <param name="autoSave">A value to indicate whether to enable autosave (optional, default is false).</param>
         /// <returns>The newly loaded dataset.</returns>
-        public static Dataset Load(string filename)
+        public static Dataset Load(string filename, bool autoSave = false)
         {
             var serializer = JsonSerializer.Create(
                 new JsonSerializerSettings()
@@ -115,7 +153,10 @@ namespace Microsoft.Psi.Data
                 });
             using var jsonFile = File.OpenText(filename);
             using var jsonReader = new JsonTextReader(jsonFile);
-            return serializer.Deserialize<Dataset>(jsonReader);
+            var dataset = serializer.Deserialize<Dataset>(jsonReader);
+            dataset.AutoSave = autoSave;
+            dataset.Filename = filename;
+            return dataset;
         }
 
         /// <summary>
@@ -141,7 +182,7 @@ namespace Microsoft.Psi.Data
         {
             var session = new Session(this, sessionName);
             this.InternalSessions.Add(session);
-            this.UponChangingOperations();
+            this.OnDatasetChanged();
             return session;
         }
 
@@ -152,7 +193,7 @@ namespace Microsoft.Psi.Data
         public void RemoveSession(Session session)
         {
             this.InternalSessions.Remove(session);
-            this.UponChangingOperations();
+            this.OnDatasetChanged();
         }
 
         /// <summary>
@@ -171,30 +212,36 @@ namespace Microsoft.Psi.Data
                 }
             }
 
-            this.UponChangingOperations();
+            this.OnDatasetChanged();
         }
 
         /// <summary>
-        /// Saves this dataset to the specified file.
+        /// Saves this dataset.
         /// </summary>
-        /// <param name="filename">The name of the file to save this dataset into.</param>
-        /// <param name="useRelativePaths">Indicates whether to use full or relative store paths.</param>
-        public void Save(string filename = "", bool useRelativePaths = true)
+        /// <param name="filename">The filename that indicates the location to save the dataset.</param>
+        /// <param name="useRelativePaths">Indicates whether to use full or relative store paths (optional, default is empty).</param>
+        public void SaveAs(string filename, bool useRelativePaths = true)
         {
-            if (filename != string.Empty)
+            this.Filename = filename;
+            this.UseRelativePaths = useRelativePaths;
+            this.Save();
+        }
+
+        /// <summary>
+        /// Saves this dataset.
+        /// </summary>
+        public void Save()
+        {
+            if (this.Filename == string.Empty)
             {
-                this.CurrentSavePath = filename;
-            }
-            else if (this.CurrentSavePath == string.Empty)
-            {
-                throw new ArgumentException("filename to save the dataset must pe provided if no default paths are set.");
+                throw new ArgumentException("filename to save the dataset must be set before save operation.");
             }
 
             var serializer = JsonSerializer.Create(
                 new JsonSerializerSettings()
                 {
                     // pass the dataset filename in the context to allow relative store paths to be computed using the RelativePathConverter
-                    Context = useRelativePaths ? new StreamingContext(StreamingContextStates.File, this.CurrentSavePath) : default,
+                    Context = this.UseRelativePaths ? new StreamingContext(StreamingContextStates.File, this.Filename) : default,
                     Formatting = Formatting.Indented,
                     NullValueHandling = NullValueHandling.Ignore,
                     ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
@@ -202,10 +249,10 @@ namespace Microsoft.Psi.Data
                     TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
                     SerializationBinder = new SafeSerializationBinder(),
                 });
-            using var jsonFile = File.CreateText(this.CurrentSavePath);
+            using var jsonFile = File.CreateText(this.Filename);
             using var jsonWriter = new JsonTextWriter(jsonFile);
             serializer.Serialize(jsonWriter, this);
-            this.UnsavedChanges = false;
+            this.HasUnsavedChanges = false;
         }
 
         /// <summary>
@@ -220,7 +267,7 @@ namespace Microsoft.Psi.Data
             var session = new Session(this, sessionName ?? streamReader.Name);
             session.AddStorePartition(streamReader, partitionName);
             this.AddSession(session);
-            this.UponChangingOperations();
+            this.OnDatasetChanged();
             return session;
         }
 
@@ -247,11 +294,11 @@ namespace Microsoft.Psi.Data
                 var result = new TResult();
                 computeDerived(pipeline, importer, result);
 
-                var startTime = DateTime.Now;
+                var startTime = DateTime.UtcNow;
                 Console.WriteLine($"Computing derived features on {inputPartition.StorePath} ...");
                 pipeline.Run(ReplayDescriptor.ReplayAll);
 
-                var finishTime = DateTime.Now;
+                var finishTime = DateTime.UtcNow;
                 Console.WriteLine($" - Time elapsed: {(finishTime - startTime).TotalMinutes:0.00} min.");
 
                 results.Add(result);
@@ -421,26 +468,24 @@ namespace Microsoft.Psi.Data
                 }).ToList();
             var sessionDuration = this.Sessions.Select(s => s.OriginatingTimeInterval.Span.TotalSeconds).ToList();
 
-            await Task.Run(async () =>
+            for (int i = 0; i < this.Sessions.Count; i++)
             {
-                for (int i = 0; i < this.Sessions.Count; i++)
-                {
-                    var session = this.Sessions[i];
-                    await session.CreateDerivedPsiPartitionAsync(
-                        computeDerived,
-                        parameter,
-                        outputPartitionName,
-                        overwrite,
-                        outputStoreName ?? outputPartitionName,
-                        outputStorePathFunction(session) ?? session.Partitions.First().StorePath,
-                        replayDescriptor,
-                        deliveryPolicy,
-                        enableDiagnostics,
-                        progress != null ? new Progress<(string, double)>(tuple => progress.Report((tuple.Item1, (sessionStart[i] + tuple.Item2 * sessionDuration[i]) / totalDuration))) : null,
-                        cancellationToken);
-                }
-            });
-            this.UponChangingOperations();
+                var session = this.Sessions[i];
+                await session.CreateDerivedPsiPartitionAsync(
+                    computeDerived,
+                    parameter,
+                    outputPartitionName,
+                    overwrite,
+                    outputStoreName ?? outputPartitionName,
+                    outputStorePathFunction(session) ?? session.Partitions.First().StorePath,
+                    replayDescriptor,
+                    deliveryPolicy,
+                    enableDiagnostics,
+                    progress != null ? new Progress<(string, double)>(tuple => progress.Report((tuple.Item1, (sessionStart[i] + tuple.Item2 * sessionDuration[i]) / totalDuration))) : null,
+                    cancellationToken);
+            }
+
+            this.OnDatasetChanged();
         }
 
         /// <summary>
@@ -455,7 +500,26 @@ namespace Microsoft.Psi.Data
                 this.AddSessionFromPsiStore(store.Name, store.Path, store.Session, partitionName);
             }
 
-            this.UponChangingOperations();
+            this.OnDatasetChanged();
+        }
+
+        /// <summary>
+        /// Method called when structure of the dataset changed.
+        /// </summary>
+        public virtual void OnDatasetChanged()
+        {
+            if (this.AutoSave)
+            {
+                this.Save();
+            }
+            else
+            {
+                this.HasUnsavedChanges = true;
+            }
+
+            // raise the event.
+            EventHandler handler = this.DatasetChanged;
+            handler?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -471,7 +535,7 @@ namespace Microsoft.Psi.Data
             }
 
             this.InternalSessions.Add(session);
-            this.UponChangingOperations();
+            this.OnDatasetChanged();
         }
 
         [OnDeserialized]
