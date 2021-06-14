@@ -38,11 +38,11 @@
             Dataset dataset = null;
             if (!File.Exists(datasetPath))
             {
-                dataset = new Dataset($"{participantID}");
+                dataset = new Dataset($"{participantID}", autoSave:true);
             }
             else
             {
-                dataset = Dataset.Load(datasetPath);
+                dataset = Dataset.Load(datasetPath, autoSave: true);
             }
 
 
@@ -60,8 +60,6 @@
                     sessionName = $"{participantID}.{studyType}.{++sessionIndex}";
                 }
                 dataset.AddSessionFromPsiStore(outputStore.Name, outputStore.Path, sessionName:sessionName);
-                // save the dataset
-                dataset.Save(datasetPath);
 
 
                 // create a transformation tree that describe the environment

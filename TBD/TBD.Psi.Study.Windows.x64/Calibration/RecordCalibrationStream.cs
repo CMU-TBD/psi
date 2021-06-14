@@ -21,7 +21,7 @@
             // Create a calibration stream
             var datasetIdentifier = Constants.CalibrationDatasetIdentifier;
             var datasetRootPath = Path.Combine(Constants.RootPath, "calibration", datasetIdentifier);
-            var dataset = new Dataset(datasetIdentifier);
+            var dataset = new Dataset(datasetIdentifier, autoSave: true);
             var storePath = "";
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
@@ -78,7 +78,6 @@
             }
             // add it to 
             dataset.AddSessionFromPsiStore("calibration-recording", storePath, datasetIdentifier, "recording");
-            dataset.Save(Path.Combine(datasetRootPath, "dataset.pds"));
         }
     }
 }

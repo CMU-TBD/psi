@@ -32,7 +32,7 @@ namespace TBD.Psi.Study.Calibration
 
 
             // Open Dataset
-            var dataset = Dataset.Load(Path.Combine(Constants.RootPath, "calibration", Constants.CalibrationDatasetIdentifier, "dataset.pds"));
+            var dataset = Dataset.Load(Path.Combine(Constants.RootPath, "calibration", Constants.CalibrationDatasetIdentifier, "dataset.pds"), autoSave:true);
             await dataset.CreateDerivedPartitionAsync(
                 (p, importer, exporter) =>
                 {
@@ -103,7 +103,6 @@ namespace TBD.Psi.Study.Calibration
             _ => Path.Combine(Constants.RootPath, "calibration", Constants.CalibrationDatasetIdentifier, "DepthCheck"),
             enableDiagnostics:true
             );
-            dataset.Save(Path.Combine(Constants.RootPath, "calibration", Constants.CalibrationDatasetIdentifier, "dataset.pds"));
         }
     }
 }
