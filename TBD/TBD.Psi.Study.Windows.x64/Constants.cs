@@ -10,30 +10,11 @@ namespace TBD.Psi.Study
 
     public class Constants
     {
-
-        public static string RootPath = @"E:\Study-Data";
-        public static string StudyType = "lab";
-        public static string PartitionIdentifier = $"{DateTime.Today:yyyy-MM-dd}";
-        // Derived
-        public static string CalibrationDatasetIdentifier = $"{PartitionIdentifier}-calibration";
-
-        // post study dataset path 
-        public static string DatasetPath = @"E:\Study-Data\X002\X002.pds";
-
-        // General
+        // settings
         public static int JPEGEncodeQuality = 60;
-
-        // recording constants
-        public static string RecordMainDirectory = @"E:\Data\Lab-Store";
-        public static string RecordFolderName = @"recordings";
-        public static string RecordStoreName = @"recording";
-
-        // Combine stats
-        public static string OperatingDirectory = @"E:\Data\Lab-Store\";
-        public static string ResourceLocations = @"E:\Data\Resources\";
-        public static string TransformationSettingsDirectory = @"C:\Users\Zhi\Desktop\Dev\";
-        public static string CalibrationSubDirectory = "calibration-recording";
-        public static string CalibrationStoreName = "recording";
+        public static string RosCoreAddress = "192.168.0.201";
+        public static string RosClientAddress = "192.168.0.157";
+        public static string RosBridgeServerAddress = "ws://192.168.0.152:9090";
         public static Dictionary<string, string> SensorCorrespondMap = new Dictionary<string, string>()
                         {
                             { "azure1", "topCam"},
@@ -47,28 +28,17 @@ namespace TBD.Psi.Study
                             { 3, WiredSyncMode.Standalone},
                         };
 
-        public static string TestRecordingPath = @"live-recordings\live-recording.0000";
-        public static string OperatingStore = @"post-board\board-detection.0000";
-        public static string OperatingStoreSubPath = @"phantom-body-test\videodata3";
-        // public static string OperatingStoreSubPath = @"live-recordings\live-recording.0000";
-        public static string OperatingStoreName = @"Cropped";
+        // Dataset path & identifier
 
+        public static string ResourceLocations = @"E:\Data\Resources\";
+        public static string RootPath = @"E:\Study-Data";
+        public static string StudyType = "lab";
+        public static string PartitionIdentifier = $"{DateTime.Today:yyyy-MM-dd}";
+        // Derived
+        public static string CalibrationDatasetIdentifier = $"{PartitionIdentifier}-calibration";
 
-        public static string LocalRosCoreAddress = "127.0.0.1";
-        public static string LocalRosClientAddress = "127.0.0.1";
-
-        // Run Live
-        public static string LiveOperatingDirectory = @"E:\Data\Lab-Store";
-        public static string LiveFolderName = @"live-recordings";
-        public static string LiveStoreName = @"live-recording";
-        public static string RosCoreAddress = "192.168.0.201";
-        public static string RosClientAddress = "192.168.0.157";
-
-        // Replay Live
-        public static string ReplayLiveStore = @"live-recording.0004";
-
-
-
+        // post study dataset path 
+        public static string ParticipantToAnalyze = "P1";
 
     }
 }

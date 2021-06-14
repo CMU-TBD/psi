@@ -79,7 +79,7 @@
                 var rosAudioPublisher = new ROSAudioSender(p, Constants.RosCoreAddress, Constants.RosClientAddress);
                
                 // study ROS Subscriber to link up topics
-                var rosListner = new ROSStudyListener(p,"ws://192.168.0.152:9090");
+                var rosListner = new ROSStudyListener(p, Constants.RosBridgeServerAddress);
                 rosListner.AddUtteranceListener("/robocept/action_feedback/voice").Write("robocept.utterances", outputStore);
                 rosListner.AddUtteranceListener("/podi/action_feedback/voice").Write("podi.utterances", outputStore);
                 rosListner.AddUtteranceListener("/robocept/utterance").Write("utterances", outputStore);

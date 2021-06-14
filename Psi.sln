@@ -226,7 +226,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.Utility", "..\TBD.P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.RosBagStreamTool", "..\TBD.Psi.Components\TBD.Psi.RosBagStreamTool\TBD.Psi.RosBagStreamTool.csproj", "{96DE4B9D-1B4D-4E01-8382-228190559939}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TBD.Psi.Geometry3Sharp.Windows", "TBD\TBD.Psi.Geometry3Sharp.Windows\TBD.Psi.Geometry3Sharp.Windows.csproj", "{1448925B-2556-4B44-917B-0AA14C782836}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TBD.Psi.Geometry3Sharp.Windows", "TBD\TBD.Psi.Geometry3Sharp.Windows\TBD.Psi.Geometry3Sharp.Windows.csproj", "{1448925B-2556-4B44-917B-0AA14C782836}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Filters", "Filters", "{E0E7957E-731F-4FDD-83FE-634FFE24862F}"
 EndProject
@@ -1096,8 +1096,16 @@ Global
 		{1448925B-2556-4B44-917B-0AA14C782836}.Release|x86.Build.0 = Release|Any CPU
 		{E0621435-AF35-4CFA-BE9E-3781AF6E161F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E0621435-AF35-4CFA-BE9E-3781AF6E161F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0621435-AF35-4CFA-BE9E-3781AF6E161F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E0621435-AF35-4CFA-BE9E-3781AF6E161F}.Debug|x64.Build.0 = Debug|Any CPU
+		{E0621435-AF35-4CFA-BE9E-3781AF6E161F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E0621435-AF35-4CFA-BE9E-3781AF6E161F}.Debug|x86.Build.0 = Debug|Any CPU
 		{E0621435-AF35-4CFA-BE9E-3781AF6E161F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E0621435-AF35-4CFA-BE9E-3781AF6E161F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0621435-AF35-4CFA-BE9E-3781AF6E161F}.Release|x64.ActiveCfg = Release|Any CPU
+		{E0621435-AF35-4CFA-BE9E-3781AF6E161F}.Release|x64.Build.0 = Release|Any CPU
+		{E0621435-AF35-4CFA-BE9E-3781AF6E161F}.Release|x86.ActiveCfg = Release|Any CPU
+		{E0621435-AF35-4CFA-BE9E-3781AF6E161F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

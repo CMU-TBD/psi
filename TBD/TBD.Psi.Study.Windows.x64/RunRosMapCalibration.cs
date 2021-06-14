@@ -39,7 +39,7 @@ namespace TBD.Psi.Study
                 var deliveryPolicy = DeliveryPolicy.SynchronousOrThrottle;
 
                 // Generate the store path
-                var outputStorePath = Path.Combine(Constants.OperatingDirectory, Constants.PartitionIdentifier, @"podi-board");
+                var outputStorePath = Path.Combine(Constants.CalibrationDatasetIdentifier, Constants.PartitionIdentifier, @"podi-board");
                 var transformationSettingPath = Path.Combine(Constants.ResourceLocations, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
                 var transformationTree = new TransformationTreeComponent(p, 1000, transformationSettingPath);
                 var azureToPsiWorld = transformationTree.QueryTransformation("world", "mainCam");

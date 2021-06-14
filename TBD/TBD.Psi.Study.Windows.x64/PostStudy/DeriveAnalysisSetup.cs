@@ -21,14 +21,15 @@ namespace TBD.Psi.Study.PostStudy
     {
         public static void Run()
         {
-            var task = Task.Run(_Run);
+            var datasetPath = Path.Combine(Constants.RootPath, Constants.ParticipantToAnalyze, $"{Constants.ParticipantToAnalyze}.pds");
+            var task = Task.Run(() => _Run(datasetPath));
             task.Wait();
         }
 
-        public static async Task _Run()
+        public static async Task _Run(string datasetPath)
         {
             // Open Dataset
-            var dataset = Dataset.Load(Constants.DatasetPath);
+            var dataset = Dataset.Load(datasetPath, autoSave: true);
             await dataset.CreateDerivedPartitionAsync(
             (pipeline, importer, exporter) =>
             {
@@ -64,7 +65,6 @@ namespace TBD.Psi.Study.PostStudy
             "analysisSetup",
             (session) => $"E:\\Study-Data\\{session.Name.Split('.').First()}\\analysisSetup\\{session.Name.Split('.')[1]}\\"
             );
-            dataset.Save(Constants.DatasetPath);
         }
     }
 }
