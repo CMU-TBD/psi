@@ -22,9 +22,9 @@
         {
             while (true)
             {
-                var participantId = "T001";
-                var sessionName = $"{participantId}.delivery.4";
-                var startTimeSec = 40.0;
+                var participantId = "P1";
+                var sessionName = $"{participantId}.delivery.0";
+                var startTimeSec = 55.0;
                 var durationSec = 10.0;
                 using (var p = Pipeline.Create(enableDiagnostics: true))
                 {

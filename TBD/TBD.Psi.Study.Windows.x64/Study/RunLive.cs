@@ -38,7 +38,7 @@
             Dataset dataset = null;
             if (!File.Exists(datasetPath))
             {
-                dataset = new Dataset($"{participantID}", autoSave:true);
+                dataset = new Dataset($"{participantID}", filename:datasetPath, autoSave:true);
             }
             else
             {

@@ -73,13 +73,14 @@ namespace TBD
 				if (ids.size() >= cvBoard->ids.size() && compreIdArrays(ids, cvBoard->ids)) {
 					cv::Mat obj_points, img_points;
 					// estimate the board
-					cv::aruco::estimatePoseBoard(corners, ids, cvBoard, *cameraMat_, *distCoeffs_, *rvecPtr, *tvecPtr, false);
+					cv::aruco::estimatePoseBoard(corners, ids, cvBoard, *cameraMat_, *distCoeffs_, *rvecPtr, *tvecPtr, initialized_);
 					// Convert tvec and rvec to a transformation matrix
 					double p1 = tvecPtr->at<double>(0);
 					double p2 = tvecPtr->at<double>(1);
 					double p3 = tvecPtr->at<double>(2);
 					cv::Mat rot;
 					cv::Rodrigues(*rvecPtr, rot);
+					initialized_ = true;
 
 					if (drawAxis)
 					{

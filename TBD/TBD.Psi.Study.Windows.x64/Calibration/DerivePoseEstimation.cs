@@ -32,6 +32,10 @@ namespace TBD.Psi.Study.Calibration
             File.WriteAllLines(csvPath, sensorCalibrationLines);
             File.WriteAllLines(tagCSVPath, baxterPositionLines);
             File.WriteAllLines(floorCSVPath, floorPositionLines);
+            // push information
+            Console.WriteLine($"sensor entries: {sensorCalibrationLines.Count / 2}");
+            Console.WriteLine($"baxter entries: {baxterPositionLines.Count}");
+            Console.WriteLine($"floor entries: {floorPositionLines.Count}");
         }
 
         public static async Task _Run(List<string> baxterPositionLines, List<string> floorPositionLines, List<string> sensorCalibrationLines)
@@ -62,7 +66,7 @@ namespace TBD.Psi.Study.Calibration
            
           
             // Open Dataset
-            var dataset = Dataset.Load(Path.Combine(Constants.RootPath, "calibration", Constants.CalibrationDatasetIdentifier, "dataset.pds"), autoSave: true);
+            var dataset = Dataset.Load(Path.Combine(Constants.RootPath, "calibration", Constants.CalibrationDatasetIdentifier, "calibration.pds"), autoSave: true);
             await dataset.CreateDerivedPartitionAsync(
                 (p, importer, exporter) =>
                 {

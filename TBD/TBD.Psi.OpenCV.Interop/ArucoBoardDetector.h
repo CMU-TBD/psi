@@ -17,6 +17,7 @@ namespace TBD
 			public ref class ArucoBoardDetector
 			{
 			private:
+				bool initialized_ = false;
 				bool receiveCalibration_ = false;
 				ArucoBoard^ board_;
 				cv::Mat1d* distCoeffs_;

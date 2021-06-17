@@ -7,10 +7,10 @@
         static void Main(string[] args)
         {
 
-            // OutputApp.Run();
+            //OutputApp.Run();
 
             // For Running Live
-            // Study.RunStudy.Run();
+            Study.RunStudy.Run();
             // RunLive.Run();
             // RunRosMapCalibration.Run();
 
@@ -19,16 +19,15 @@
 
             // Post Study
             // PostStudy.DatasetOrganization.Run();
-            PostStudy.DeriveVisualize.Run();
+            // PostStudy.DeriveVisualize.Run();
             // PostStudy.Derive2D.Run();
-            PostStudy.Derive2DRecenter.Run();
+            // PostStudy.Derive2DRecenter.Run();
             // PostStudy.DeriveAnalysisSetup.Run();
 
-            // Calibration Stackz
+            // Calibration Stack
             // Calibration.RecordCalibrationStream.Run();
             // Calibration.DeriveBoardEstimations.Run();
             // Calibration.DeriveDepthCheck.Run();
-
         }
     }
 }

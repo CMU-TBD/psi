@@ -21,7 +21,7 @@
             // Create a calibration stream
             var datasetIdentifier = Constants.CalibrationDatasetIdentifier;
             var datasetRootPath = Path.Combine(Constants.RootPath, "calibration", datasetIdentifier);
-            var dataset = new Dataset(datasetIdentifier, autoSave: true);
+            var dataset = new Dataset(datasetIdentifier, Path.Combine(datasetRootPath, "calibration.pds"), autoSave: true);
             var storePath = "";
             using (var p = Pipeline.Create(enableDiagnostics: true))
             {
@@ -71,9 +71,9 @@
                 }
 
                 p.Diagnostics.Write("diagnostics", store);
-                // Run for 10 seconds
+                // Run for 30 seconds
                 p.RunAsync();
-                p.WaitAll(15000); 
+                p.WaitAll(30000); 
                 Console.WriteLine("Ending ...");
             }
             // add it to 

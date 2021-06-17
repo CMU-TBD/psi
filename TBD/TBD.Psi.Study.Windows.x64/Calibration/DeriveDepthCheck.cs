@@ -32,7 +32,7 @@ namespace TBD.Psi.Study.Calibration
 
 
             // Open Dataset
-            var dataset = Dataset.Load(Path.Combine(Constants.RootPath, "calibration", Constants.CalibrationDatasetIdentifier, "dataset.pds"), autoSave:true);
+            var dataset = Dataset.Load(Path.Combine(Constants.RootPath, "calibration", Constants.CalibrationDatasetIdentifier, "calibration.pds"), autoSave:true);
             await dataset.CreateDerivedPartitionAsync(
                 (p, importer, exporter) =>
                 {
