@@ -33,7 +33,8 @@ namespace TBD.Psi.Study
         public static string ResourceLocations = @"E:\Data\Resources\";
         public static string RootPath = @"E:\Study-Data";
         public static string StudyType = "lab";
-        public static string PartitionIdentifier = $"{DateTime.Today:yyyy-MM-dd}";
+        // public static string PartitionIdentifier = $"{DateTime.Today:yyyy-MM-dd}";
+        public static string PartitionIdentifier = "2021-06-16";
         // Derived
         public static string CalibrationDatasetIdentifier = $"{PartitionIdentifier}-calibration";
 
