@@ -144,7 +144,7 @@ namespace Microsoft.Psi.Visualization
                     {
                         lock (this.imageLock)
                         {
-                            if ((this.psiImage != null) && (this.psiImage.Resource != null))
+                            if ((this.psiImage != null) && (this.psiImage.Resource != null) && (this.Image != null))
                             {
                                 this.Image.WritePixels(new Int32Rect(0, 0, this.psiImage.Resource.Width, this.psiImage.Resource.Height), this.psiImage.Resource.ImageData, this.psiImage.Resource.Stride * this.psiImage.Resource.Height, this.psiImage.Resource.Stride);
                                 this.renderedFrames.Increment();
@@ -173,6 +173,10 @@ namespace Microsoft.Psi.Visualization
 
                         case Imaging.PixelFormat.Gray_16bpp:
                             pixelFormat = PixelFormats.Gray16;
+                            break;
+
+                        case Imaging.PixelFormat.RGB_24bpp:
+                            pixelFormat = PixelFormats.Rgb24;
                             break;
 
                         case Imaging.PixelFormat.BGR_24bpp:
