@@ -40,7 +40,7 @@ namespace TBD.Psi.Study
 
                 // Generate the store path
                 var outputStorePath = Path.Combine(Constants.CalibrationDatasetIdentifier, Constants.PartitionIdentifier, @"podi-board");
-                var transformationSettingPath = Path.Combine(Constants.ResourceLocations, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
+                var transformationSettingPath = Path.Combine(Constants.SettingsLocation, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
                 var transformationTree = new TransformationTreeComponent(p, 1000, transformationSettingPath);
                 var azureToPsiWorld = transformationTree.QueryTransformation("world", "mainCam");
 
@@ -82,7 +82,7 @@ namespace TBD.Psi.Study
                 Console.ReadLine();
 
                 // generate file path
-                var mapPath = Path.Combine(Constants.ResourceLocations, $"ros-map-{Constants.StudyType}-{Constants.PartitionIdentifier}.csv");
+                var mapPath = Path.Combine(Constants.CSVsLocation, $"ros-map-{Constants.StudyType}-{Constants.PartitionIdentifier}.csv");
                 File.WriteAllLines(mapPath, matched);
             }
         }

@@ -63,7 +63,7 @@
 
 
                 // create a transformation tree that describe the environment
-                var transformationSettingPath = Path.Combine(Constants.ResourceLocations, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
+                var transformationSettingPath = Path.Combine(Constants.SettingsLocation, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
                 var transformationTree = new TransformationTreeComponent(p, 1000, transformationSettingPath);
                 transformationTree.Write("world", outputStore);
 
@@ -120,7 +120,7 @@
 
                     // Add body to merger
                     var bodyInWorld = k4a.Bodies.ChangeToFrame(transformationTree.QueryTransformation("world", Constants.SensorCorrespondMap[deviceName]));
-                    var humanBodyInWorld = bodyInWorld.ChangeToHumanBodies();
+                    var humanBodyInWorld = bodyInWorld.ChangeToHumanBodies().HumanBodiesSituatedfilter();
                     humanBodyInWorld.Write($"{deviceName}.human-bodies", outputStore);
                     bodyMerger.AddHumanBodyStream(humanBodyInWorld, mainBodyKinectNum == i);
                 }

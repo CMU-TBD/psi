@@ -12,7 +12,7 @@ namespace TBD.Psi.Study
     {
         public static void Run()
         {
-            var transformationSettingPath = Path.Combine(Constants.ResourceLocations, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
+            var transformationSettingPath = Path.Combine(Constants.SettingsLocation, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
             var tree = TransformationTree.TransformationTreeJSONParser.ParseJSONFile(transformationSettingPath);
             var cs = tree.QueryTransformation("world", "baxterBase");
             var q = Utils.GetQuaternionFromCoordinateSystem(cs);

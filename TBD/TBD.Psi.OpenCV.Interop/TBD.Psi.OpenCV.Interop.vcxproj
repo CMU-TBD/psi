@@ -93,12 +93,16 @@
   <ItemGroup>
     <ClCompile Include="ArucoDetector.cpp" />
     <ClCompile Include="ArucoBoardDetector.cpp" />
+    <ClCompile Include="CharucoBoardDetector.cpp" />
     <ClCompile Include="ImageBuffer.cpp" />
     <ClCompile Include="ArucoBoardDetector.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArucoBoard.h" />
     <ClInclude Include="ArucoDetector.h" />
+    <ClInclude Include="CharucoBoard.h" />
+    <ClInclude Include="CharucoBoardDetector.h" />
+    <ClInclude Include="Helper.h" />
     <ClInclude Include="ImageBuffer.h" />
   </ItemGroup>
   <ItemGroup>

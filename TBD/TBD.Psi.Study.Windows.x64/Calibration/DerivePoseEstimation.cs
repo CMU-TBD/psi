@@ -26,9 +26,9 @@ namespace TBD.Psi.Study.Calibration
             var task = Task.Run( () => _Run(baxterPositionLines, floorPositionLines, sensorCalibrationLines));
             task.Wait();
             // generate file path
-            var csvPath = Path.Combine(Constants.ResourceLocations, $"board-{Constants.StudyType}-{Constants.CalibrationDatasetIdentifier}.csv");
-            var tagCSVPath = Path.Combine(Constants.ResourceLocations, $"baxter-head-{Constants.StudyType}-{Constants.CalibrationDatasetIdentifier}.csv");
-            var floorCSVPath = Path.Combine(Constants.ResourceLocations, $"floor-{Constants.StudyType}-{Constants.CalibrationDatasetIdentifier}.csv");
+            var csvPath = Path.Combine(Constants.CSVsLocation, $"board-{Constants.StudyType}-{Constants.CalibrationDatasetIdentifier}.csv");
+            var tagCSVPath = Path.Combine(Constants.CSVsLocation, $"baxter-head-{Constants.StudyType}-{Constants.CalibrationDatasetIdentifier}.csv");
+            var floorCSVPath = Path.Combine(Constants.CSVsLocation, $"floor-{Constants.StudyType}-{Constants.CalibrationDatasetIdentifier}.csv");
             File.WriteAllLines(csvPath, sensorCalibrationLines);
             File.WriteAllLines(tagCSVPath, baxterPositionLines);
             File.WriteAllLines(floorCSVPath, floorPositionLines);
@@ -49,10 +49,10 @@ namespace TBD.Psi.Study.Calibration
             var boardXNum = 3;
             var boardYNum = 2;
             var boardDict = OpenCV.ArucoDictionary.DICT_4X4_50;
-            List<int> firstMarkerList = new List<int>() { 0, 6, 40 };
+            List<int> firstMarkerList = new List<int>() { 0, 6 };
 
             // which marker list is the floorboard
-            int[] floorBoardMarkers = { 0, 40};
+            int[] floorBoardMarkers = { 0};
             var floorInViewDeviceName = "azure2";
 
             // baxter face board information

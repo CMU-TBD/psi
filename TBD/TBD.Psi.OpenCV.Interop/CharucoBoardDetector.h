@@ -6,7 +6,7 @@
 #include <opencv2/aruco.hpp>
 #include <opencv2/calib3d.hpp>
 #include "ImageBuffer.h"
-#include "ArucoBoard.h"
+#include "CharucoBoard.h"
 #include "Helper.h"
 
 namespace TBD
@@ -15,19 +15,19 @@ namespace TBD
 	{
 		namespace OpenCV
 		{
-			public ref class ArucoBoardDetector
+			public ref class CharucoBoardDetector
 			{
 			private:
 				bool initialized_ = false;
 				bool receiveCalibration_ = false;
-				ArucoBoard^ board_;
+				CharucoBoard^ board_;
 				cv::Mat1d* distCoeffs_;
 				cv::Mat1d* cameraMat_;
 				cv::Mat* rvecPtr;
 				cv::Mat* tvecPtr;
 			public:
 
-				ArucoBoardDetector(ArucoBoard^ board) {
+				CharucoBoardDetector(CharucoBoard^ board) {
 					board_ = board;
 					distCoeffs_ = new cv::Mat_<double>(8, 1);
 					*distCoeffs_ << 0, 0, 0, 0, 0, 0, 0, 0;
@@ -36,7 +36,7 @@ namespace TBD
 					tvecPtr = new cv::Mat_<double>(3, 1);
 				}
 
-				~ArucoBoardDetector() {
+				~CharucoBoardDetector() {
 					delete distCoeffs_;
 					delete cameraMat_;
 					delete rvecPtr;
@@ -50,7 +50,7 @@ namespace TBD
 					return receiveCalibration_;
 				}
 
-				array<double, 2>^ DetectArucoBoard(ImageBuffer^ grayImage, bool drawAxis);
+				array<double, 2>^ Detect(ImageBuffer^ grayImage, bool drawAxis);
 			};
 		}
 	}

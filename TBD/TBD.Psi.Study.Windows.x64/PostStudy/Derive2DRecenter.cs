@@ -40,7 +40,12 @@ namespace TBD.Psi.Study.PostStudy
                 {
                     var treeStream = importer.OpenStream<TransformationTree<string>>("world");
                     var bodies = importer.OpenStream<List<HumanBody>>("tracked");
-                    bodies.Fuse(treeStream.First(), Available.Nearest<TransformationTree<string>>()).Select(m =>
+
+                    // producers
+                    IProducer<Dictionary<string, double>> baxterJointState = null;
+                    IProducer<CoordinateSystem> centeredPodiPose = null;
+
+                    var humanPositions = bodies.Fuse(treeStream.First(), Available.Nearest<TransformationTree<string>>()).Select(m =>
                     {
                         (var bodies, var tree) = m;
                         var transform = tree.QueryTransformation("world", "baxterBase").Invert();
@@ -63,19 +68,35 @@ namespace TBD.Psi.Study.PostStudy
                             projectedArr.Add((body.Id, result));
                         }
                         return projectedArr;
-                    }).Write("humans2D", exporter);
+                    });
+                    humanPositions.Write("humans2D", exporter);
+                    humanPositions.Select(msg =>
+                    {
+                        var dict = new Dictionary<string, double>();
+                        foreach(var m in msg)
+                        {
+                            dict[m.Item1.ToString()] = Math.Sqrt((m.Item2[0] * m.Item2[0]) + (m.Item2[1] * m.Item2[1]));
+                        }
+                        return dict;
+                    }).Write("humanDist", exporter);
 
                     // project podi as a rectangle
-                    if (importer.HasStream("podi"))
+                    if (importer.HasStream("podi.pose"))
                     {
                         var podiLength = 0.5;
                         var podiWidth = 0.3;
-                        importer.OpenStream<CoordinateSystem>("podi").Fuse(treeStream.First(), Available.Nearest<TransformationTree<string>>()).Select(m =>
+
+                        var podiPose = importer.OpenStream<CoordinateSystem>("podi.pose");
+                        centeredPodiPose = podiPose.Fuse(treeStream.First(), Available.Nearest<TransformationTree<string>>()).Select(m =>
                         {
                             (var cs, var tree) = m;
                             var transform = tree.QueryTransformation("world", "baxterBase").Invert();
                             var result = new double[5];
-                            cs = cs.TransformBy(transform);
+                            return cs.TransformBy(transform);
+                        });
+                        centeredPodiPose.Select(cs =>
+                        {
+                            var result = new double[5];
                             result[0] = cs.Origin.X;
                             result[1] = cs.Origin.Y;
                             result[2] = cs.XAxis.SignedAngleTo(UnitVector3D.XAxis, UnitVector3D.ZAxis).Radians;
@@ -84,18 +105,24 @@ namespace TBD.Psi.Study.PostStudy
                             return ("podi", result);
                         }).Write("podi2D", exporter);
                     }
-
-                    treeStream.Select(_ =>
+                    // project baxter's head pose
+                    if (importer.HasStream("baxter.joint_states"))
                     {
-                        return ("baxter", new double[] { 0, 0, 0, 0.5, 0.5 });
-                    }).Write("baxter2D", exporter);
-
-
+                        baxterJointState = importer.OpenStream<Dictionary<string, double>>("baxter.joint_states");
+                        baxterJointState.Select(jointState =>
+                        {
+                            // get the headjoint
+                            var head_yaw = jointState["head_pan"];
+                            return ("baxter", new double[] { 0, 0, -1 * head_yaw, 0.5, 0.5 });
+                        }).Write("baxter2D", exporter);
+                    }
+                    // get analysis values
+                    
                 },
             "human2DRecentered",
             true,
             "human2DRecentered",
-            (session) => $"E:\\Study-Data\\{session.Name.Split('.').First()}\\2d-human-recentered\\{session.Name.Split('.')[1]}\\"
+            (session) => $"E:\\Study-Data\\{session.Name.Split('.').First()}\\2d-human-recentered\\{String.Join(".", session.Name.Split('.').Skip(1))}\\"
             );
         }
     }

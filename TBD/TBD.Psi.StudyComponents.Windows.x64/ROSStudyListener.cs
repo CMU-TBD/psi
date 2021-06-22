@@ -17,7 +17,6 @@ namespace TBD.Psi.StudyComponents
     public class ROSStudyListener
     {
         private Pipeline p;
-        private PsiExporter store;
         private RosSharpBridge bridge;
         private Dictionary<string, DateTime> lastMsgTime = new Dictionary<string, DateTime>();
 

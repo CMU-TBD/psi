@@ -38,7 +38,7 @@ namespace TBD.Psi.Study.Calibration
                 {
 
                     //create transformation tree and build the relationships
-                    var transformationSettingPath = Path.Combine(Constants.ResourceLocations, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
+                    var transformationSettingPath = Path.Combine(Constants.SettingsLocation, $"transformations-{Constants.StudyType}-{Constants.PartitionIdentifier}.json");
                     var transformationTree = new TransformationTreeComponent(p, 500, transformationSettingPath);
 
 

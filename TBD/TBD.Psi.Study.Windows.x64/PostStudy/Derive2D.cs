@@ -80,7 +80,7 @@ namespace TBD.Psi.Study.PostStudy
             "human2D",
             true,
             "human2D",
-            (session) => $"E:\\Study-Data\\{session.Name.Split('.').First()}\\2d-human\\{session.Name.Split('.')[1]}\\"
+            (session) => $"E:\\Study-Data\\{session.Name.Split('.').First()}\\2d-human\\\\{String.Join(".", session.Name.Split('.').Skip(1))}\\"
             );
         }
     }

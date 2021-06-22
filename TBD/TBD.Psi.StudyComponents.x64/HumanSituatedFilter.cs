@@ -20,10 +20,17 @@ namespace TBD.Psi.StudyComponents
             foreach (var humanBody in msg)
             {
                 // a bunch of heutristic rules about whether a human body is valid
-                if (humanBody.EstimatedHeight >= 1)
+                // height
+                if (humanBody.EstimatedHeight < 1)
                 {
-                    newList.Add(humanBody);
+                    continue;
                 }
+                // create a no entry zone
+                if (humanBody.RootPose.Origin.Y <= -1 && humanBody.RootPose.Origin.X <= 1.75)
+                {
+                    continue;
+                }
+                newList.Add(humanBody);
             }
             this.Out.Post(newList, env.OriginatingTime);
         }

@@ -7,18 +7,6 @@ namespace TBD
 	{
 		namespace OpenCV
 		{
-			// helper function
-			static cv::Mat WrapInMat(ImageBuffer^ img)
-			{
-				cv::Mat ret = cv::Mat(img->Height, img->Width, CV_MAKETYPE(CV_8U, img->Stride / img->Width), (void*)img->Data, cv::Mat::AUTO_STEP);
-				return ret;
-			}
-
-			static ImageBuffer^ MatUnWrap(cv::Mat mat)
-			{
-				return gcnew ImageBuffer(mat.rows, mat.cols, System::IntPtr((void*)mat.data), mat.step);
-			}
-
 			void ArucoBoardDetector::SetCameraIntrinsics(array<double>^ intrinsics, array<double>^ radial, array<double>^ tangent)
 			{
 				if (radial->Length > 2) 
@@ -39,16 +27,6 @@ namespace TBD
 					0, 0, 1;
 				receiveCalibration_ = true;
 			}
-
-			bool compreIdArrays(std::vector<int> ids, std::vector<int> boardIds)
-			{
-				bool missing = false;
-				for (auto bid : boardIds) {
-					missing = (std::find(ids.begin(), ids.end(), bid) == ids.end());
-				}
-				return !missing;
-			}
-
 
 			array<double, 2>^ ArucoBoardDetector::DetectArucoBoard(ImageBuffer^ grayImage, bool drawAxis)
 			{
@@ -73,7 +51,7 @@ namespace TBD
 				if (ids.size() >= cvBoard->ids.size() && compreIdArrays(ids, cvBoard->ids)) {
 					cv::Mat obj_points, img_points;
 					// estimate the board
-					cv::aruco::estimatePoseBoard(corners, ids, cvBoard, *cameraMat_, *distCoeffs_, *rvecPtr, *tvecPtr, initialized_);
+					cv::aruco::estimatePoseBoard(corners, ids, cvBoard, *cameraMat_, *distCoeffs_, *rvecPtr, *tvecPtr, false);
 					// Convert tvec and rvec to a transformation matrix
 					double p1 = tvecPtr->at<double>(0);
 					double p2 = tvecPtr->at<double>(1);

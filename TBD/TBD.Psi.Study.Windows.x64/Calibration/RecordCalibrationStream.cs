@@ -44,7 +44,7 @@
                         OutputCalibration = true,
                         OutputImu = true,
                         DeviceIndex = i - 1,
-                        Exposure = TimeSpan.FromMilliseconds(10),
+                        Exposure = TimeSpan.FromMilliseconds(12),
                         ColorResolution = ColorResolution.R1440p,
                         WiredSyncMode = Constants.SensorSyncMode[i]
                     };

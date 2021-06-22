@@ -10,8 +10,7 @@
             //OutputApp.Run();
 
             // For Running Live
-            Study.RunStudy.Run();
-            // RunLive.Run();
+            // Study.RunStudy.Run();
             // RunRosMapCalibration.Run();
 
             // Replay of Lives Recordings 
@@ -22,11 +21,13 @@
             // PostStudy.DeriveVisualize.Run();
             // PostStudy.Derive2D.Run();
 
-            // PostStudy.Derive2DRecenter.Run();
+            PostStudy.DeriveStudyInfo.Run();
+            PostStudy.Derive2DRecenter.Run();
             // PostStudy.DeriveAnalysisSetup.Run();
 
             // Calibration Stack
             // Calibration.RecordCalibrationStream.Run();
+            // Calibration.DeriveCharucoEstimations.Run();
             // Calibration.DeriveBoardEstimations.Run();
             // Calibration.DeriveDepthCheck.Run();
         }
