@@ -84,6 +84,9 @@ namespace Microsoft.Psi.AzureKinect
 
                 // Call the body tracker and pop results
                 this.tracker.EnqueueCapture(this.capture);
+
+                // Call the body tracker and pop results
+                this.tracker.EnqueueCapture(this.capture);
                 using (Frame bodyFrame = this.tracker.PopResult(false))
                 {
                     // Parse the output into a list of KinectBody's to post
