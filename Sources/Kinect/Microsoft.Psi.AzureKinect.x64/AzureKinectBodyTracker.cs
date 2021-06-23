@@ -100,16 +100,15 @@ namespace Microsoft.Psi.AzureKinect
                                 this.currentBodies.Add(new AzureKinectBody());
                             }
 
-                            this.currentBodies[(int)bodyIndex].CopyFrom(bodyFrame.GetBody(bodyIndex));
-                            bodyIndex++;
-                        }
+                        this.currentBodies[(int)bodyIndex].CopyFrom(bodyFrame.GetBody(bodyIndex));
+                        bodyIndex++;
+                    }
 
-                        this.currentBodies.RemoveRange((int)bodyIndex, this.currentBodies.Count - (int)bodyIndex);
-                    }
-                    else
-                    {
-                        this.currentBodies.Clear();
-                    }
+                    this.currentBodies.RemoveRange((int)bodyIndex, this.currentBodies.Count - (int)bodyIndex);
+                }
+                else
+                {
+                    this.currentBodies.Clear();
                 }
 
                 this.Out.Post(this.currentBodies, envelope.OriginatingTime);
