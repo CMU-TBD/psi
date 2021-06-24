@@ -29,7 +29,7 @@ namespace TBD.Psi.Study.PostStudy
             await dataset.CreateDerivedPartitionAsync(
                 (pipeline, importer, exporter) =>
                 {
-                    var mainCamId = 1;
+                    var mainCamId = 3;
                     var bodyMerger = new BodyMerger(pipeline);
                     var bodyTracker = new BodyTracker(pipeline);
 

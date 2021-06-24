@@ -21,8 +21,9 @@
             // PostStudy.DeriveVisualize.Run();
             // PostStudy.Derive2D.Run();
 
-            PostStudy.DeriveStudyInfo.Run();
-            PostStudy.Derive2DRecenter.Run();
+            PostStudy.ReevaluateTracking.Run();
+            // PostStudy.DeriveStudyInfo.Run();
+            // PostStudy.Derive2DRecenter.Run();
             // PostStudy.DeriveAnalysisSetup.Run();
 
             // Calibration Stack

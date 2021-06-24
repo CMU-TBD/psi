@@ -46,7 +46,7 @@ namespace TBD.Psi.Study
         public static string CalibrationDatasetIdentifier = $"{PartitionIdentifier}-calibration";
 
         // post study dataset path 
-        public static string ParticipantToAnalyze = "P1";
+        public static string ParticipantToAnalyze = "P2";
 
     }
 }
